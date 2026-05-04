@@ -145,13 +145,18 @@ sudo modprobe -r hid_asus && sudo modprobe hid_asus
 | No audio | Apply audio quirk | Apply audio quirk | Native |
 | GPU crashes | Apply GTT fix | Should be stable | Native |
 | Suspend fails | Apply MMC fix | Apply MMC fix | Apply MMC fix |
-| Intermittent OLED artifacts/flicker while scrolling | Apply display fix (`dcdebugmask`) | Ensure `amdgpu.dcdebugmask=0xe12` is present in a **single-line** `/etc/kernel/cmdline` (systemd-boot) or GRUB cmdline | Same as 6.17+ |
+| Intermittent OLED artifacts/flicker while scrolling | Apply display fix (`dcdebugmask`) | Ensure the kernel-appropriate mask is present in a **single-line** `/etc/kernel/cmdline` (systemd-boot), GRUB cmdline, or Limine config: `0xe12` on kernel 6.x, `0x600` on kernel 7.0+ | Same guidance applies |
 
-### Display Fix Validation (Kernel 6.19+)
+### Display Fix Validation
 
 On systemd-boot systems, `/etc/kernel/cmdline` must be a single line. If display parameters were appended on a separate line by older tooling, the fix may not apply reliably.
 
-If an older `amdgpu.dcdebugmask=` value already exists, the installer now merges in the required bits and regenerates boot artifacts automatically. If you changed cmdline manually, rebuild once yourself:
+The installer now normalizes its managed display bits instead of only OR-ing them:
+
+- Kernel 6.x expects `amdgpu.dcdebugmask=0xe12`
+- Kernel 7.0+ expects `amdgpu.dcdebugmask=0x600`
+
+If an older `amdgpu.dcdebugmask=` value already exists, the installer now rewrites the toolkit-managed bits to the current kernel target and regenerates boot artifacts automatically. If you changed cmdline manually, rebuild once yourself:
 
 ```bash
 # Arch/CachyOS (mkinitcpio)
@@ -164,8 +169,11 @@ sudo dracut --regenerate-all -f
 ```bash
 cat /etc/kernel/cmdline
 # Expected to include (same line):
-# ... amdgpu.dcdebugmask=0xe12 ...
+# ... amdgpu.dcdebugmask=0xe12 ...   # kernel 6.x
+# ... amdgpu.dcdebugmask=0x600 ...   # kernel 7.0+
 ```
+
+On Limine-managed systems, the installer updates `/etc/default/limine` when present and regenerates entries via `limine-update` or `limine-mkinitcpio`.
 
 ---
 

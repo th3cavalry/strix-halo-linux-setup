@@ -4,7 +4,7 @@ set -euo pipefail
 
 # ==============================================================================
 # GZ302 Distribution Manager Library
-# Version: 6.3.6
+# Version: 6.3.7
 #
 # This library provides distribution-specific setup orchestration for the GZ302.
 # It coordinates hardware fixes across all subsystem libraries and manages
@@ -178,10 +178,25 @@ distro_configure_amd_pstate() {
     done
 
     # --- Limine ---
-    # Limine v5+ uses /etc/limine/limine.conf; v4 uses /boot/limine.cfg
-    # Both formats are handled: "cmdline:" (v5 TOML-style) and "CMDLINE=" (v4 uppercase)
+    # Limine commonly uses /etc/default/limine plus limine-update/limine-mkinitcpio,
+    # but older/manual installs may still keep kernel parameters in limine.conf.
+    local limine_updated=false
+    if [[ -f /etc/default/limine ]]; then
+        found_any=true
+        if grep -q "$param" /etc/default/limine 2>/dev/null; then
+            info "amd_pstate=guided already present in /etc/default/limine"
+        elif declare -f ensure_limine_kernel_param >/dev/null 2>&1 && ensure_limine_kernel_param "$param"; then
+            success "Limine default configuration updated: amd_pstate=guided"
+            limine_updated=true
+        else
+            warning "Failed to update /etc/default/limine for amd_pstate=guided"
+        fi
+    fi
+
+    # Limine v5+ uses /etc/limine/limine.conf; v4 uses /boot/limine.cfg.
+    # Both formats are handled: "cmdline:" (v5 TOML-style) and "CMDLINE=" (v4 uppercase).
     local limine_cfg
-    for limine_cfg in /etc/limine/limine.conf /boot/limine/limine.conf /boot/limine.cfg; do
+    for limine_cfg in /etc/limine/limine.conf /boot/limine/limine.conf /boot/limine.cfg /boot/limine.conf; do
         [[ -f "$limine_cfg" ]] || continue
         found_any=true
         if grep -q "$param" "$limine_cfg" 2>/dev/null; then
@@ -202,7 +217,15 @@ distro_configure_amd_pstate() {
             continue
         fi
         success "Limine configuration updated: amd_pstate=guided"
+        limine_updated=true
     done
+
+    if [[ "$limine_updated" == "true" ]] && declare -f limine_regenerate_entries >/dev/null 2>&1; then
+        info "Regenerating Limine entries..."
+        if limine_regenerate_entries; then
+            success "Limine entries regenerated"
+        fi
+    fi
 
     if [[ "$found_any" == false ]]; then
         warning "Unknown bootloader: cannot add amd_pstate=guided automatically"

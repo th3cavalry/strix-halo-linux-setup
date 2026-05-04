@@ -4,7 +4,7 @@ set -euo pipefail
 
 # ==============================================================================
 # GZ302 Kernel Compatibility Library
-# Version: 6.3.6
+# Version: 6.3.7
 #
 # This library provides central kernel version detection and compatibility
 # logic for all other libraries. It determines what workarounds are needed
@@ -34,6 +34,7 @@ readonly KERNEL_STABLE=616       # 6.16 - Stable support
 readonly KERNEL_NATIVE=617       # 6.17 - Native support for most hardware
 readonly KERNEL_OPTIMAL=618      # 6.18 - ROCm 7.2, firmware improvements
 readonly KERNEL_AUDIO_NATIVE=619 # 6.19 - CS35L41 audio native support
+readonly KERNEL_NEXT_MAJOR=700   # 7.0 - newer display stack behavior
 
 # --- Core Version Functions ---
 
@@ -206,18 +207,18 @@ kernel_requires_psr_su_workaround() {
 kernel_get_psr_su_parameter() {
     local version_num
     version_num=$(kernel_get_version_num)
-    
-    # For all kernels: disable PSR/PSR-SU/Replay/IPS/stutter via dcdebugmask
+
+    # Kernel 6.x still benefits from the broader stability mask:
     # 0xe12 = DC_DISABLE_STUTTER(0x002) | DC_DISABLE_PSR(0x010) |
     #         DC_DISABLE_PSR_SU(0x200) | DC_DISABLE_REPLAY(0x400) |
     #         DC_DISABLE_IPS(0x800)
-    # Panel Replay (0x400) is explicitly enabled for DCN 3.5 by the driver
-    # and was not disabled by the old 0x200 mask — causing eDP flicker.
-    if [[ $version_num -lt 612 ]]; then
-        echo "amdgpu.dcdebugmask=0xe12"
+    #
+    # On kernel 7.0+, reports from KDE/CachyOS show the older 0xe12 mask can
+    # trigger pageflip timeouts and hard freezes. Restrict the toolkit-managed
+    # bits to PSR-SU + Panel Replay only on that stack.
+    if [[ $version_num -ge $KERNEL_NEXT_MAJOR ]]; then
+        echo "amdgpu.dcdebugmask=0x600"
     else
-        # Kernel 6.12+ still enables PSR/Replay for DCN 3.5 eDP by default.
-        # All bits remain needed for GZ302 OLED stability.
         echo "amdgpu.dcdebugmask=0xe12"
     fi
 }

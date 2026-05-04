@@ -2,6 +2,13 @@
 
 All notable changes to GZ302-Linux-Setup will be documented in this file.
 
+## [6.3.7] - 2026-05-04
+
+### Fixed
+- **Kernel 7 display-mask regression (Issue #166)**: `display_apply_psr_su_fix()` now normalizes the toolkit-managed `amdgpu.dcdebugmask` bits to a kernel-aware target instead of only OR-ing flags forever. Kernel 6.x keeps `0xe12`, while kernel 7.0+ now uses `0x600` to avoid KDE/KWin pageflip freezes while preserving the OLED PSR-SU and Panel Replay fix.
+- **Limine `amd_pstate=guided` detection/update gap (Issue #166)**: Bootloader detection now recognizes `/etc/default/limine`, the AMD P-State path updates both default Limine configs and direct `limine.conf` installs, and the installer regenerates Limine entries with `limine-update` or `limine-mkinitcpio` when changes were made.
+- **Display-fix guidance sync**: README, kernel-support docs, and the suspend helper now describe the kernel-aware display mask instead of recommending `0xe12` unconditionally.
+
 ## [6.3.6] - 2026-05-03
 
 ### Fixed

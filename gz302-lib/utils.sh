@@ -9,7 +9,7 @@ set -euo pipefail
 
 # ==============================================================================
 # GZ302 Shared Utilities Library
-# Version: 6.3.6
+# Version: 6.3.7
 #
 # This library contains shared functions for the GZ302 Linux Setup scripts.
 # It is sourced by gz302-setup.sh and all optional modules.
@@ -356,7 +356,7 @@ detect_bootloader() {
         echo "systemd-boot"
     elif [[ -f "/boot/grub/grub.cfg" ]] || [[ -f "/boot/grub2/grub.cfg" ]]; then
         echo "grub"
-    elif [[ -f "/etc/default/limine" ]] || [[ -f "/boot/limine.conf" ]]; then
+    elif [[ -f "/etc/default/limine" ]] || [[ -f "/etc/limine/limine.conf" ]] || [[ -f "/boot/limine/limine.conf" ]] || [[ -f "/boot/limine.cfg" ]] || [[ -f "/boot/limine.conf" ]]; then
         echo "limine"
     elif [[ -f "/boot/refind_linux.conf" ]]; then
         echo "refind"
@@ -798,8 +798,8 @@ ensure_syslinux_kernel_param() {
 }
 
 # Configure kernel parameters for Limine bootloader
-# Limine uses /etc/default/limine with KERNEL_CMDLINE[default]+="params"
-# Changes require running 'limine-mkinitcpio' to regenerate entries
+# Limine commonly uses /etc/default/limine with KERNEL_CMDLINE[default]+="params"
+# Changes require running 'limine-update' (preferred) or 'limine-mkinitcpio'
 # Returns 0 if a change was made, 1 if no change was needed, 2 if config not found.
 ensure_limine_kernel_param() {
     local param="$1"
@@ -821,7 +821,7 @@ ensure_limine_kernel_param() {
     # Check if KERNEL_CMDLINE[default] line exists with quotes
     if grep -qE '^KERNEL_CMDLINE\[default\]\+?="[^"]*"' "$limine_conf"; then
         # Append to existing KERNEL_CMDLINE[default] line (handles both = and +=)
-        sed -i 's/^\(KERNEL_CMDLINE\[default\]\+\?="[^"]*\)"$/\1 '"${escaped}"'"/' "$limine_conf"
+        sed -i -E "s/^(KERNEL_CMDLINE\[default\](\+)?=\"[^\"]*)\"/\1 ${escaped}\"/" "$limine_conf"
         return 0
     elif grep -qE '^KERNEL_CMDLINE\[default\]' "$limine_conf"; then
         # Line exists but in different format - append new line instead
@@ -832,4 +832,27 @@ ensure_limine_kernel_param() {
         echo "KERNEL_CMDLINE[default]+=\"$param\"" >> "$limine_conf"
         return 0
     fi
+}
+
+limine_regenerate_entries() {
+    if command -v limine-update >/dev/null 2>&1; then
+        if limine-update 2>/dev/null; then
+            return 0
+        fi
+
+        warning "limine-update failed - manual Limine regeneration may be required"
+        return 1
+    fi
+
+    if command -v limine-mkinitcpio >/dev/null 2>&1; then
+        if limine-mkinitcpio 2>/dev/null; then
+            return 0
+        fi
+
+        warning "limine-mkinitcpio failed - manual Limine regeneration may be required"
+        return 1
+    fi
+
+    warning "No Limine update command found - manual Limine regeneration may be required"
+    return 1
 }

@@ -1,6 +1,6 @@
 # ASUS ROG Flow Z13 (GZ302) Linux Toolkit
 
-![Version](https://img.shields.io/badge/version-6.3.6-blue?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-6.3.7-blue?style=for-the-badge)
 ![Kernel](https://img.shields.io/badge/Kernel-6.14%2B-orange?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/Device-ASUS%20ROG%20Flow%20Z13-red?style=for-the-badge)
@@ -110,7 +110,7 @@ The scripts automatically detect your kernel and adapt:
 
 **Issue:** Purple/green color artifacts during scrolling, intermittent corruption during idle, or color-shift fringing on the built-in OLED panel (not external monitors).
 **Cause:** Multiple DC power-save features active on the internal eDP panel: PSR, PSR-SU, Panel Replay (DCN 3.5 / Strix Halo), IPS (Idle Power Save), DRAM stutter, and scatter-gather display on APU. ABM (Adaptive Backlight Management) also causes colour-shift artifacts on OLED.
-**Fix:** `amdgpu.dcdebugmask=0xe12` + modprobe options `abmlevel=0`, `sg_display=0`, and `cwsr_enable=0` — applied automatically by the installer.
+**Fix:** The installer applies a kernel-aware `amdgpu.dcdebugmask` automatically: `0xe12` on kernel 6.x, `0x600` on kernel 7.0+, plus modprobe options `abmlevel=0`, `sg_display=0`, and `cwsr_enable=0`.
 
 ---
 

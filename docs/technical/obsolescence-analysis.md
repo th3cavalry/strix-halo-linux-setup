@@ -310,7 +310,7 @@ The updated `gz302-setup.sh` script now detects your kernel version and applies 
 2. **AI/LLM Optimization:** Strix Halo memory tuning for large models
 3. **RGB Control:** Keyboard backlight convenience via z13ctl
 4. **Distribution Parity:** Equal support across Arch/Debian/Fedora/OpenSUSE
-5. **AMD P-State:** Automated `amd_pstate=guided` bootloader configuration (GRUB, systemd-boot, Limine v4/v5)
+5. **AMD P-State:** Automated `amd_pstate=guided` bootloader configuration (GRUB, systemd-boot, Limine v4/v5, and `/etc/default/limine`-managed installs)
 
 ### Obsolescence as Success
 

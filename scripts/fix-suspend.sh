@@ -10,6 +10,20 @@ set -euo pipefail
 
 HOOK_PATH="/usr/lib/systemd/system-sleep/gz302-reset.sh"
 
+get_display_mask_param() {
+    local kernel_version major minor version_num
+    kernel_version=$(uname -r | cut -d. -f1,2)
+    major=$(echo "$kernel_version" | cut -d. -f1)
+    minor=$(echo "$kernel_version" | cut -d. -f2)
+    version_num=$((major * 100 + minor))
+
+    if [[ $version_num -ge 700 ]]; then
+        echo "amdgpu.dcdebugmask=0x600"
+    else
+        echo "amdgpu.dcdebugmask=0xe12"
+    fi
+}
+
 echo "========================================="
 echo " GZ302 Suspend Fix Installer (v3.0)"
 echo "========================================="
@@ -259,9 +273,14 @@ echo ""
 
 CMDLINE=$(cat /proc/cmdline 2>/dev/null)
 SUGGEST_PARAMS=""
+DISPLAY_MASK_PARAM=$(get_display_mask_param)
 
-if ! echo "$CMDLINE" | grep -q "amdgpu.dcdebugmask"; then
-    SUGGEST_PARAMS+="  amdgpu.dcdebugmask=0xe12   # Current OLED/display stability mask\n"
+if ! echo "$CMDLINE" | grep -q "$DISPLAY_MASK_PARAM"; then
+    if echo "$CMDLINE" | grep -q "amdgpu.dcdebugmask="; then
+        SUGGEST_PARAMS+="  ${DISPLAY_MASK_PARAM}   # Replace the existing display mask with the kernel-aware value\n"
+    else
+        SUGGEST_PARAMS+="  ${DISPLAY_MASK_PARAM}   # Current OLED/display stability mask\n"
+    fi
 fi
 if ! echo "$CMDLINE" | grep -q "rtc_cmos.use_acpi_alarm"; then
     SUGGEST_PARAMS+="  rtc_cmos.use_acpi_alarm=1   # Fix RTC wakeup via ACPI\n"
