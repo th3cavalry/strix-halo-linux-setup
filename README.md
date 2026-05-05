@@ -1,6 +1,6 @@
 # ASUS ROG Flow Z13 (GZ302) Linux Toolkit
 
-![Version](https://img.shields.io/badge/version-6.3.7-blue?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-6.4.0-blue?style=for-the-badge)
 ![Kernel](https://img.shields.io/badge/Kernel-6.14%2B-orange?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/Device-ASUS%20ROG%20Flow%20Z13-red?style=for-the-badge)
@@ -85,7 +85,7 @@ After installation, look for **"ASUS ROG Flow Z13 (GZ302) Command Center"** in y
 - **Left-click:** Toggle Dashboard Window (Monitoring, Fan Curves, AI Status)
 - **Right-click:** Quick access menu:
   - **⚡ Profiles:** Switch between all 8 performance modes (10W-90W)
-  - **🌈 RGB Lighting:** Adjust brightness and animation effects
+  - **🌈 RGB Lighting:** Pick static colors separately for keyboard and backlight, plus brightness and animation effects
   - **🔋 Battery Limit:** Set 60/80/100% charge caps
   - **🔄 Auto Switch:** Toggle automatic AC/Battery profile switching
 - **Hover:** Real-time temperature, profile, and power status

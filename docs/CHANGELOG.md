@@ -2,6 +2,14 @@
 
 All notable changes to GZ302-Linux-Setup will be documented in this file.
 
+## [6.4.0] - 2026-05-05
+
+### Added
+- **Tray RGB palette for both zones**: The command center dashboard and tray menu now expose visual static-color pickers for the keyboard and backlight separately, including preset swatches and a custom color dialog.
+
+### Fixed
+- **Per-zone z13ctl targeting in the tray app**: Command-center RGB actions now use `z13ctl --device keyboard|lightbar` for zone-specific static colors, brightness, and effects so keyboard and backlight changes stop overwriting each other.
+
 ## [6.3.7] - 2026-05-04
 
 ### Fixed

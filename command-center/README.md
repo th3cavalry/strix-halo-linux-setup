@@ -15,7 +15,8 @@ This is a G-Helper inspired GUI utility that provides quick access to system con
 - **Real-time TDP Overrides**: Surgical control over power limits via `z13ctl`.
 
 ### 🌈 RGB Lighting
-- **Keyboard & Lightbar Control**: Unified management for all RGB zones.
+- **Separate Static Color Pickers**: Visual swatches and custom color dialogs for keyboard and backlight.
+- **Per-Zone Quick Controls**: Keyboard and backlight shortcuts are scoped to the selected zone instead of broadcasting to all LEDs.
 - **Brightness Levels**: Off, Low, Medium, High.
 - **Animation Effects**: Rainbow, Color Cycle, Breathing.
 - **Quick Toggle**: "Turn Off All" option for immediate stealth mode.
@@ -76,7 +77,7 @@ This creates a launcher in your application menu and sets the command center to 
 2. **Quick Switch**: Right-click the tray icon to access:
    - **⚡ Profiles**: Select performance modes.
    - **🔋 Battery Limit**: Quickly cap charging.
-   - **🌈 RGB Lighting**: Adjust brightness and effects.
+   - **🌈 RGB Lighting**: Pick static colors separately for keyboard and backlight, then adjust brightness and effects.
    - **🔄 Auto Settings Adjust**: Toggle automatic power switching.
 3. **Tray Icons**:
    - 🔋 Battery icon: Running on battery (Auto-switch enabled).

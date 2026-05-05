@@ -9,7 +9,7 @@ set -euo pipefail
 
 # ==============================================================================
 # GZ302 Shared Utilities Library
-# Version: 6.3.7
+# Version: 6.4.0
 #
 # This library contains shared functions for the GZ302 Linux Setup scripts.
 # It is sourced by gz302-setup.sh and all optional modules.

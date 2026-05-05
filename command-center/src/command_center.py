@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-GZ302 Command Center — Strix Halo Edition (v6.3.7)
+GZ302 Command Center — Strix Halo Edition (v6.4.0)
 Unified Dashboard and System Tray Controller.
 Inspired by G-Helper and Strix-Halo-Control.
 """
@@ -14,7 +14,7 @@ from pathlib import Path
 from PyQt6.QtWidgets import (
     QApplication, QSystemTrayIcon, QMenu, QWidget, QVBoxLayout,
     QHBoxLayout, QLabel, QPushButton, QFrame, QGridLayout,
-    QSlider, QProgressBar, QLineEdit, QSizePolicy
+    QColorDialog, QSlider, QProgressBar, QLineEdit, QSizePolicy
 )
 from PyQt6.QtGui import QIcon, QAction, QActionGroup, QColor, QFont, QPainter, QPixmap, QCursor
 from PyQt6.QtCore import QTimer, Qt, QPoint, QRect, QSize
@@ -37,10 +37,20 @@ from modules.rgb_controller import RGBController
 from modules.power_controller import PowerController
 
 TRAY_ICON_SIZE = 24
-VERSION = "6.3.7"
+VERSION = "6.4.0"
 DASHBOARD_WINDOW_TITLE = "GZ302 Dashboard"
 DASHBOARD_WINDOW_ROLE = "gz302-dashboard"
 KWIN_DASHBOARD_SCRIPT_NAME = "gz302_dashboard_anchor"
+RGB_COLOR_PRESETS = [
+    ("Ice", "7FDBFF"),
+    ("Mint", "2ECC71"),
+    ("Lemon", "F1C40F"),
+    ("Amber", "F39C12"),
+    ("Coral", "FF6B6B"),
+    ("Rose", "FF4D8D"),
+    ("Violet", "9B59B6"),
+    ("White", "FFFFFF"),
+]
 
 class DashboardWindow(QWidget):
     """G-Helper-style compact popup panel."""
@@ -203,16 +213,32 @@ class DashboardWindow(QWidget):
         vbox.setSpacing(6)
         vbox.addWidget(self._section_title("RGB LIGHTING"))
 
+        vbox.addWidget(
+            self._build_color_row(
+                "Keyboard", self.rgb.set_keyboard_color, self.rgb.turn_off_keyboard
+            )
+        )
+        vbox.addWidget(
+            self._build_color_row(
+                "Backlight", self.rgb.set_lightbar_color, self.rgb.turn_off_lightbar
+            )
+        )
+
         hbox = QHBoxLayout()
         hbox.setSpacing(6)
+        hbox.addWidget(self._rgb_row_label("Keyboard"))
         for label, val in [("Off", 0), ("Low", 1), ("Med", 2), ("High", 3)]:
             btn = QPushButton(label)
             btn.setObjectName("rgb_btn")
             btn.setFixedHeight(28)
             btn.clicked.connect(lambda _, v=val: self.rgb.set_keyboard_brightness(v))
             hbox.addWidget(btn)
+        hbox.addStretch()
+        vbox.addLayout(hbox)
 
-        hbox.addSpacing(8)
+        hbox = QHBoxLayout()
+        hbox.setSpacing(6)
+        hbox.addWidget(self._rgb_row_label("Keyboard FX"))
         for label, fx in [("Rainbow", "rainbow"), ("Breathing", "breathing"), ("Off", None)]:
             btn = QPushButton(label)
             btn.setObjectName("rgb_btn")
@@ -220,10 +246,70 @@ class DashboardWindow(QWidget):
             if fx:
                 btn.clicked.connect(lambda _, e=fx: self.rgb.set_keyboard_animation(e))
             else:
-                btn.clicked.connect(self.rgb.turn_off)
+                btn.clicked.connect(self.rgb.turn_off_keyboard)
             hbox.addWidget(btn)
+        hbox.addStretch()
         vbox.addLayout(hbox)
         return section
+
+    def _build_color_row(self, zone_label, apply_color, turn_off):
+        row = QFrame()
+        row.setObjectName("rgb_zone_row")
+        hbox = QHBoxLayout(row)
+        hbox.setContentsMargins(0, 0, 0, 0)
+        hbox.setSpacing(6)
+        hbox.addWidget(self._rgb_row_label(zone_label))
+
+        for color_name, hex_color in RGB_COLOR_PRESETS:
+            hbox.addWidget(
+                self._build_color_swatch(zone_label, color_name, hex_color, apply_color)
+            )
+
+        custom_btn = QPushButton("Custom")
+        custom_btn.setObjectName("rgb_minor_btn")
+        custom_btn.setFixedHeight(24)
+        custom_btn.clicked.connect(
+            lambda _, zone=zone_label, callback=apply_color: self._pick_custom_color(zone, callback)
+        )
+        hbox.addWidget(custom_btn)
+
+        off_btn = QPushButton("Off")
+        off_btn.setObjectName("rgb_minor_btn")
+        off_btn.setFixedHeight(24)
+        off_btn.clicked.connect(turn_off)
+        hbox.addWidget(off_btn)
+        hbox.addStretch()
+        return row
+
+    def _build_color_swatch(self, zone_label, color_name, hex_color, apply_color):
+        btn = QPushButton()
+        btn.setObjectName("rgb_swatch_btn")
+        btn.setToolTip(f"{zone_label}: {color_name}")
+        btn.setFixedSize(22, 22)
+        btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn.clicked.connect(lambda _, value=hex_color: apply_color(value))
+        btn.setStyleSheet(
+            f"QPushButton {{"
+            f"background-color: #{hex_color};"
+            "border: 1px solid #2a2a2a;"
+            "border-radius: 11px;"
+            "padding: 0;"
+            "}"
+            "QPushButton:hover { border: 2px solid #f5f5f5; }"
+            "QPushButton:pressed { border: 2px solid #ff4655; }"
+        )
+        return btn
+
+    def _pick_custom_color(self, zone_label, apply_color):
+        color = QColorDialog.getColor(QColor("#FFFFFF"), self, f"{zone_label} Color")
+        if color.isValid():
+            apply_color(color.name().lstrip("#").upper())
+
+    def _rgb_row_label(self, text):
+        lbl = QLabel(text)
+        lbl.setObjectName("rgb_zone_label")
+        lbl.setFixedWidth(68)
+        return lbl
 
     def _build_fan_section(self):
         section = QFrame()
@@ -407,6 +493,23 @@ class DashboardWindow(QWidget):
             QPushButton#footer_btn:hover { color: #aaa; border-color: #444; }
             QPushButton#footer_btn:checked { color: #ff4655; border-color: #ff4655; }
             #ver_label { font-size: 10px; color: #333; }
+            #rgb_zone_label {
+                font-size: 10px;
+                font-weight: bold;
+                color: #666;
+                text-transform: uppercase;
+            }
+            QPushButton#rgb_minor_btn {
+                background-color: #171717;
+                border: 1px solid #2a2a2a;
+                border-radius: 4px;
+                color: #aaa;
+                padding: 0 8px;
+            }
+            QPushButton#rgb_minor_btn:hover {
+                background-color: #252525;
+                color: #fff;
+            }
         """)
         self.adjustSize()
 
@@ -518,6 +621,35 @@ class CommandCenterApp(QSystemTrayIcon):
         
         self.notifier.notify("Strix Halo", "Control Panel Ready", "success", 2000)
 
+    def _build_color_icon(self, hex_color):
+        pixmap = QPixmap(14, 14)
+        pixmap.fill(Qt.GlobalColor.transparent)
+        painter = QPainter(pixmap)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setBrush(QColor(f"#{hex_color}"))
+        painter.setPen(QColor("#2a2a2a"))
+        painter.drawEllipse(1, 1, 12, 12)
+        painter.end()
+        return QIcon(pixmap)
+
+    def _open_custom_color_dialog(self, zone_label, apply_color):
+        color = QColorDialog.getColor(QColor("#FFFFFF"), self.dashboard, f"{zone_label} Color")
+        if color.isValid():
+            apply_color(color.name().lstrip("#").upper())
+
+    def _populate_static_color_menu(self, menu, zone_label, apply_color, turn_off):
+        for color_name, hex_color in RGB_COLOR_PRESETS:
+            action = QAction(color_name, self)
+            action.setIcon(self._build_color_icon(hex_color))
+            action.triggered.connect(lambda _, value=hex_color: apply_color(value))
+            menu.addAction(action)
+
+        menu.addSeparator()
+        menu.addAction("Custom...").triggered.connect(
+            lambda _=False, zone=zone_label, callback=apply_color: self._open_custom_color_dialog(zone, callback)
+        )
+        menu.addAction("Off").triggered.connect(turn_off)
+
     def setup_menu(self):
         self.menu.clear()
         self.menu.addAction("🖥️ Open Dashboard").triggered.connect(
@@ -556,20 +688,46 @@ class CommandCenterApp(QSystemTrayIcon):
 
         # --- RGB Lighting ---
         rgb_menu = self.menu.addMenu("🌈 RGB Lighting")
+        static_menu = rgb_menu.addMenu("🎨 Static Colors")
+        self._populate_static_color_menu(
+            static_menu.addMenu("⌨️ Keyboard"),
+            "Keyboard",
+            self.rgb.set_keyboard_color,
+            self.rgb.turn_off_keyboard,
+        )
+        self._populate_static_color_menu(
+            static_menu.addMenu("💡 Backlight"),
+            "Backlight",
+            self.rgb.set_lightbar_color,
+            self.rgb.turn_off_lightbar,
+        )
         
         # Brightness Submenu
-        bright_menu = rgb_menu.addMenu("💡 Brightness")
+        bright_menu = rgb_menu.addMenu("⌨️ Keyboard Brightness")
         for label, val in [("Off", 0), ("Low", 1), ("Medium", 2), ("High", 3)]:
             a = QAction(label, self)
             a.triggered.connect(lambda _, v=val: self.rgb.set_keyboard_brightness(v))
             bright_menu.addAction(a)
+
+        lightbar_menu = rgb_menu.addMenu("💡 Backlight Brightness")
+        for label, val in [("Off", 0), ("Low", 1), ("Medium", 2), ("High", 3)]:
+            a = QAction(label, self)
+            a.triggered.connect(lambda _, v=val: self.rgb.set_window_backlight(v))
+            lightbar_menu.addAction(a)
             
         # Effects Submenu
-        effects_menu = rgb_menu.addMenu("✨ Effects")
+        effects_menu = rgb_menu.addMenu("✨ Keyboard Effects")
         for label, effect in [("Rainbow", "rainbow"), ("Color Cycle", "colorcycle"), ("Breathing", "breathing")]:
             a = QAction(label, self)
             a.triggered.connect(lambda _, e=effect: self.rgb.set_keyboard_animation(e))
             effects_menu.addAction(a)
+
+        lightbar_fx_menu = rgb_menu.addMenu("✨ Backlight Effects")
+        for label, effect in [("Rainbow", "rainbow"), ("Breathing", "breathing")]:
+            a = QAction(label, self)
+            a.triggered.connect(lambda _, e=effect: self.rgb.start_window_animation(e))
+            lightbar_fx_menu.addAction(a)
+        lightbar_fx_menu.addAction("Off").triggered.connect(self.rgb.turn_off_lightbar)
             
         rgb_menu.addAction("❌ Turn Off All").triggered.connect(self.rgb.turn_off)
 

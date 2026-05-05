@@ -1,6 +1,6 @@
 # GZ302 Testing Guide — Strix Halo Edition
 
-**Current Version:** 6.3.7  
+**Current Version:** 6.4.0  
 **Status:** Unified Testing Framework for GZ302 & Strix Halo Platform
 
 ---
@@ -28,6 +28,8 @@ The Command Center is the most visible component and requires rigorous UI/UX val
 - [ ] **Dynamic Updates**: Right-click the tray icon multiple times. Verify that checkmarks correctly follow the active power profile.
 - [ ] **Power Profiles**: Select each of the 8 profiles (Emergency to Maximum). Use `z13ctl status` to verify the profile and TDP apply correctly.
 - [ ] **RGB Lighting**: 
+    - Test keyboard and backlight static color swatches separately from both the dashboard and tray menu.
+    - Test each custom color dialog and confirm it changes only the selected zone.
     - Test each brightness level (Off, Low, Medium, High).
     - Test animation effects (Rainbow, Color Cycle, Breathing).
     - Verify "Turn Off All" kills both keyboard and lightbar LEDs.
@@ -36,6 +38,7 @@ The Command Center is the most visible component and requires rigorous UI/UX val
 
 ### Dashboard Window
 - [ ] **Visibility**: Left-click tray icon to show/hide.
+- [ ] **Static Color Picker**: Verify the dashboard shows separate keyboard and backlight color rows with visual swatches and a custom color action.
 - [ ] **Real-time Stats**: Verify APU temperature and CPU load update every 3 seconds.
 - [ ] **Fan Curves**: Apply a custom curve. Verify `z13ctl status` shows the new curve points.
 - [ ] **AI/NPU Status**: Confirm the "AI & NPU" tab correctly identifies the Ryzen AI NPU state.
