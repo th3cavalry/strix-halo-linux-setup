@@ -102,6 +102,10 @@ The scripts automatically detect your kernel and adapt:
 | **6.14 – 6.16** | Applies workarounds for WiFi (MT7925), Touchpad, Tablet mode |
 | **6.17+** | Native support — cleans up obsolete fixes, focuses on tuning |
 
+> [!NOTE]
+> **Ubuntu 26.04 is supported.** On Linux 7.0+ most old hardware-enablement workarounds are no longer required, but the setup script is still useful for tuning and consistency.
+> If you see OLED artifacts, confirm `amdgpu.dcdebugmask=0x600` is present in your boot cmdline (applies to all supported kernels).
+
 ---
 
 ## Display Fixes
@@ -167,4 +171,3 @@ This removes all GZ302 tools, z13ctl daemon/config, systemd services, udev rules
 
 **License:** MIT
 **Maintained by:** th3cavalry
-
