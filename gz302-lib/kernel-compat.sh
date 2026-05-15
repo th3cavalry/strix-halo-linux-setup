@@ -4,7 +4,7 @@ set -euo pipefail
 
 # ==============================================================================
 # GZ302 Kernel Compatibility Library
-# Version: 6.4.0
+# Version: 6.4.1
 #
 # This library provides central kernel version detection and compatibility
 # logic for all other libraries. It determines what workarounds are needed
@@ -205,22 +205,13 @@ kernel_requires_psr_su_workaround() {
 # Get PSR-SU kernel parameter for current kernel
 # Returns: Kernel parameter string for PSR-SU
 kernel_get_psr_su_parameter() {
-    local version_num
-    version_num=$(kernel_get_version_num)
-
-    # Kernel 6.x still benefits from the broader stability mask:
-    # 0xe12 = DC_DISABLE_STUTTER(0x002) | DC_DISABLE_PSR(0x010) |
-    #         DC_DISABLE_PSR_SU(0x200) | DC_DISABLE_REPLAY(0x400) |
-    #         DC_DISABLE_IPS(0x800)
-    #
-    # On kernel 7.0+, reports from KDE/CachyOS show the older 0xe12 mask can
-    # trigger pageflip timeouts and hard freezes. Restrict the toolkit-managed
-    # bits to PSR-SU + Panel Replay only on that stack.
-    if [[ $version_num -ge $KERNEL_NEXT_MAJOR ]]; then
-        echo "amdgpu.dcdebugmask=0x600"
-    else
-        echo "amdgpu.dcdebugmask=0xe12"
-    fi
+    # Use 0x600 (DC_DISABLE_PSR_SU | DC_DISABLE_REPLAY) for all supported
+    # kernels.  The broader 0xe12 mask (which also disables DRAM stutter,
+    # PSR, and IPS) was previously used on 6.x but user reports confirm it
+    # breaks s2idle: the side LED keeps cycling and battery drains during
+    # suspend.  0x600 fixes the OLED scrolling/replay artifacts without
+    # interfering with the suspend/resume path on any supported kernel.
+    echo "amdgpu.dcdebugmask=0x600"
 }
 
 # --- Status and Information Functions ---

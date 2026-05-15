@@ -11,17 +11,7 @@ set -euo pipefail
 HOOK_PATH="/usr/lib/systemd/system-sleep/gz302-reset.sh"
 
 get_display_mask_param() {
-    local kernel_version major minor version_num
-    kernel_version=$(uname -r | cut -d. -f1,2)
-    major=$(echo "$kernel_version" | cut -d. -f1)
-    minor=$(echo "$kernel_version" | cut -d. -f2)
-    version_num=$((major * 100 + minor))
-
-    if [[ $version_num -ge 700 ]]; then
-        echo "amdgpu.dcdebugmask=0x600"
-    else
-        echo "amdgpu.dcdebugmask=0xe12"
-    fi
+    echo "amdgpu.dcdebugmask=0x600"
 }
 
 echo "========================================="

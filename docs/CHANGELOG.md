@@ -2,6 +2,11 @@
 
 All notable changes to GZ302-Linux-Setup will be documented in this file.
 
+## [6.4.1] - 2026-05-15
+
+### Fixed
+- **Display mask `0xe12` breaks suspend on kernel 6.x (Issue #168)**: Changed `amdgpu.dcdebugmask` to `0x600` (PSR-SU + Panel Replay disable only) for **all** supported kernels. The broader `0xe12` mask (which additionally disables DRAM stutter, PSR v1, and IPS) was causing s2idle suspend failures on kernel 6.x — the side LED kept cycling on/off and the battery drained during sleep. Existing bootloader configurations with `0xe12` are automatically normalized to `0x600` on the next installer run. Affected files: `gz302-lib/kernel-compat.sh`, `gz302-lib/display-fix.sh`, `scripts/fix-suspend.sh`.
+
 ## [6.4.0] - 2026-05-05
 
 ### Added
