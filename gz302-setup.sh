@@ -81,6 +81,9 @@ done
 # --- GitHub base URL ---
 GITHUB_RAW_URL="https://raw.githubusercontent.com/th3cavalry/GZ302-Linux-Setup/main"
 
+# --- Version (read once at startup) ---
+SETUP_VERSION="6.5.0"
+
 # --- Script directory detection ---
 resolve_script_dir() {
     local source="${BASH_SOURCE[0]}"
@@ -1051,7 +1054,7 @@ setup_distro_base() {
 main() {
     check_root
     print_banner
-    print_section "Strix Halo Linux Setup v$(cat "${SCRIPT_DIR}/VERSION" 2>/dev/null || echo '6.5.0')"
+    print_section "Strix Halo Linux Setup v$(cat "${SCRIPT_DIR}/VERSION" 2>/dev/null || echo "${SETUP_VERSION}")"
     echo
 
     # --- Step 1: Hardware & system detection ---------------------------------

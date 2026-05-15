@@ -306,9 +306,10 @@ device_get_support_tier() {
     echo "$DEVICE_SUPPORT_TIER"
 }
 
-# Check a single capability flag by name
+# Check a single capability flag by name (portable uppercase conversion)
 # Usage: device_has_capability "Z13CTL" && install_z13ctl
 device_has_capability() {
-    local cap="CAP_${1^^}"
-    [[ "${!cap:-false}" == "true" ]]
+    local cap_name
+    cap_name=$(echo "CAP_${1}" | tr '[:lower:]' '[:upper:]')
+    [[ "${!cap_name:-false}" == "true" ]]
 }
