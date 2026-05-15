@@ -22,6 +22,7 @@ uname -r  # Example: 6.19.0-2-cachyos
 | 6.16 | ⚠️ Maturing | Most fixes needed |
 | 6.17-6.18 | ✅ Production | Audio quirk only |
 | 6.19+ | ✅ Optimal | Minimal fixes, all native |
+| 7.0+ | ✅ Optimal | Tuning-focused; verify display mask if artifacts persist |
 
 ---
 
@@ -57,7 +58,7 @@ uname -r  # Example: 6.19.0-2-cachyos
 | **Fedora 43** | 6.17+ | ✅ Excellent |
 | **OpenSUSE TW** | 6.18+ | ✅ Excellent |
 | **Ubuntu 24.04.4** | 6.17 (HWE) | ✅ Excellent |
-| **Ubuntu 26.04** | 6.19+ | ✅ Excellent |
+| **Ubuntu 26.04** | 7.0+ | ✅ Excellent |
 
 ### Ubuntu Kernel Upgrade
 ```bash
