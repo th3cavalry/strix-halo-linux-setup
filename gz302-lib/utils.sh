@@ -8,10 +8,10 @@ set -euo pipefail
 # SC2030/SC2031: Subshell variable modification is handled
 
 # ==============================================================================
-# GZ302 Shared Utilities Library
-# Version: 6.4.1
+# Strix Halo Shared Utilities Library
+# Version: 6.5.0
 #
-# This library contains shared functions for the GZ302 Linux Setup scripts.
+# This library contains shared functions for the Strix Halo Linux Setup scripts.
 # It is sourced by gz302-setup.sh and all optional modules.
 # ==============================================================================
 
@@ -299,8 +299,8 @@ print_banner() {
    ╚═════╝ ╚══════╝╚═════╝  ╚═════╝ ╚══════╝
 BANNER
     printf "${C_NC}"
-    printf "${C_DIM}   ASUS ROG Flow Z13 Linux Setup${C_NC}\n"
-    printf "${C_DIM}   AMD Ryzen AI MAX+ 395 | Radeon 8060S${C_NC}\n"
+    printf "${C_DIM}   Strix Halo Linux Setup — AMD Ryzen AI MAX Platform${C_NC}\n"
+    printf "${C_DIM}   Radeon 8060S | gfx1151 | RDNA 3.5${C_NC}\n"
     echo
 }
 

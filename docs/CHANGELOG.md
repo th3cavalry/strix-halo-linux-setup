@@ -2,6 +2,29 @@
 
 All notable changes to GZ302-Linux-Setup will be documented in this file.
 
+## [6.5.0] - 2026-05-15
+
+### Added
+- **Strix Halo platform broadening**: The installer now supports all AMD Strix Halo (Ryzen AI MAX / MAX+) devices, not just the ASUS ROG Flow Z13 (GZ302). Hardware auto-detection determines the device profile and applies only the relevant fixes.
+- **`gz302-lib/device-manager.sh`** — new library that reads DMI, lspci, and kernel module state to produce a normalized device profile (`DEVICE_VENDOR`, `DEVICE_MODEL`, `DEVICE_CLASS`, `DEVICE_SUPPORT_TIER`) and capability flags (`CAP_ASUS_WMI`, `CAP_DETACHABLE_KB`, `CAP_INTERNAL_OLED`, `CAP_MT7925`, `CAP_CS35L41`, `CAP_Z13CTL`, `CAP_ROCM`). Known device profiles: ASUS ROG Flow Z13 (GZ302), HP ZBook Ultra G1a, Framework Desktop, ASUS TUF Gaming A14, and experimental mini-PC / handheld classes.
+- **`docs/technical/external-integrations-catalog.md`** — curated catalog of Strix Halo community projects: z13ctl, Strix-Halo-Control, amd-strix-halo-toolboxes (kyuz0), vLLM, ComfyUI, GameMode, and MangoHUD. Includes device compatibility, install method, trust level, and known kernel bug/fix table.
+- **New installer workflow** — the main flow is now:
+  1. Hardware + system detection (device profile, kernel, distro, bootloader)
+  2. Hardware fixes (kernel-level patches/params)
+  3. Command Center (z13ctl gated to ASUS devices + tray app for all devices)
+  4. Gaming packages (Steam, Lutris, MangoHUD, GameMode)
+  5. AI / LLM packages (Ollama, ROCm, vLLM, ComfyUI)
+  6. Other tools (Hypervisor + community integrations)
+- **Community integrations section** — the installer presents the ecosystem catalog and lets users opt-in to Strix-Halo-Control and amd-strix-halo-toolboxes (via Distrobox).
+- **z13ctl capability gating** — z13ctl is now only offered and installed on devices where `CAP_Z13CTL=true` (ASUS ROG hardware). Non-ASUS users are directed to the integrations catalog.
+- **ROCm capability detection** — the AI section shows whether the Radeon 8060S was confirmed before suggesting ROCm workloads.
+
+### Changed
+- **Project branding**: README title updated to "Strix Halo Linux Setup"; banner subtitle updated to "AMD Ryzen AI MAX Platform"; supported device table added.
+- **`gz302-setup.sh` help text**: Updated to list new sections and all supported device classes.
+- **`gz302-lib/utils.sh` banner**: Subtitle now reads "Strix Halo Linux Setup — AMD Ryzen AI MAX Platform" instead of GZ302-specific text.
+- **Section 3 header**: "Display & Tools" renamed to "Display & Command Center".
+
 ## [6.4.1] - 2026-05-15
 
 ### Fixed

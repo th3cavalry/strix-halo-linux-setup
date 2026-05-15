@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-GZ302 Command Center — Strix Halo Edition (v6.4.1)
+GZ302 Command Center — Strix Halo Edition (v6.5.0)
 Unified Dashboard and System Tray Controller.
 Inspired by G-Helper and Strix-Halo-Control.
 """
