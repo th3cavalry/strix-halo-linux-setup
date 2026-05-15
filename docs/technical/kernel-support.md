@@ -146,18 +146,17 @@ sudo modprobe -r hid_asus && sudo modprobe hid_asus
 | No audio | Apply audio quirk | Apply audio quirk | Native |
 | GPU crashes | Apply GTT fix | Should be stable | Native |
 | Suspend fails | Apply MMC fix | Apply MMC fix | Apply MMC fix |
-| Intermittent OLED artifacts/flicker while scrolling | Apply display fix (`dcdebugmask`) | Ensure the kernel-appropriate mask is present in a **single-line** `/etc/kernel/cmdline` (systemd-boot), GRUB cmdline, or Limine config: `0xe12` on kernel 6.x, `0x600` on kernel 7.0+ | Same guidance applies |
+| Intermittent OLED artifacts/flicker while scrolling | Apply display fix (`dcdebugmask`) | Use `amdgpu.dcdebugmask=0x600` on all supported kernels in a **single-line** `/etc/kernel/cmdline` (systemd-boot), GRUB cmdline, or Limine config | Same guidance applies |
 
 ### Display Fix Validation
 
 On systemd-boot systems, `/etc/kernel/cmdline` must be a single line. If display parameters were appended on a separate line by older tooling, the fix may not apply reliably.
 
-The installer now normalizes its managed display bits instead of only OR-ing them:
+The installer now normalizes its managed display bits instead of only OR-ing them.
 
-- Kernel 6.x expects `amdgpu.dcdebugmask=0xe12`
-- Kernel 7.0+ expects `amdgpu.dcdebugmask=0x600`
+All supported kernels use `amdgpu.dcdebugmask=0x600` (PSR-SU + Panel Replay disabled). The previously used `0xe12` mask was found to break s2idle suspend on kernel 6.x — the side LED keeps cycling and the battery drains during sleep.
 
-If an older `amdgpu.dcdebugmask=` value already exists, the installer now rewrites the toolkit-managed bits to the current kernel target and regenerates boot artifacts automatically. If you changed cmdline manually, rebuild once yourself:
+If an older `amdgpu.dcdebugmask=` value already exists, the installer rewrites the toolkit-managed bits to the current target and regenerates boot artifacts automatically. If you changed cmdline manually, rebuild once yourself:
 
 ```bash
 # Arch/CachyOS (mkinitcpio)
@@ -170,8 +169,7 @@ sudo dracut --regenerate-all -f
 ```bash
 cat /etc/kernel/cmdline
 # Expected to include (same line):
-# ... amdgpu.dcdebugmask=0xe12 ...   # kernel 6.x
-# ... amdgpu.dcdebugmask=0x600 ...   # kernel 7.0+
+# ... amdgpu.dcdebugmask=0x600 ...
 ```
 
 On Limine-managed systems, the installer updates `/etc/default/limine` when present and regenerates entries via `limine-update` or `limine-mkinitcpio`.

@@ -12,14 +12,12 @@ set -euo pipefail
 # Key Issues Addressed:
 # - PSR/PSR-SU causes scrolling artifacts on OLED panels
 # - Panel Replay (PR) causes flicker on OLED eDP panels
-# - IPS (Idle Power States) causes intermittent display instability
-# - DRAM memory stutter causes micro-glitches during display memory fetches
 # - Scatter-gather display causes flicker under memory pressure on APUs
 #
 # Fixes Applied:
-# - Kernel-aware amdgpu.dcdebugmask:
-#   - Kernel 6.x:  0xe12 (stutter + PSR + PSR-SU + Replay + IPS off)
-#   - Kernel 7.0+: 0x600 (PSR-SU + Replay off; avoids pageflip freezes)
+# - amdgpu.dcdebugmask=0x600 for all supported kernels:
+#   DC_DISABLE_PSR_SU (0x200) + DC_DISABLE_REPLAY (0x400)
+#   (The broader 0xe12 mask was found to break s2idle on 6.x kernels)
 # - amdgpu.sg_display=0: Scatter-gather display disabled (APU flicker)
 # - amdgpu.abmlevel=0:   ABM disabled for OLED panels (DPCD capability)
 #
@@ -40,17 +38,9 @@ display_get_target_dcdebugmask_value() {
         return 0
     fi
 
-    local kernel_version major minor version_num
-    kernel_version=$(uname -r | cut -d. -f1,2)
-    major=$(echo "$kernel_version" | cut -d. -f1)
-    minor=$(echo "$kernel_version" | cut -d. -f2)
-    version_num=$((major * 100 + minor))
-
-    if [[ $version_num -ge 700 ]]; then
-        echo "0x600"
-    else
-        echo "0xe12"
-    fi
+    # Use 0x600 (DC_DISABLE_PSR_SU | DC_DISABLE_REPLAY) for all supported
+    # kernels.  The broader 0xe12 mask breaks s2idle on 6.x kernels.
+    echo "0x600"
 }
 
 display_get_target_dcdebugmask_param() {
@@ -497,10 +487,8 @@ display_verify_psr_su_fix() {
     minor=$(echo "$kver" | cut -d. -f2)
     local version_num=$((major * 100 + minor))
     
-    if [[ $version_num -ge 700 ]]; then
-        echo "  ✓ Kernel 7.0+ should use the reduced 0x600 display mask"
-    elif [[ $version_num -ge 612 ]]; then
-        echo "  ✓ Kernel 6.x should use the full 0xe12 display mask"
+    if [[ $version_num -ge 612 ]]; then
+        echo "  ✓ Kernel $(uname -r | cut -d. -f1,2) — using 0x600 display mask"
     else
         echo "  ⚠️  Kernel < 6.12 - manual PSR-SU disable recommended"
         status=1
@@ -585,16 +573,13 @@ Library Information:
   display_fix_lib_help          - Show this help
 
 Kernel-aware Display Fix Information:
-    Kernel 6.x   -> dcdebugmask=0xe12
-        DC_DISABLE_STUTTER (0x002)  - DRAM memory stutter off (APU LCD latency)
-        DC_DISABLE_PSR     (0x010)  - PSR v1 + PSR-SU off
-        DC_DISABLE_PSR_SU  (0x200)  - belt-and-suspenders PSR-SU disable
+    All supported kernels -> dcdebugmask=0x600
+        DC_DISABLE_PSR_SU  (0x200)  - PSR-SU disable (fixes OLED scrolling artifacts)
         DC_DISABLE_REPLAY  (0x400)  - Panel Replay off (eDP0 flicker)
-        DC_DISABLE_IPS     (0x800)  - all Idle Power States off
 
-    Kernel 7.0+ -> dcdebugmask=0x600
-        DC_DISABLE_PSR_SU  (0x200)  - belt-and-suspenders PSR-SU disable
-        DC_DISABLE_REPLAY  (0x400)  - Panel Replay off without the 7.x pageflip regressions
+    Note: The broader 0xe12 mask (which also disables DRAM stutter, PSR, and
+    IPS) was previously used on kernel 6.x but was found to break s2idle
+    suspend: the side LED keeps cycling and battery drains during sleep.
 
   Also requires in /etc/modprobe.d/amdgpu.conf:
     options amdgpu sg_display=0   (APU scatter-gather flicker)

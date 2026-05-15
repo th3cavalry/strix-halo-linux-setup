@@ -104,7 +104,7 @@ The scripts automatically detect your kernel and adapt:
 
 > [!NOTE]
 > **Ubuntu 26.04 is supported.** On Linux 7.0+ most old hardware-enablement workarounds are no longer required, but the setup script is still useful for tuning and consistency.
-> If you see OLED artifacts, confirm a kernel-appropriate `amdgpu.dcdebugmask=` value is present in your boot cmdline (`0xe12` on kernel 6.x, `0x600` on kernel 7.0+).
+> If you see OLED artifacts, confirm `amdgpu.dcdebugmask=0x600` is present in your boot cmdline (applies to all supported kernels).
 
 ---
 
@@ -114,7 +114,7 @@ The scripts automatically detect your kernel and adapt:
 
 **Issue:** Purple/green color artifacts during scrolling, intermittent corruption during idle, or color-shift fringing on the built-in OLED panel (not external monitors).
 **Cause:** Multiple DC power-save features active on the internal eDP panel: PSR, PSR-SU, Panel Replay (DCN 3.5 / Strix Halo), IPS (Idle Power Save), DRAM stutter, and scatter-gather display on APU. ABM (Adaptive Backlight Management) also causes colour-shift artifacts on OLED.
-**Fix:** The installer applies a kernel-aware `amdgpu.dcdebugmask` automatically: `0xe12` on kernel 6.x, `0x600` on kernel 7.0+, plus modprobe options `abmlevel=0`, `sg_display=0`, and `cwsr_enable=0`.
+**Fix:** The installer applies `amdgpu.dcdebugmask=0x600` (PSR-SU + Panel Replay disabled) for all supported kernels, plus modprobe options `abmlevel=0`, `sg_display=0`, and `cwsr_enable=0`.
 
 ---
 
