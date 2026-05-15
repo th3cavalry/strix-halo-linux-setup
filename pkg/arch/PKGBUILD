@@ -1,6 +1,6 @@
 # Maintainer: th3cavalry <github.com/th3cavalry>
 pkgname=gz302-linux-setup
-pkgver=6.4.1
+pkgver=6.4.2
 pkgrel=1
 pkgdesc="Linux optimization suite for ASUS ROG Flow Z13 (GZ302) — z13ctl backend"
 arch=('any')

@@ -4,7 +4,7 @@ set -euo pipefail
 
 # ==============================================================================
 # GZ302 Distribution Manager Library
-# Version: 6.4.1
+# Version: 6.4.2
 #
 # This library provides distribution-specific setup orchestration for the GZ302.
 # It coordinates hardware fixes across all subsystem libraries and manages
@@ -25,7 +25,7 @@ set -euo pipefail
 # --- Hardware Fixes (Orchestrator) ---
 distro_apply_hardware_fixes() {
     info "Applying GZ302 hardware fixes using modular libraries..."
-    
+
     # Use kernel-compat if available, otherwise manual check
     local kver
     if declare -f kernel_get_version_num >/dev/null; then
@@ -33,7 +33,7 @@ distro_apply_hardware_fixes() {
     else
         kver=0
     fi
-    
+
     # 1. WiFi Configuration
     info "Configuring WiFi (MediaTek MT7925)..."
     if declare -f wifi_detect_hardware >/dev/null && wifi_detect_hardware >/dev/null 2>&1; then
@@ -244,7 +244,7 @@ distro_provide_optimization_info() {
     if [[ -f /etc/os-release ]]; then
         distro_id=$(grep -oP '(?<=^ID=)[^\n"]+' /etc/os-release 2>/dev/null | tr -d '"' || true)
     fi
-    
+
     # CachyOS-specific optimizations
     if [[ "$distro_id" == "cachyos" ]]; then
         info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -278,7 +278,7 @@ distro_provide_optimization_info() {
         info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         info ""
     fi
-    
+
     # General AMD P-State information for all Arch-based distributions
     if [[ "$distro" == "arch" ]] && [[ "$distro_id" != "cachyos" ]]; then
         info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -302,7 +302,7 @@ distro_provide_optimization_info() {
         info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         info ""
     fi
-    
+
     # Information for other distributions
     if [[ "$distro" != "arch" ]]; then
         info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

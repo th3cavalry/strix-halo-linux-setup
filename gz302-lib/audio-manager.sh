@@ -4,7 +4,7 @@ set -euo pipefail
 
 # ==============================================================================
 # GZ302 Audio Manager Library
-# Version: 6.4.1
+# Version: 6.4.2
 #
 # This library manages audio configuration for the GZ302, including:
 # - Sound Open Firmware (SOF) installation
@@ -47,12 +47,12 @@ audio_detect_cs35l41() {
     if [[ -r /proc/asound/cards ]] && grep -qi "cs35l41" /proc/asound/cards 2>/dev/null; then
         return 0
     fi
-    
+
     # Check dmesg for CS35L41 driver messages
     if dmesg | grep -qi "cs35l41"; then
         return 0
     fi
-    
+
     return 1
 }
 
@@ -62,7 +62,7 @@ audio_get_subsystem_id() {
     # GZ302 should have subsystem ID 1043:1fb3
     local subsystem_id
     subsystem_id=$(lspci -vnn | grep -i audio -A 10 | grep -i "subsystem" | grep -oP '[\da-f]{4}:[\da-f]{4}' | head -1)
-    
+
     if [[ -n "$subsystem_id" ]]; then
         echo "$subsystem_id"
     else
@@ -82,12 +82,12 @@ audio_sof_active() {
     if lsmod | grep -q "^snd_sof"; then
         return 0
     fi
-    
+
     if [[ -d /lib/firmware/intel/sof ]] || [[ -d /lib/firmware/amd/sof ]]; then
         # Firmware present, likely in use
         return 0
     fi
-    
+
     return 1
 }
 
@@ -113,7 +113,7 @@ audio_sof_firmware_installed() {
        [[ -d /usr/lib/firmware/amd/sof ]]; then
         return 0
     fi
-    
+
     return 1
 }
 
@@ -158,41 +158,41 @@ audio_get_state() {
     local ucm_installed="false"
     local cs35l41_config="false"
     local alsa_state_enabled="false"
-    
+
     if audio_detect_controller >/dev/null 2>&1; then
         controller_detected="true"
     fi
-    
+
     if audio_detect_cs35l41; then
         cs35l41_detected="true"
     fi
-    
+
     subsystem_id=$(audio_get_subsystem_id)
-    
+
     if audio_module_loaded; then
         module_loaded="true"
     fi
-    
+
     if audio_sof_active; then
         sof_active="true"
     fi
-    
+
     if audio_sof_firmware_installed; then
         sof_firmware_installed="true"
     fi
-    
+
     if audio_ucm_installed; then
         ucm_installed="true"
     fi
-    
+
     if audio_cs35l41_config_applied; then
         cs35l41_config="true"
     fi
-    
+
     if audio_alsa_state_enabled; then
         alsa_state_enabled="true"
     fi
-    
+
     cat <<EOF
 {
     "controller_detected": "$controller_detected",
@@ -216,20 +216,20 @@ EOF
 # Output: Status messages
 audio_install_sof_firmware() {
     local distro="$1"
-    
+
     if [[ -z "$distro" ]]; then
         echo "ERROR: Distribution parameter required"
         return 1
     fi
-    
+
     # Check if already installed
     if audio_sof_firmware_installed && audio_ucm_installed; then
         echo "SOF firmware and UCM already installed"
         return 0
     fi
-    
+
     echo "Installing Sound Open Firmware (SOF) for GZ302EA audio..."
-    
+
     case "$distro" in
         arch)
             # Install SOF firmware from official Arch repos
@@ -288,12 +288,12 @@ audio_apply_cs35l41_config() {
         # Not detected, don't apply config
         return 0
     fi
-    
+
     # Check if already configured
     if audio_cs35l41_config_applied; then
         return 0  # Already configured
     fi
-    
+
     # Apply configuration
     cat > /etc/modprobe.d/cs35l41.conf <<'EOF'
 # Cirrus Logic CS35L41 amplifiers - ASUS ROG Flow Z13 GZ302
@@ -302,7 +302,7 @@ audio_apply_cs35l41_config() {
 # Load cs35l41_hda after snd_hda_intel so the HDA bus is ready.
 softdep snd_hda_intel post: cs35l41_hda
 EOF
-    
+
     return 0
 }
 
@@ -312,11 +312,11 @@ audio_enable_alsa_state() {
     if audio_alsa_state_enabled; then
         return 0  # Already enabled
     fi
-    
+
     # Enable state save/restore services
     systemctl enable --now alsa-restore.service 2>/dev/null || true
     systemctl enable --now alsa-state.service 2>/dev/null || true
-    
+
     return 0
 }
 
@@ -326,16 +326,16 @@ audio_enable_alsa_state() {
 # Output: Status messages
 audio_apply_configuration() {
     local distro="${1:-}"
-    
+
     echo "Configuring audio for GZ302..."
-    
+
     # Install SOF firmware if distribution provided
     if [[ -n "$distro" ]]; then
         if ! audio_install_sof_firmware "$distro"; then
             echo "WARNING: SOF firmware installation had issues"
         fi
     fi
-    
+
     # Check kernel version for CS35L41 native support
     local kver=0
     if declare -f kernel_get_version_num >/dev/null; then
@@ -358,12 +358,12 @@ audio_apply_configuration() {
     else
         echo "CS35L41 amplifier not detected (may appear after reboot)"
     fi
-    
+
     # Enable ALSA state services
     if ! audio_enable_alsa_state; then
         echo "WARNING: Failed to enable ALSA state services"
     fi
-    
+
     echo "Audio configuration complete"
     return 0
 }
@@ -375,35 +375,35 @@ audio_apply_configuration() {
 # Output: Status information
 audio_verify_working() {
     local status=0
-    
+
     # Check if audio controller detected
     if ! audio_detect_controller >/dev/null 2>&1; then
         echo "ERROR: Audio controller not detected"
         return 1
     fi
-    
+
     # Check if audio module loaded
     if ! audio_module_loaded; then
         echo "WARNING: snd_hda_intel module not loaded"
         status=1
     fi
-    
+
     # Check for audio cards
     if [[ ! -f /proc/asound/cards ]] || ! grep -q "[0-9]" /proc/asound/cards; then
         echo "WARNING: No audio cards detected"
         status=1
     fi
-    
+
     # Check for kernel errors
     if dmesg | tail -200 | grep -qi "snd.*error\|audio.*fail\|cs35l41.*error"; then
         echo "WARNING: Recent audio errors in kernel log"
         status=1
     fi
-    
+
     if [[ $status -eq 0 ]]; then
         echo "Audio verification passed"
     fi
-    
+
     return $status
 }
 
@@ -414,42 +414,42 @@ audio_verify_working() {
 audio_print_status() {
     local state
     state=$(audio_get_state)
-    
+
     local controller_detected
     local cs35l41_detected
     local subsystem_id
     local sof_firmware
     local cs35l41_config
-    
+
     controller_detected=$(echo "$state" | grep "controller_detected" | cut -d'"' -f4)
     cs35l41_detected=$(echo "$state" | grep "cs35l41_detected" | cut -d'"' -f4)
     subsystem_id=$(echo "$state" | grep "subsystem_id" | cut -d'"' -f4)
     sof_firmware=$(echo "$state" | grep "sof_firmware_installed" | cut -d'"' -f4)
     cs35l41_config=$(echo "$state" | grep "cs35l41_config_applied" | cut -d'"' -f4)
-    
+
     echo "Audio Status (GZ302EA):"
     echo "  Controller:          $controller_detected"
     echo "  CS35L41 Amplifiers:  $cs35l41_detected"
     echo "  Subsystem ID:        $subsystem_id"
     echo "  SOF Firmware:        $sof_firmware"
     echo "  CS35L41 Config:      $cs35l41_config"
-    
+
     # Check for expected subsystem ID
     if [[ "$subsystem_id" != "1043:1fb3" && "$subsystem_id" != "unknown" ]]; then
         echo "  ⚠️  WARNING: Unexpected subsystem ID (expected 1043:1fb3)"
     fi
-    
+
     # Check for missing components
     if [[ "$sof_firmware" == "false" ]]; then
         echo "  ⚠️  WARNING: SOF firmware not installed"
         echo "      Audio may not work optimally"
     fi
-    
+
     if [[ "$cs35l41_detected" == "true" && "$cs35l41_config" == "false" ]]; then
         echo "  ⚠️  WARNING: CS35L41 detected but not configured"
         echo "      Run 'audio_apply_configuration' to configure"
     fi
-    
+
     # Display audio cards
     echo
     echo "Audio Cards:"
@@ -501,18 +501,18 @@ Library Information:
 
 Example Usage:
   source gz302-lib/audio-manager.sh
-  
+
   # Detect hardware
   if audio_detect_controller; then
       echo "Audio controller found"
   fi
-  
+
   # Apply configuration
   audio_apply_configuration "arch"
-  
+
   # Verify working
   audio_verify_working
-  
+
   # Check status
   audio_print_status
 

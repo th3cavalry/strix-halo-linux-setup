@@ -4,7 +4,7 @@ set -euo pipefail
 
 # ==============================================================================
 # GZ302 State Manager Library
-# Version: 6.4.1
+# Version: 6.4.2
 #
 # This library provides persistent state tracking for the GZ302 toolkit.
 # It tracks what fixes have been applied, when they were applied, and provides
@@ -40,21 +40,21 @@ state_init() {
             return 1
         }
     fi
-    
+
     # Create backup directory
     if [[ ! -d "$BACKUP_DIR" ]]; then
         mkdir -p "$BACKUP_DIR" 2>/dev/null || {
             echo "WARNING: Failed to create backup directory: $BACKUP_DIR"
         }
     fi
-    
+
     # Create log directory
     if [[ ! -d "$LOG_DIR" ]]; then
         mkdir -p "$LOG_DIR" 2>/dev/null || {
             echo "WARNING: Failed to create log directory: $LOG_DIR"
         }
     fi
-    
+
     # Create version file if it doesn't exist
     if [[ ! -f "$STATE_STORE_DIR/version" ]]; then
         local tmp_ver
@@ -62,7 +62,7 @@ state_init() {
         echo "$STATE_VERSION" > "$tmp_ver"
         mv "$tmp_ver" "${STATE_STORE_DIR}/version"
     fi
-    
+
     return 0
 }
 
@@ -89,27 +89,27 @@ state_mark_applied() {
     local component="$1"
     local fix_name="$2"
     local metadata="${3:-}"
-    
+
     if [[ -z "$component" ]] || [[ -z "$fix_name" ]]; then
         echo "ERROR: Component and fix_name required"
         return 1
     fi
-    
+
     # Ensure state is initialized
     if ! state_is_initialized; then
         state_init || return 1
     fi
-    
+
     local state_file
     state_file=$(state_get_component_file "$component")
-    
+
     local timestamp
     timestamp=$(date +%Y-%m-%d_%H:%M:%S)
-    
+
     # Create or update state file
     # Format: fix_name|timestamp|metadata
     local entry="${fix_name}|${timestamp}|${metadata}"
-    
+
     # Write atomically via mktemp + mv
     local tmp_file
     tmp_file=$(mktemp "${state_file}.XXXXXX")
@@ -118,7 +118,7 @@ state_mark_applied() {
     fi
     echo "$entry" >> "$tmp_file"
     mv "$tmp_file" "$state_file"
-    
+
     return 0
 }
 
@@ -128,22 +128,22 @@ state_mark_applied() {
 state_is_applied() {
     local component="$1"
     local fix_name="$2"
-    
+
     if [[ -z "$component" ]] || [[ -z "$fix_name" ]]; then
         return 1
     fi
-    
+
     if ! state_is_initialized; then
         return 1
     fi
-    
+
     local state_file
     state_file=$(state_get_component_file "$component")
-    
+
     if [[ ! -f "$state_file" ]]; then
         return 1
     fi
-    
+
     grep -q "^${fix_name}|" "$state_file" 2>/dev/null
 }
 
@@ -153,29 +153,29 @@ state_is_applied() {
 state_mark_removed() {
     local component="$1"
     local fix_name="$2"
-    
+
     if [[ -z "$component" ]] || [[ -z "$fix_name" ]]; then
         echo "ERROR: Component and fix_name required"
         return 1
     fi
-    
+
     if ! state_is_initialized; then
         return 0  # Nothing to remove
     fi
-    
+
     local state_file
     state_file=$(state_get_component_file "$component")
-    
+
     if [[ ! -f "$state_file" ]]; then
         return 0  # Nothing to remove
     fi
-    
+
     # Remove entry atomically via mktemp + mv
     local tmp_file
     tmp_file=$(mktemp "${state_file}.XXXXXX")
     grep -v "^${fix_name}|" "$state_file" > "$tmp_file" 2>/dev/null || true
     mv "$tmp_file" "$state_file"
-    
+
     return 0
 }
 
@@ -185,15 +185,15 @@ state_mark_removed() {
 state_get_metadata() {
     local component="$1"
     local fix_name="$2"
-    
+
     if ! state_is_applied "$component" "$fix_name"; then
         echo ""
         return 1
     fi
-    
+
     local state_file
     state_file=$(state_get_component_file "$component")
-    
+
     # Extract metadata (third field)
     grep "^${fix_name}|" "$state_file" 2>/dev/null | cut -d'|' -f3
 }
@@ -204,15 +204,15 @@ state_get_metadata() {
 state_get_timestamp() {
     local component="$1"
     local fix_name="$2"
-    
+
     if ! state_is_applied "$component" "$fix_name"; then
         echo ""
         return 1
     fi
-    
+
     local state_file
     state_file=$(state_get_component_file "$component")
-    
+
     # Extract timestamp (second field)
     grep "^${fix_name}|" "$state_file" 2>/dev/null | cut -d'|' -f2
 }
@@ -222,18 +222,18 @@ state_get_timestamp() {
 # Output: List of fix names (one per line)
 state_list_fixes() {
     local component="$1"
-    
+
     if [[ -z "$component" ]]; then
         return 1
     fi
-    
+
     local state_file
     state_file=$(state_get_component_file "$component")
-    
+
     if [[ ! -f "$state_file" ]]; then
         return 0
     fi
-    
+
     # Extract fix names (first field)
     cut -d'|' -f1 "$state_file"
 }
@@ -245,22 +245,22 @@ state_list_fixes() {
 # Output: JSON-like state information
 state_get_component_state() {
     local component="$1"
-    
+
     if [[ -z "$component" ]]; then
         echo '{"error": "component required"}'
         return 1
     fi
-    
+
     local state_file
     state_file=$(state_get_component_file "$component")
-    
+
     if [[ ! -f "$state_file" ]]; then
         echo "{\"component\": \"$component\", \"fixes\": []}"
         return 0
     fi
-    
+
     echo "{\"component\": \"$component\", \"fixes\": ["
-    
+
     local first=true
     while IFS='|' read -r fix_name timestamp metadata; do
         if [[ "$first" == true ]]; then
@@ -270,7 +270,7 @@ state_get_component_state() {
         fi
         echo "    {\"name\": \"$fix_name\", \"timestamp\": \"$timestamp\", \"metadata\": \"$metadata\"}"
     done < "$state_file"
-    
+
     echo "  ]}"
 }
 
@@ -281,29 +281,29 @@ state_get_system_state() {
         echo '{"error": "state not initialized"}'
         return 1
     fi
-    
+
     echo "{"
     echo "  \"version\": \"$STATE_VERSION\","
     echo "  \"components\": {"
-    
+
     local first=true
     for state_file in "$STATE_STORE_DIR"/*.state; do
         if [[ ! -f "$state_file" ]]; then
             continue
         fi
-        
+
         local component
         component=$(basename "$state_file" .state)
-        
+
         if [[ "$first" == true ]]; then
             first=false
         else
             echo ","
         fi
-        
+
         echo "    \"$component\": $(state_get_component_state "$component")"
     done
-    
+
     echo "  }"
     echo "}"
 }
@@ -316,12 +316,12 @@ state_get_system_state() {
 # Output: Backup file path
 state_backup_file() {
     local file_path="$1"
-    
+
     if [[ ! -f "$file_path" ]]; then
         echo "WARNING: File not found: $file_path"
         return 1
     fi
-    
+
     # Ensure backup directory exists
     if [[ ! -d "$BACKUP_DIR" ]]; then
         mkdir -p "$BACKUP_DIR" 2>/dev/null || {
@@ -329,16 +329,16 @@ state_backup_file() {
             return 1
         }
     fi
-    
+
     # Create timestamped backup
     local timestamp
     timestamp=$(date +%Y%m%d_%H%M%S)
-    
+
     local filename
     filename=$(basename "$file_path")
-    
+
     local backup_path="${BACKUP_DIR}/${filename}.${timestamp}.bak"
-    
+
     if cp "$file_path" "$backup_path" 2>/dev/null; then
         echo "$backup_path"
         return 0
@@ -353,20 +353,20 @@ state_backup_file() {
 # Returns: 0 on success, 1 on failure
 state_restore_file() {
     local backup_path="$1"
-    
+
     if [[ ! -f "$backup_path" ]]; then
         echo "ERROR: Backup file not found: $backup_path"
         return 1
     fi
-    
+
     # Extract original filename (remove timestamp and .bak)
     local filename
     filename=$(basename "$backup_path" | sed 's/\.[0-9_]*\.bak$//')
-    
+
     # Determine original path (assume /etc/ for modprobe.d, systemd, etc.)
     # This is simplified - real implementation would store original path
     local original_path="/etc/${filename}"
-    
+
     if cp "$backup_path" "$original_path" 2>/dev/null; then
         echo "Restored: $original_path from $backup_path"
         return 0
@@ -383,7 +383,7 @@ state_list_backups() {
         echo "No backups directory found"
         return 0
     fi
-    
+
     find "$BACKUP_DIR" -name "*.bak" -type f 2>/dev/null | sort
 }
 
@@ -394,15 +394,15 @@ state_list_backups() {
 state_log() {
     local level="$1"
     local message="$2"
-    
+
     if [[ ! -d "$LOG_DIR" ]]; then
         mkdir -p "$LOG_DIR" 2>/dev/null || return 1
     fi
-    
+
     local log_file="$LOG_DIR/state.log"
     local timestamp
     timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    
+
     echo "[$timestamp] [$level] $message" >> "$log_file"
 }
 
@@ -412,12 +412,12 @@ state_log() {
 state_get_log() {
     local lines="${1:-50}"
     local log_file="$LOG_DIR/state.log"
-    
+
     if [[ ! -f "$log_file" ]]; then
         echo "No log file found"
         return 0
     fi
-    
+
     tail -n "$lines" "$log_file"
 }
 
@@ -429,54 +429,54 @@ state_print_status() {
     echo "GZ302 State Manager Status"
     echo "=========================="
     echo
-    
+
     if ! state_is_initialized; then
         echo "Status: NOT INITIALIZED"
         echo "Run: state_init"
         return 1
     fi
-    
+
     echo "Status: Initialized"
     echo "State Directory: $STATE_STORE_DIR"
     echo "Backup Directory: $BACKUP_DIR"
     echo "Log Directory: $LOG_DIR"
     echo "Version: $STATE_VERSION"
     echo
-    
+
     echo "Component States:"
     for state_file in "$STATE_STORE_DIR"/*.state; do
         if [[ ! -f "$state_file" ]]; then
             echo "  No components configured yet"
             break
         fi
-        
+
         local component
         component=$(basename "$state_file" .state)
-        
+
         echo "  Component: $component"
-        
+
         while IFS='|' read -r fix_name timestamp metadata; do
             echo "    ✓ $fix_name (applied: $timestamp)"
             if [[ -n "$metadata" ]]; then
                 echo "      Metadata: $metadata"
             fi
         done < "$state_file"
-        
+
         echo
     done
-    
+
     echo "Recent Backups:"
     local backup_count
     backup_count=$(state_list_backups | wc -l)
     echo "  Total: $backup_count"
-    
+
     if [[ $backup_count -gt 0 ]]; then
         echo "  Latest 5:"
         state_list_backups | tail -5 | while read -r backup; do
             echo "    $(basename "$backup")"
         done
     fi
-    
+
     echo
     echo "Recent Log Entries:"
     state_get_log 10
@@ -489,7 +489,7 @@ state_print_status() {
 state_clear_all() {
     echo "WARNING: This will clear all state tracking"
     echo "Backups and logs will be preserved"
-    
+
     if [[ -d "$STATE_STORE_DIR" ]]; then
         rm -f "$STATE_STORE_DIR"/*.state 2>/dev/null || {
             echo "ERROR: Failed to clear state"
@@ -497,7 +497,7 @@ state_clear_all() {
         }
         echo "All state cleared"
     fi
-    
+
     return 0
 }
 
@@ -506,20 +506,20 @@ state_clear_all() {
 # Returns: 0 on success
 state_clear_component() {
     local component="$1"
-    
+
     if [[ -z "$component" ]]; then
         echo "ERROR: Component required"
         return 1
     fi
-    
+
     local state_file
     state_file=$(state_get_component_file "$component")
-    
+
     if [[ -f "$state_file" ]]; then
         rm -f "$state_file"
         echo "State cleared for component: $component"
     fi
-    
+
     return 0
 }
 
@@ -573,24 +573,24 @@ Example Usage:
   # Initialize
   source gz302-lib/state-manager.sh
   state_init
-  
+
   # Mark fix as applied
   state_mark_applied "wifi" "aspm_workaround" "kernel_6.16"
-  
+
   # Check if applied
   if state_is_applied "wifi" "aspm_workaround"; then
       echo "ASPM workaround already applied"
   fi
-  
+
   # Backup file before modification
   backup=$(state_backup_file "/etc/modprobe.d/mt7925.conf")
-  
+
   # Log activity
   state_log "INFO" "Applied WiFi ASPM workaround"
-  
+
   # View status
   state_print_status
-  
+
   # Get JSON state
   state_get_system_state | jq .
 
