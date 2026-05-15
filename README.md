@@ -1,6 +1,6 @@
 # ASUS ROG Flow Z13 (GZ302) Linux Toolkit
 
-![Version](https://img.shields.io/badge/version-6.4.0-blue?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-6.4.1-blue?style=for-the-badge)
 ![Kernel](https://img.shields.io/badge/Kernel-6.14%2B-orange?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/Device-ASUS%20ROG%20Flow%20Z13-red?style=for-the-badge)
@@ -102,6 +102,10 @@ The scripts automatically detect your kernel and adapt:
 | **6.14 – 6.16** | Applies workarounds for WiFi (MT7925), Touchpad, Tablet mode |
 | **6.17+** | Native support — cleans up obsolete fixes, focuses on tuning |
 
+> [!NOTE]
+> **Ubuntu 26.04 is supported.** On Linux 7.0+ most old hardware-enablement workarounds are no longer required, but the setup script is still useful for tuning and consistency.
+> If you see OLED artifacts, confirm a kernel-appropriate `amdgpu.dcdebugmask=` value is present in your boot cmdline (`0xe12` on kernel 6.x, `0x600` on kernel 7.0+).
+
 ---
 
 ## Display Fixes
@@ -167,4 +171,3 @@ This removes all GZ302 tools, z13ctl daemon/config, systemd services, udev rules
 
 **License:** MIT
 **Maintained by:** th3cavalry
-

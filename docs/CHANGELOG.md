@@ -2,6 +2,12 @@
 
 All notable changes to GZ302-Linux-Setup will be documented in this file.
 
+## [6.4.1] - 2026-05-15
+
+### Fixed
+- **Ubuntu 26.04 support clarification**: Updated README and kernel-support docs to explicitly confirm Ubuntu 26.04 support on the kernel 7.0+ path and clarify that Linux 7+ is primarily tuning/consistency, not legacy hardware-enablement.
+- **OLED artifact guidance wording**: Added a direct note to verify `amdgpu.dcdebugmask` in boot cmdline with kernel-aware values (`0xe12` on kernel 6.x, `0x600` on kernel 7.0+).
+
 ## [6.4.0] - 2026-05-05
 
 ### Added
