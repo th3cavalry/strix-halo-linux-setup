@@ -4,7 +4,7 @@ set -euo pipefail
 
 # ==============================================================================
 # GZ302 Display Manager Library
-# Version: 6.4.1
+# Version: 6.4.2
 #
 # This library provides refresh rate management and display control for the
 # ASUS ROG Flow Z13 (GZ302) with its 180Hz display.
@@ -109,7 +109,7 @@ display_has_kscreen() {
 # Returns: Space-separated list of display names
 display_detect_outputs() {
     local displays=()
-    
+
     if display_is_x11; then
         # X11 environment
         mapfile -t displays < <(xrandr --listmonitors 2>/dev/null | grep -E "^ [0-9]:" | awk '{print $4}' | cut -d'/' -f1)
@@ -120,17 +120,17 @@ display_detect_outputs() {
         # KDE Plasma on Wayland
         mapfile -t displays < <(kscreen-doctor -o 2>/dev/null | grep -E "^Output:" | awk '{print $2}' | cut -d: -f1)
     fi
-    
+
     # Fallback to DRM
     if [[ ${#displays[@]} -eq 0 && -d /sys/class/drm ]]; then
         mapfile -t displays < <(find /sys/class/drm -maxdepth 1 -name "card*-*" -type l -exec basename {} \; 2>/dev/null | grep -v "Virtual" | head -5)
     fi
-    
+
     # Default fallback
     if [[ ${#displays[@]} -eq 0 ]]; then
         displays=("eDP-1")
     fi
-    
+
     echo "${displays[@]}"
 }
 
@@ -139,7 +139,7 @@ display_detect_outputs() {
 display_get_primary() {
     local displays
     displays=$(display_detect_outputs)
-    
+
     # Look for internal display first (eDP)
     for disp in $displays; do
         if [[ "$disp" == eDP* || "$disp" == *-eDP-* ]]; then
@@ -147,7 +147,7 @@ display_get_primary() {
             return 0
         fi
     done
-    
+
     # Return first display
     echo "$displays" | awk '{print $1}'
 }
@@ -160,7 +160,7 @@ display_get_primary() {
 display_get_current_refresh() {
     local display="${1:-$(display_get_primary)}"
     local rate=""
-    
+
     if display_is_x11; then
         # X11: Parse current mode from xrandr
         rate=$(xrandr 2>/dev/null | grep -A20 "^${display}" | grep -E "^\s+" | grep "\*" | head -1 | grep -oP '\d+\.\d+(?=\*?)' | cut -d. -f1)
@@ -171,12 +171,12 @@ display_get_current_refresh() {
         # KDE Plasma
         rate=$(kscreen-doctor -o 2>/dev/null | grep -A5 "$display" | grep "Refresh:" | grep -oP '\d+(?=Hz)')
     fi
-    
+
     # Fallback
     if [[ -z "$rate" ]]; then
         rate="60"
     fi
-    
+
     echo "$rate"
 }
 
@@ -186,20 +186,20 @@ display_get_current_refresh() {
 display_get_supported_rates() {
     local display="${1:-$(display_get_primary)}"
     local rates=""
-    
+
     if display_is_x11; then
         # X11: Extract all refresh rates from current resolution mode
         rates=$(xrandr 2>/dev/null | grep -A20 "^${display}" | grep -E "^\s+${GZ302_RESOLUTION}" | grep -oP '\d+\.\d+' | cut -d. -f1 | sort -nu)
     elif display_has_wlr_randr; then
         rates=$(wlr-randr 2>/dev/null | grep -A30 "^${display}" | grep -oP '\d+(?=\.\d+ Hz)' | sort -nu)
     fi
-    
+
     # Fallback: Common GZ302 rates
     if [[ -z "$rates" ]]; then
         printf '%s\n' 30 48 60 90 120 180
         return
     fi
-    
+
     echo "$rates"
 }
 
@@ -212,7 +212,7 @@ display_vrr_supported() {
     if [[ ! -d /sys/class/drm ]]; then
         return 1
     fi
-    
+
     # Look for vrr_capable in DRM properties
     local drm_device
     for drm_device in /sys/class/drm/card*-*/; do
@@ -222,12 +222,12 @@ display_vrr_supported() {
             fi
         fi
     done
-    
+
     # Check for AMD GPU with VRR
     if lsmod 2>/dev/null | grep -q "^amdgpu"; then
         return 0  # Assume VRR capable if AMD GPU
     fi
-    
+
     return 1
 }
 
@@ -248,10 +248,10 @@ display_vrr_enable() {
         echo "VRR not supported on this system" >&2
         return 1
     fi
-    
+
     mkdir -p "$DISPLAY_CONFIG_DIR"
     echo "true" > "$DISPLAY_VRR_ENABLED_FILE"
-    
+
     # Try to enable at DRM level
     local drm_device
     for drm_device in /sys/class/drm/card*-*/; do
@@ -259,7 +259,7 @@ display_vrr_enable() {
             echo "1" > "${drm_device}vrr_enabled" 2>/dev/null || true
         fi
     done
-    
+
     echo "VRR enabled"
     return 0
 }
@@ -269,14 +269,14 @@ display_vrr_enable() {
 display_vrr_disable() {
     mkdir -p "$DISPLAY_CONFIG_DIR"
     echo "false" > "$DISPLAY_VRR_ENABLED_FILE"
-    
+
     local drm_device
     for drm_device in /sys/class/drm/card*-*/; do
         if [[ -f "${drm_device}vrr_enabled" ]]; then
             echo "0" > "${drm_device}vrr_enabled" 2>/dev/null || true
         fi
     done
-    
+
     echo "VRR disabled"
     return 0
 }
@@ -309,7 +309,7 @@ display_profile_valid() {
 display_set_rate_xrandr() {
     local display="$1"
     local rate="$2"
-    
+
     if xrandr --output "$display" --rate "$rate" 2>/dev/null; then
         return 0
     fi
@@ -322,7 +322,7 @@ display_set_rate_xrandr() {
 display_set_rate_wlr() {
     local display="$1"
     local rate="$2"
-    
+
     # wlr-randr requires full mode spec, try different formats
     if wlr-randr --output "$display" --custom-mode "${GZ302_RESOLUTION}@${rate}Hz" 2>/dev/null; then
         return 0
@@ -334,12 +334,12 @@ display_set_rate_wlr() {
 }
 
 # Set refresh rate using kscreen-doctor (KDE Wayland)
-# Args: $1 = display, $2 = rate  
+# Args: $1 = display, $2 = rate
 # Returns: 0 on success, 1 on failure
 display_set_rate_kscreen() {
     local display="$1"
     local rate="$2"
-    
+
     if kscreen-doctor "output.${display}.mode.${GZ302_RESOLUTION}@${rate}" 2>/dev/null; then
         return 0
     fi
@@ -351,24 +351,24 @@ display_set_rate_kscreen() {
 # Returns: 0 on success, 1 on failure
 display_apply_profile() {
     local profile="$1"
-    
+
     if ! display_profile_valid "$profile"; then
         echo "Error: Unknown profile '$profile'" >&2
         return 1
     fi
-    
+
     local target_rate="${DISPLAY_REFRESH_PROFILES[$profile]}"
     local displays
     displays=$(display_detect_outputs)
-    
+
     echo "Setting refresh rate profile: $profile (${target_rate}Hz)"
-    
+
     local success=false
     local display
-    
+
     for display in $displays; do
         echo "Configuring display: $display"
-        
+
         # Try X11 first
         if display_is_x11; then
             if display_set_rate_xrandr "$display" "$target_rate"; then
@@ -377,7 +377,7 @@ display_apply_profile() {
                 continue
             fi
         fi
-        
+
         # Try wlr-randr
         if display_has_wlr_randr; then
             if display_set_rate_wlr "$display" "$target_rate"; then
@@ -386,7 +386,7 @@ display_apply_profile() {
                 continue
             fi
         fi
-        
+
         # Try kscreen
         if display_has_kscreen; then
             if display_set_rate_kscreen "$display" "$target_rate"; then
@@ -395,15 +395,15 @@ display_apply_profile() {
                 continue
             fi
         fi
-        
+
         echo "  ⚠ Could not set refresh rate for $display"
     done
-    
+
     if [[ "$success" == true ]]; then
         # Save current profile
         mkdir -p "$DISPLAY_CONFIG_DIR"
         echo "$profile" > "$DISPLAY_CURRENT_PROFILE_FILE"
-        
+
         # Apply VRR range if enabled
         if display_vrr_enabled; then
             local min_range="${DISPLAY_VRR_MIN[$profile]:-48}"
@@ -411,13 +411,13 @@ display_apply_profile() {
             echo "VRR range: ${min_range}-${max_range}Hz"
             echo "${min_range}:${max_range}" > "$DISPLAY_VRR_RANGES_FILE"
         fi
-        
+
         # Apply frame limit if applicable
         local frame_limit="${DISPLAY_FRAME_LIMITS[$profile]:-0}"
         if [[ "$frame_limit" != "0" ]]; then
             display_set_frame_limit "$frame_limit"
         fi
-        
+
         echo "Display profile '$profile' applied"
         return 0
     else
@@ -430,7 +430,7 @@ display_apply_profile() {
 # Args: $1 = fps limit (0 = no limit)
 display_set_frame_limit() {
     local limit="$1"
-    
+
     # Find user's home directory
     local user_home
     if [[ -n "${SUDO_USER:-}" ]]; then
@@ -438,12 +438,12 @@ display_set_frame_limit() {
     else
         user_home="$HOME"
     fi
-    
+
     local mangohud_dir="$user_home/.config/MangoHud"
     local mangohud_config="$mangohud_dir/MangoHud.conf"
-    
+
     mkdir -p "$mangohud_dir" 2>/dev/null || true
-    
+
     if [[ "$limit" == "0" ]]; then
         # Remove FPS limit
         if [[ -f "$mangohud_config" ]]; then
@@ -468,13 +468,13 @@ display_print_status() {
     displays=$(display_detect_outputs)
     local primary
     primary=$(display_get_primary)
-    
+
     echo "Display Status:"
     echo "  Environments: $(display_is_x11 && echo "X11") $(display_is_wayland && echo "Wayland")"
     echo "  Primary Display: $primary"
     echo "  Current Refresh: $(display_get_current_refresh "$primary")Hz"
     echo "  Current Profile: $(display_get_current_profile)"
-    
+
     echo ""
     echo "VRR Status:"
     display_vrr_supported && echo "  VRR: Supported" || echo "  VRR: Not supported"
@@ -482,7 +482,7 @@ display_print_status() {
     if [[ -f "$DISPLAY_VRR_RANGES_FILE" ]]; then
         echo "  VRR Range: $(cat "$DISPLAY_VRR_RANGES_FILE" 2>/dev/null | tr ':' '-')Hz"
     fi
-    
+
     echo ""
     echo "Connected Displays:"
     local disp
@@ -491,7 +491,7 @@ display_print_status() {
         rate=$(display_get_current_refresh "$disp")
         echo "  $disp: ${rate}Hz"
     done
-    
+
     echo ""
     echo "Available Tools:"
     display_is_x11 && command -v xrandr >/dev/null && echo "  ✓ xrandr (X11)"
@@ -607,7 +607,7 @@ RRCFG_SCRIPT
 # Ensure configuration directory exists
 display_init_config() {
     mkdir -p "$DISPLAY_CONFIG_DIR"
-    
+
     # Set default VRR state if not present
     if [[ ! -f "$DISPLAY_VRR_ENABLED_FILE" ]]; then
         echo "false" > "$DISPLAY_VRR_ENABLED_FILE"

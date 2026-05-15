@@ -9,7 +9,7 @@ set -euo pipefail
 
 # ==============================================================================
 # GZ302 Shared Utilities Library
-# Version: 6.4.1
+# Version: 6.4.2
 #
 # This library contains shared functions for the GZ302 Linux Setup scripts.
 # It is sourced by gz302-setup.sh and all optional modules.
@@ -90,7 +90,7 @@ print_section() {
     local title="$1"
     local width=60
     local padding=$(( (width - ${#title} - 2) / 2 ))
-    
+
     echo
     printf "${C_BOLD_CYAN}"
     printf '╔'; printf '═%.0s' $(seq 1 $width); printf '╗\n'
@@ -112,10 +112,10 @@ print_step() {
     local current="$1"
     local total="$2"
     local message="$3"
-    
+
     CURRENT_STEP=$current
     TOTAL_STEPS=$total
-    
+
     printf "${C_BOLD_WHITE}[${C_CYAN}%d${C_WHITE}/${C_CYAN}%d${C_BOLD_WHITE}]${C_NC} ${C_WHITE}%s${C_NC}\n" "$current" "$total" "$message"
 }
 
@@ -169,10 +169,10 @@ SPINNER_MSG=""
 start_spinner() {
     local msg="${1:-Working...}"
     SPINNER_MSG="$msg"
-    
+
     # Don't start spinner if not in a terminal
     [[ ! -t 1 ]] && return
-    
+
     (
         local i=0
         while true; do
@@ -188,17 +188,17 @@ start_spinner() {
 stop_spinner() {
     local status="${1:-success}"
     local msg="${2:-$SPINNER_MSG}"
-    
+
     # Kill the spinner if running
     if [[ -n "$SPINNER_PID" ]]; then
         kill "$SPINNER_PID" 2>/dev/null
         wait "$SPINNER_PID" 2>/dev/null
         SPINNER_PID=""
     fi
-    
+
     # Clear the line and print final status
     [[ -t 1 ]] && printf "\r\033[K"
-    
+
     if [[ "$status" == "success" ]]; then
         printf "${C_GREEN}${SYMBOL_CHECK}${C_NC} ${C_WHITE}%s${C_NC}\n" "$msg"
     elif [[ "$status" == "warning" ]]; then
@@ -217,7 +217,7 @@ print_progress_bar() {
     local percent=$((current * 100 / total))
     local filled=$((current * width / total))
     local empty=$((width - filled))
-    
+
     printf "\r${C_CYAN}["
     printf "%${filled}s" | tr ' ' '█'
     printf "%${empty}s" | tr ' ' '░'
@@ -241,7 +241,7 @@ print_keyval() {
 print_status() {
     local status="$1"
     local message="$2"
-    
+
     case "$status" in
         "ok"|"success"|"done")
             printf "${C_GREEN}[  OK  ]${C_NC} %s\n" "$message"
@@ -271,7 +271,7 @@ print_box() {
     local width=60
     local msg_len=${#message}
     local padding=$(( (width - msg_len - 2) / 2 ))
-    
+
     echo
     printf "${color}"
     printf '┌'; printf '─%.0s' $(seq 1 $width); printf '┐\n'
@@ -291,10 +291,10 @@ print_tip() {
 print_banner() {
     printf "${C_BOLD_CYAN}"
     cat << 'BANNER'
-   ██████╗ ███████╗██████╗  ██████╗ ██████╗ 
+   ██████╗ ███████╗██████╗  ██████╗ ██████╗
   ██╔════╝ ╚══███╔╝╚════██╗██╔═████╗╚════██╗
   ██║  ███╗  ███╔╝  █████╔╝██║██╔██║ █████╔╝
-  ██║   ██║ ███╔╝   ╚═══██╗████╔╝██║██╔═══╝ 
+  ██║   ██║ ███╔╝   ╚═══██╗████╔╝██║██╔═══╝
   ╚██████╔╝███████╗██████╔╝╚██████╔╝███████╗
    ╚═════╝ ╚══════╝╚═════╝  ╚═════╝ ╚══════╝
 BANNER
@@ -318,11 +318,11 @@ get_real_user() {
 # --- Distribution Detection ---
 detect_distribution() {
     local distro=""
-    
+
     if [[ -f /etc/os-release ]]; then
         # shellcheck disable=SC1091
         . /etc/os-release
-        
+
         # Detect Arch-based systems (including Omarchy, CachyOS, EndeavourOS, Manjaro)
         if [[ "${ID:-}" == "arch" || "${ID:-}" == "omarchy" || "${ID:-}" == "cachyos" || "${ID_LIKE:-}" == *"arch"* ]]; then
             distro="arch"
@@ -341,7 +341,7 @@ detect_distribution() {
             distro="opensuse"
         fi
     fi
-    
+
     if [[ -z "$distro" ]]; then
         # Fallback for unknown distros, return unknown but don't exit
         echo "unknown"
@@ -453,15 +453,15 @@ create_config_backup() {
     local timestamp
     timestamp=$(date +%Y%m%d_%H%M%S)
     local backup_subdir="${BACKUP_DIR}/${timestamp}_${description}"
-    
+
     # Create backup directory
     mkdir -p "$backup_subdir"
-    
+
     print_subsection "Creating Configuration Backup"
     info "Backup location: $backup_subdir"
-    
+
     local backed_up=0
-    
+
     # Backup modprobe.d configurations
     if [[ -d /etc/modprobe.d ]]; then
         local modprobe_files
@@ -474,7 +474,7 @@ create_config_backup() {
             completed_item "Modprobe configurations"
         fi
     fi
-    
+
     # Backup systemd services
     if [[ -d "$SYSTEMD_DIR" ]]; then
         local systemd_files
@@ -487,7 +487,7 @@ create_config_backup() {
             completed_item "Systemd services"
         fi
     fi
-    
+
     # Backup sudoers entries
     if [[ -d "$SUDOERS_DIR" ]]; then
         local sudoers_files
@@ -500,7 +500,7 @@ create_config_backup() {
             completed_item "Sudoers configurations"
         fi
     fi
-    
+
     # Backup custom scripts
     if [[ -d "$BIN_DIR" ]]; then
         local script_files
@@ -513,7 +513,7 @@ create_config_backup() {
             completed_item "Custom scripts"
         fi
     fi
-    
+
     # Backup config directories
     for config_dir in "$CONFIG_DIR" "/etc/gz302-tdp" "/etc/gz302-refresh" "/etc/gz302-rgb"; do
         if [[ -d "$config_dir" ]]; then
@@ -524,7 +524,7 @@ create_config_backup() {
             ((backed_up++)) || true
         fi
     done
-    
+
     # Create backup manifest
     cat > "$backup_subdir/MANIFEST.txt" << EOF
 GZ302 Configuration Backup
@@ -537,7 +537,7 @@ $(find "$backup_subdir" -type f ! -name "MANIFEST.txt" | sed "s|$backup_subdir/|
 To restore:
   sudo cp -r $backup_subdir/* /
 EOF
-    
+
     if [[ $backed_up -gt 0 ]]; then
         success "Backup created: $backup_subdir"
         print_tip "To restore: sudo cp -r $backup_subdir/* /"
@@ -545,7 +545,7 @@ EOF
         info "No existing configurations to backup"
         rmdir "$backup_subdir" 2>/dev/null || true
     fi
-    
+
     echo "$backup_subdir"
 }
 
@@ -555,7 +555,7 @@ list_backups() {
         info "No backups found"
         return 1
     fi
-    
+
     print_subsection "Available Backups"
     local count=0
     for backup in "$BACKUP_DIR"/*; do
@@ -573,12 +573,12 @@ list_backups() {
             ((count++))
         fi
     done
-    
+
     if [[ $count -eq 0 ]]; then
         info "No backups found"
         return 1
     fi
-    
+
     return 0
 }
 
@@ -593,9 +593,9 @@ init_checkpoint() {
     local phase="${1:-main}"
     local checkpoint_dir
     checkpoint_dir=$(dirname "$GZ302_CHECKPOINT_FILE")
-    
+
     mkdir -p "$checkpoint_dir"
-    
+
     # Check for existing checkpoint
     if [[ -f "$GZ302_CHECKPOINT_FILE" ]]; then
         local saved_phase
@@ -604,7 +604,7 @@ init_checkpoint() {
             return 0  # Checkpoint exists for this phase
         fi
     fi
-    
+
     # Create new checkpoint file
     cat > "$GZ302_CHECKPOINT_FILE" << EOF
 PHASE=$phase
@@ -637,21 +637,21 @@ ask_yes_no() {
 # Usage: complete_step "step-name"
 complete_step() {
     local step="$1"
-    
+
     if [[ ! -f "$GZ302_CHECKPOINT_FILE" ]]; then
         return 1
     fi
-    
+
     # Add step to completed list
     local current_steps
     current_steps=$(grep "^COMPLETED_STEPS=" "$GZ302_CHECKPOINT_FILE" | cut -d'=' -f2)
-    
+
     if [[ -z "$current_steps" ]]; then
         current_steps="$step"
     else
         current_steps="${current_steps},$step"
     fi
-    
+
     sed -i "s/^COMPLETED_STEPS=.*/COMPLETED_STEPS=${current_steps}/" "$GZ302_CHECKPOINT_FILE"
     sed -i "s/^LAST_UPDATE=.*/LAST_UPDATE=$(date +%s)/" "$GZ302_CHECKPOINT_FILE"
 }
@@ -660,14 +660,14 @@ complete_step() {
 # Usage: is_step_completed "step-name"
 is_step_completed() {
     local step="$1"
-    
+
     if [[ ! -f "$GZ302_CHECKPOINT_FILE" ]]; then
         return 1
     fi
-    
+
     local completed_steps
     completed_steps=$(grep "^COMPLETED_STEPS=" "$GZ302_CHECKPOINT_FILE" | cut -d'=' -f2)
-    
+
     if echo ",$completed_steps," | grep -q ",$step,"; then
         return 0
     fi
@@ -680,7 +680,7 @@ get_completed_steps() {
         echo ""
         return
     fi
-    
+
     grep "^COMPLETED_STEPS=" "$GZ302_CHECKPOINT_FILE" | cut -d'=' -f2
 }
 
@@ -692,25 +692,25 @@ clear_checkpoint() {
 # Check if we're resuming from a checkpoint
 check_resume() {
     local phase="${1:-main}"
-    
+
     if [[ ! -f "$GZ302_CHECKPOINT_FILE" ]]; then
         return 1  # No checkpoint to resume
     fi
-    
+
     local saved_phase
     saved_phase=$(grep "^PHASE=" "$GZ302_CHECKPOINT_FILE" | cut -d'=' -f2)
-    
+
     if [[ "$saved_phase" != "$phase" ]]; then
         return 1  # Different phase
     fi
-    
+
     local completed_steps
     completed_steps=$(get_completed_steps)
-    
+
     if [[ -z "$completed_steps" ]]; then
         return 1  # No steps completed
     fi
-    
+
     # Found a valid checkpoint
     return 0
 }
@@ -718,27 +718,27 @@ check_resume() {
 # Show resume prompt
 prompt_resume() {
     local phase="${1:-main}"
-    
+
     if ! check_resume "$phase"; then
         return 1
     fi
-    
+
     local completed_steps
     completed_steps=$(get_completed_steps)
     local step_count
     step_count=$(echo "$completed_steps" | tr ',' '\n' | wc -l)
-    
+
     local last_update
     last_update=$(grep "^LAST_UPDATE=" "$GZ302_CHECKPOINT_FILE" | cut -d'=' -f2)
     local last_date
     last_date=$(date -d "@$last_update" 2>/dev/null || date -r "$last_update" 2>/dev/null || echo "unknown")
-    
+
     echo
     print_box "Resume Previous Installation?"
     info "Found incomplete installation from: $last_date"
     info "Completed steps: $step_count"
     echo
-    
+
     # Use helper to ask prompt but honor ASSUME_YES
     if ask_yes_no "Resume from last checkpoint? [Y/n] " Y; then
         return 0

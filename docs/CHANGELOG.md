@@ -2,6 +2,11 @@
 
 All notable changes to GZ302-Linux-Setup will be documented in this file.
 
+## [6.4.2] - 2026-05-15
+
+### Fixed
+- **Dashboard multi-monitor placement**: KWin positioner now correctly uses `window.output` so the dashboard stays on the screen that actually contains the window instead of teleporting to the active screen.
+
 ## [6.4.1] - 2026-05-15
 
 ### Fixed

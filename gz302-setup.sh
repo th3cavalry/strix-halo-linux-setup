@@ -3,7 +3,7 @@
 # ==============================================================================
 # ASUS ROG Flow Z13 (GZ302) Linux Setup — Unified Installer
 # Author: th3cavalry using Copilot
-# Version: 6.4.1
+# Version: 6.4.2
 #
 # Supported Models:
 # - GZ302EA-XS99 (128GB RAM)

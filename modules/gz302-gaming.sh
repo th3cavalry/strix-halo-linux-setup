@@ -2,7 +2,7 @@
 
 # ==============================================================================
 # GZ302 Gaming Software Module
-# Version: 6.4.1
+# Version: 6.4.2
 #
 # This module installs gaming software for the ASUS ROG Flow Z13 (GZ302)
 # Includes: Steam, Lutris, MangoHUD, GameMode, Wine, and performance tools
@@ -45,7 +45,7 @@ else
         echo "Error: curl or wget not found. Cannot download utils."
         exit 1
     fi
-    
+
     if [[ -f "${SCRIPT_DIR}/gz302-utils.sh" ]]; then
         chmod +x "${SCRIPT_DIR}/gz302-utils.sh"
         # shellcheck source=/dev/null
@@ -60,14 +60,14 @@ fi
 
 install_gaming_stack() {
     print_section "Installing Gaming Software Stack"
-    
+
     local distro
     distro=$(detect_distribution)
-    
+
     case "$distro" in
         arch)
             info "Installing Gaming packages for Arch Linux..."
-            
+
             # Check for CachyOS
             if grep -q "CachyOS" /etc/os-release; then
                 info "CachyOS detected - using optimized gaming meta-packages..."
@@ -79,7 +79,7 @@ install_gaming_stack() {
                     printf '\n[multilib]\nInclude = /etc/pacman.d/mirrorlist\n' >> /etc/pacman.conf
                     pacman -Sy
                 fi
-                
+
                 # Install packages (Using standard wine as requested)
                 pacman -S --noconfirm --needed \
                     steam \
@@ -90,41 +90,41 @@ install_gaming_stack() {
                     winetricks
             fi
             ;;
-            
+
         debian|ubuntu)
             info "Installing Gaming packages for Debian/Ubuntu..."
             # Enable 32-bit architecture
             dpkg --add-architecture i386
             apt-get update
-            
+
             # Install Steam
             apt-get install -y steam-installer || apt-get install -y steam
-            
+
             # Install Lutris, MangoHUD, GameMode
             apt-get install -y lutris mangohud gamemode wine winetricks
             ;;
-            
+
         fedora)
             info "Installing Gaming packages for Fedora..."
             # Enable RPM Fusion if possible (usually needed for Steam/Lutris)
             # We assume user might have it, or we try best effort
             dnf install -y steam lutris mangohud gamemode wine winetricks
             ;;
-            
+
         opensuse)
             info "Installing Gaming packages for OpenSUSE..."
             zypper install -y steam lutris mangohud gamemode wine winetricks
             ;;
-            
+
         *)
             warning "Unsupported distribution: $distro"
             return 1
             ;;
     esac
-    
+
     # --- Optimizations ---
     print_subsection "Applying Gaming Optimizations"
-    
+
     # Increase map count for some games (CS2, DayZ, etc)
     local sysctl_file="/etc/sysctl.d/99-gaming.conf"
     if [[ ! -f "$sysctl_file" ]]; then
@@ -132,7 +132,7 @@ install_gaming_stack() {
         echo "vm.max_map_count = 2147483642" > "$sysctl_file"
         sysctl -p "$sysctl_file" 2>/dev/null || true
     fi
-    
+
     success "Gaming stack installed!"
 }
 
@@ -142,7 +142,7 @@ main() {
         error "This script must be run as root"
         exit 1
     fi
-    
+
     print_banner "GZ302 Gaming Module"
     install_gaming_stack
 }

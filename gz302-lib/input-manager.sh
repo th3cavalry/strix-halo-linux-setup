@@ -4,7 +4,7 @@ set -euo pipefail
 
 # ==============================================================================
 # GZ302 Input Manager Library
-# Version: 6.4.1
+# Version: 6.4.2
 #
 # This library manages ASUS HID devices (keyboard, touchpad) and tablet mode
 # functionality for the GZ302.
@@ -48,14 +48,14 @@ input_touchpad_detected() {
             return 0
         fi
     fi
-    
+
     # Check via libinput
     if command -v libinput >/dev/null 2>&1; then
         if libinput list-devices 2>/dev/null | grep -qi "touchpad"; then
             return 0
         fi
     fi
-    
+
     return 1
 }
 
@@ -68,7 +68,7 @@ input_keyboard_detected() {
             return 0
         fi
     fi
-    
+
     return 1
 }
 
@@ -102,7 +102,7 @@ input_get_tablet_mode() {
         echo "available"
         return 0
     fi
-    
+
     echo "unknown"
     return 1
 }
@@ -179,47 +179,47 @@ input_get_state() {
     local tablet_daemon_running="false"
     local tablet_mode_available="false"
     local keyboard_remapped="false"
-    
+
     if input_detect_hid_devices >/dev/null 2>&1; then
         hid_detected="true"
     fi
-    
+
     if input_touchpad_detected; then
         touchpad_detected="true"
     fi
-    
+
     if input_keyboard_detected; then
         keyboard_detected="true"
     fi
-    
+
     if input_hid_asus_loaded; then
         hid_module_loaded="true"
     fi
-    
+
     if input_hid_config_applied; then
         hid_config_applied="true"
     fi
-    
+
     if input_touchpad_forcing_applied; then
         touchpad_forcing="true"
     fi
-    
+
     if input_i2c_quirk_applied; then
         i2c_quirk_applied="true"
     fi
-    
+
     if input_reload_service_enabled; then
         reload_service_enabled="true"
     fi
-    
+
     if input_tablet_daemon_running; then
         tablet_daemon_running="true"
     fi
-    
+
     if input_tablet_mode_switch_available; then
         tablet_mode_available="true"
     fi
-    
+
     if input_keyboard_remapped; then
         keyboard_remapped="true"
     fi
@@ -249,7 +249,7 @@ input_apply_hid_config() {
     if input_hid_config_applied; then
         return 0  # Already configured
     fi
-    
+
     # Create HID configuration
     cat > /etc/modprobe.d/hid-asus.conf <<'EOF'
 # ASUS HID configuration for GZ302
@@ -257,7 +257,7 @@ input_apply_hid_config() {
 # Kernel 6.15+ includes mature touchpad gesture support and improved ASUS HID integration
 options hid_asus fnlock_default=0
 EOF
-    
+
     return 0
 }
 
@@ -266,14 +266,14 @@ EOF
 input_apply_touchpad_forcing() {
     # This is a legacy workaround for kernel < 6.17
     # Should only be called if kernel requires it
-    
+
     cat > /etc/modprobe.d/hid-asus.conf <<'EOF'
 # ASUS HID configuration for GZ302
 # fnlock_default=0: F1-F12 keys work as media keys by default
 # enable_touchpad=1: Force touchpad detection (needed for kernel < 6.17)
 options hid_asus fnlock_default=0 enable_touchpad=1
 EOF
-    
+
     return 0
 }
 
@@ -283,7 +283,7 @@ input_remove_touchpad_forcing() {
     if ! input_touchpad_forcing_applied; then
         return 0  # Already clean
     fi
-    
+
     # Remove forcing option, keep fnlock setting
     cat > /etc/modprobe.d/hid-asus.conf <<'EOF'
 # ASUS HID configuration for GZ302
@@ -291,7 +291,7 @@ input_remove_touchpad_forcing() {
 # Kernel 6.17+ handles touchpad enumeration natively
 options hid_asus fnlock_default=0
 EOF
-    
+
     return 0
 }
 
@@ -301,13 +301,13 @@ input_apply_i2c_quirk() {
     if input_i2c_quirk_applied; then
         return 0  # Already applied
     fi
-    
+
     cat > /etc/modprobe.d/i2c-hid-acpi-gz302.conf <<'EOF'
 # ASUS GZ302 touchpad stability
 # Some units benefit from enabling i2c_hid_acpi quirk 0x01
 options i2c_hid_acpi quirks=0x01
 EOF
-    
+
     return 0
 }
 
@@ -329,10 +329,10 @@ RemainAfterExit=yes
 [Install]
 WantedBy=graphical.target
 EOF
-    
+
     systemctl daemon-reload >/dev/null 2>&1
     systemctl enable reload-hid_asus.service >/dev/null 2>&1
-    
+
     return 0
 }
 
@@ -342,10 +342,10 @@ input_remove_reload_service() {
     if systemctl is-enabled reload-hid_asus.service >/dev/null 2>&1; then
         systemctl disable --now reload-hid_asus.service >/dev/null 2>&1
     fi
-    
+
     rm -f /etc/systemd/system/reload-hid_asus.service
     systemctl daemon-reload >/dev/null 2>&1
-    
+
     return 0
 }
 
@@ -355,16 +355,16 @@ input_apply_rgb_udev_rule() {
     if [[ -f /etc/udev/rules.d/99-gz302-keyboard.rules ]]; then
         return 0  # Already applied
     fi
-    
+
     cat > /etc/udev/rules.d/99-gz302-keyboard.rules <<'EOF'
 # GZ302 Keyboard RGB Control - Allow unprivileged USB access
 # ASUS ROG Flow Z13 keyboard (USB 0b06.0.00)
 SUBSYSTEMS=="usb", ATTRS{idVendor}=="0b05", ATTRS{idProduct}=="1a30", TAG+="uaccess"
 EOF
-    
+
     udevadm control --reload 2>/dev/null || true
     udevadm trigger 2>/dev/null || true
-    
+
     return 0
 }
 
@@ -374,7 +374,7 @@ EOF
 # Output: Status messages
 input_apply_configuration() {
     local kernel_ver="${1:-}"
-    
+
     # Auto-detect kernel version if not provided
     if [[ -z "$kernel_ver" ]]; then
         # Try to use kernel-compat library if available
@@ -390,53 +390,53 @@ input_apply_configuration() {
             kernel_ver=$((major * 100 + minor))
         fi
     fi
-    
+
     echo "Configuring ASUS input devices..."
-    
+
     # Always apply basic HID config
     if ! input_apply_hid_config; then
         echo "ERROR: Failed to apply HID configuration"
         return 1
     fi
-    
+
     # Always apply i2c quirk
     if ! input_apply_i2c_quirk; then
         echo "WARNING: Failed to apply i2c quirk"
     fi
-    
+
     # Always apply RGB udev rule
     if ! input_apply_rgb_udev_rule; then
         echo "WARNING: Failed to apply RGB udev rule"
     fi
-    
+
     # Kernel-specific workarounds
     if [[ $kernel_ver -lt 617 ]]; then
         echo "Kernel < 6.17 detected: Applying input workarounds"
-        
+
         # Apply touchpad forcing
         input_apply_touchpad_forcing
-        
+
         # Create reload service
         input_create_reload_service
-        
+
         echo "Input workarounds applied (needed for kernel < 6.17)"
     else
         echo "Kernel 6.17+ detected: Using native input support"
-        
+
         # Remove obsolete workarounds if present
         if input_touchpad_forcing_applied; then
             echo "Removing obsolete touchpad forcing"
             input_remove_touchpad_forcing
         fi
-        
+
         if input_reload_service_enabled; then
             echo "Removing obsolete HID reload service"
             input_remove_reload_service
         fi
-        
+
         echo "Native input support configured"
     fi
-    
+
     if ! input_create_keyboard_remap; then
         echo "WARNING: Failed to create keyboard remapping hwdb file"
     fi
@@ -455,7 +455,7 @@ input_create_keyboard_remap() {
     # Detect the keyboard product ID (standard is 1a30, but some variants differ)
     local product_id
     product_id=$(lsusb | grep -i "ASUS.*Keyboard" | grep -oP '0b05:[\da-f]{4}' | head -1 | cut -d: -f2 | tr '[:lower:]' '[:upper:]')
-    
+
     # Fallback to standard GZ302EA product ID if not detected
     [[ -z "$product_id" ]] && product_id="1A30"
 
@@ -482,7 +482,7 @@ input_remove_keyboard_remap() {
 # Output: Status information
 input_verify_working() {
     local status=0
-    
+
     # Check touchpad
     if ! input_touchpad_detected; then
         echo "WARNING: Touchpad not detected"
@@ -490,7 +490,7 @@ input_verify_working() {
     else
         echo "✓ Touchpad detected"
     fi
-    
+
     # Check keyboard
     if ! input_keyboard_detected; then
         echo "WARNING: Keyboard not detected"
@@ -498,7 +498,7 @@ input_verify_working() {
     else
         echo "✓ Keyboard detected"
     fi
-    
+
     # Check HID module
     if ! input_hid_asus_loaded; then
         echo "WARNING: hid_asus module not loaded"
@@ -506,11 +506,11 @@ input_verify_working() {
     else
         echo "✓ hid_asus module loaded"
     fi
-    
+
     if [[ $status -eq 0 ]]; then
         echo "Input verification passed"
     fi
-    
+
     return $status
 }
 
@@ -521,7 +521,7 @@ input_verify_working() {
 input_print_status() {
     local state
     state=$(input_get_state)
-    
+
     local hid_detected
     local touchpad_detected
     local keyboard_detected
@@ -530,7 +530,7 @@ input_print_status() {
     local reload_service
     local tablet_daemon
     local keyboard_remapped
-    
+
     hid_detected=$(echo "$state" | grep "hid_devices_detected" | cut -d'"' -f4)
     touchpad_detected=$(echo "$state" | grep "touchpad_detected" | cut -d'"' -f4)
     keyboard_detected=$(echo "$state" | grep "keyboard_detected" | cut -d'"' -f4)
@@ -539,7 +539,7 @@ input_print_status() {
     reload_service=$(echo "$state" | grep "reload_service_enabled" | cut -d'"' -f4)
     tablet_daemon=$(echo "$state" | grep "tablet_daemon_running" | cut -d'"' -f4)
     keyboard_remapped=$(echo "$state" | grep "keyboard_remapped" | cut -d'"' -f4)
-    
+
     echo "Input Status (ASUS HID Devices):"
     echo "  HID Devices:         $hid_detected"
     echo "  Touchpad Detected:   $touchpad_detected"
@@ -549,7 +549,7 @@ input_print_status() {
     echo "  Reload Service:      $reload_service"
     echo "  Tablet Daemon:       $tablet_daemon"
     echo "  Keyboard remapped:   $keyboard_remapped"
-    
+
     # Check for obsolete workarounds on kernel 6.17+
     local kernel_ver
     if declare -f kernel_get_version_num >/dev/null 2>&1; then
@@ -557,13 +557,13 @@ input_print_status() {
     else
         kernel_ver=0
     fi
-    
+
     if [[ $kernel_ver -ge 617 ]]; then
         if [[ "$touchpad_forcing" == "true" ]]; then
             echo "  ⚠️  WARNING: Touchpad forcing applied on kernel 6.17+ (obsolete)"
             echo "      Run 'input_apply_configuration' to remove"
         fi
-        
+
         if [[ "$reload_service" == "true" ]]; then
             echo "  ⚠️  WARNING: HID reload service enabled on kernel 6.17+ (obsolete)"
             echo "      Run 'input_apply_configuration' to remove"
@@ -620,18 +620,18 @@ Library Information:
 
 Example Usage:
   source gz302-lib/input-manager.sh
-  
+
   # Detect hardware
   if input_detect_hid_devices; then
       echo "HID devices found"
   fi
-  
+
   # Apply configuration
   input_apply_configuration
-  
+
   # Verify working
   input_verify_working
-  
+
   # Check status
   input_print_status
 

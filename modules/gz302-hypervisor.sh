@@ -2,7 +2,7 @@
 
 # ==============================================================================
 # GZ302 Hypervisor Software Module
-# Version: 6.4.1
+# Version: 6.4.2
 #
 # This module installs hypervisor software for the ASUS ROG Flow Z13 (GZ302)
 # Includes: Full KVM/QEMU stack, VirtualBox
@@ -45,7 +45,7 @@ else
         echo "Error: curl or wget not found. Cannot download utils."
         exit 1
     fi
-    
+
     if [[ -f "${SCRIPT_DIR}/gz302-utils.sh" ]]; then
         chmod +x "${SCRIPT_DIR}/gz302-utils.sh"
         # shellcheck source=/dev/null
@@ -59,10 +59,10 @@ fi
 # --- Main Installation Logic ---
 install_kvm_stack() {
     print_section "Installing Hypervisor Software (KVM/QEMU)"
-    
+
     local distro
     distro=$(detect_distribution)
-    
+
     case "$distro" in
         arch)
             info "Installing KVM packages for Arch Linux..."
@@ -75,7 +75,7 @@ install_kvm_stack() {
                 openbsd-netcat \
                 libguestfs
             ;;
-            
+
         debian|ubuntu)
             info "Installing KVM packages for Debian/Ubuntu..."
             apt-get install -y \
@@ -85,29 +85,29 @@ install_kvm_stack() {
                 bridge-utils \
                 virt-manager
             ;;
-            
+
         fedora)
             info "Installing KVM packages for Fedora..."
             dnf groupinstall -y "Virtualization"
             ;;
-            
+
         opensuse)
             info "Installing KVM packages for OpenSUSE..."
             zypper install -y -t pattern kvm_server kvm_tools
             ;;
-            
+
         *)
             warning "Unsupported distribution: $distro"
             return 1
             ;;
     esac
-    
+
     # --- Configuration ---
     print_subsection "Configuring Libvirt"
-    
+
     # Enable libvirtd service
     systemctl enable --now libvirtd || warning "Failed to enable libvirtd"
-    
+
     # Add user to libvirt group
     local real_user="${SUDO_USER:-$USER}"
     if [[ -n "$real_user" && "$real_user" != "root" ]]; then
@@ -116,7 +116,7 @@ install_kvm_stack() {
         # Also kvm group just in case
         usermod -aG kvm "$real_user" 2>/dev/null || true
     fi
-    
+
     # Set URI default
     if [[ -n "$real_user" ]]; then
         local user_home
@@ -128,7 +128,7 @@ install_kvm_stack() {
              fi
         fi
     fi
-    
+
     success "Hypervisor stack installed!"
 }
 
@@ -138,7 +138,7 @@ main() {
         error "This script must be run as root"
         exit 1
     fi
-    
+
     print_banner "GZ302 Hypervisor Module"
     install_kvm_stack
 }

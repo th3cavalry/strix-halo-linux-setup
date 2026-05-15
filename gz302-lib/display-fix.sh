@@ -4,7 +4,7 @@ set -euo pipefail
 
 # ==============================================================================
 # GZ302 Display Fix Library
-# Version: 6.4.1
+# Version: 6.4.2
 #
 # This library provides display-specific fixes for OLED panels on GZ302.
 # Focuses on all eDP power-saving features that can cause display artifacts.
@@ -132,7 +132,7 @@ display_psr_su_enabled() {
             return 1  # display fixes disabled
         fi
     fi
-    
+
     # Check kernel cmdline (systemd-boot)
     if [[ -f /etc/kernel/cmdline ]]; then
         if display_has_target_dcdebugmask /etc/kernel/cmdline; then
@@ -272,7 +272,7 @@ display_apply_psr_su_fix() {
     target_param=$(display_get_target_dcdebugmask_param)
 
     info "Applying PSR-SU disable fix for OLED panel scrolling artifacts..."
-    
+
     # Add to GRUB if present
     if [[ -f /etc/default/grub ]]; then
         if grep -q "amdgpu.dcdebugmask=" /etc/default/grub 2>/dev/null; then
@@ -305,7 +305,7 @@ display_apply_psr_su_fix() {
             warning "grub-mkconfig not found - manual update required"
         fi
     fi
-    
+
     # Add to systemd-boot if present
     if [[ -f /etc/kernel/cmdline ]]; then
         local cmdline_updated=false
@@ -335,7 +335,7 @@ display_apply_psr_su_fix() {
 
         success "systemd-boot configuration updated"
     fi
-    
+
     # For systemd-boot with loader entries
     if [[ -d /boot/loader/entries ]]; then
         for entry in /boot/loader/entries/*.conf; do
@@ -444,7 +444,7 @@ display_apply_psr_su_fix() {
             sed -i "s|^\(options .*\)$|\1 ${target_param}|" "$refind_cfg"
         fi
     done
-    
+
     # Apply runtime fix (if possible)
     if [[ -d /sys/kernel/debug/dri ]]; then
         for dri_dir in /sys/kernel/debug/dri/*/; do
@@ -457,10 +457,10 @@ display_apply_psr_su_fix() {
             fi
         done
     fi
-    
+
     success "PSR-SU fix applied successfully"
     info "Reboot required to apply changes permanently"
-    
+
     return 0
 }
 
@@ -470,7 +470,7 @@ display_apply_psr_su_fix() {
 # Returns: 0 if working, 1 if issues detected
 display_verify_psr_su_fix() {
     local status=0
-    
+
     # Check if fix is applied
     if display_psr_su_enabled; then
         echo "  ⚠️  PSR-SU is still enabled - scrolling artifacts may occur"
@@ -478,7 +478,7 @@ display_verify_psr_su_fix() {
     else
         echo "  ✓ PSR-SU is disabled - scrolling artifacts should be resolved"
     fi
-    
+
     # Check kernel version
     local kver
     kver=$(uname -r | cut -d. -f1,2)
@@ -486,14 +486,14 @@ display_verify_psr_su_fix() {
     major=$(echo "$kver" | cut -d. -f1)
     minor=$(echo "$kver" | cut -d. -f2)
     local version_num=$((major * 100 + minor))
-    
+
     if [[ $version_num -ge 612 ]]; then
         echo "  ✓ Kernel $(uname -r | cut -d. -f1,2) — using 0x600 display mask"
     else
         echo "  ⚠️  Kernel < 6.12 - manual PSR-SU disable recommended"
         status=1
     fi
-    
+
     return $status
 }
 
@@ -503,24 +503,24 @@ display_verify_psr_su_fix() {
 display_print_psr_su_status() {
     local psr_enabled
     local fix_applied
-    
+
     if display_psr_su_enabled; then
         psr_enabled="enabled"
     else
         psr_enabled="disabled"
     fi
-    
+
     if display_psr_su_fix_applied; then
         fix_applied="applied"
     else
         fix_applied="not applied"
     fi
-    
+
     echo "PSR-SU Status:"
     echo "  PSR-SU Status: $psr_enabled"
     echo "  Fix Applied: $fix_applied"
     echo ""
-    
+
     # Check current runtime status if available
     if [[ -d /sys/kernel/debug/dri ]]; then
         echo "Runtime Status:"
@@ -533,7 +533,7 @@ display_print_psr_su_status() {
             fi
         done
     fi
-    
+
     echo ""
     echo "Recommended Fix:"
     echo "  $(display_get_target_dcdebugmask_param) (kernel-aware OLED/display stability mask)"
@@ -548,7 +548,7 @@ display_print_psr_su_status() {
 # --- Library Information ---
 
 display_fix_lib_version() {
-    echo "6.4.1"
+    echo "6.4.2"
 }
 
 display_fix_lib_help() {
