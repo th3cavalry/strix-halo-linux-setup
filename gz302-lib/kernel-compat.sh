@@ -4,7 +4,7 @@ set -euo pipefail
 
 # ==============================================================================
 # GZ302 Kernel Compatibility Library
-# Version: 6.4.2
+# Version: 6.6.5
 #
 # This library provides central kernel version detection and compatibility
 # logic for all other libraries. It determines what workarounds are needed
@@ -221,7 +221,7 @@ kernel_get_psr_su_parameter() {
 kernel_get_status() {
     local version_num
     version_num=$(kernel_get_version_num)
-
+    
     if [[ $version_num -lt $KERNEL_MIN ]]; then
         echo "unsupported"
     elif [[ $version_num -lt $KERNEL_RECOMMENDED ]]; then
@@ -243,16 +243,16 @@ kernel_print_status() {
     local version_str
     local version_num
     local status
-
+    
     version_str=$(kernel_get_version_string)
     version_num=$(kernel_get_version_num)
     status=$(kernel_get_status)
-
+    
     echo "Kernel Version: $version_str"
     echo "Version Number: $version_num"
     echo "Status: $status"
     echo
-
+    
     case "$status" in
         unsupported)
             echo "❌ UNSUPPORTED: Below minimum required version"
@@ -286,7 +286,7 @@ kernel_print_status() {
             ;;
     esac
     echo
-
+    
     # List required workarounds
     echo "Required Workarounds:"
     if kernel_requires_wifi_workaround; then
@@ -304,7 +304,7 @@ kernel_print_status() {
     if kernel_requires_audio_quirks; then
         echo "  • Audio quirks (CS35L41)"
     fi
-
+    
     if kernel_has_native_support; then
         echo "  (Most hardware now native - minimal fixes needed)"
     fi
@@ -315,19 +315,19 @@ kernel_print_status() {
 kernel_list_obsolete_workarounds() {
     local version_num
     version_num=$(kernel_get_version_num)
-
+    
     if [[ $version_num -ge $KERNEL_AUDIO_NATIVE ]]; then
         # Kernel 6.19+ - CS35L41 audio quirk upstreamed
         echo "cs35l41_audio_quirks"
     fi
-
+    
     if [[ $version_num -ge $KERNEL_NATIVE ]]; then
         # Kernel 6.17+ - these are obsolete
         echo "wifi_aspm_workaround"
         echo "input_device_forcing"
         echo "tablet_mode_daemon"
     fi
-
+    
     if [[ $version_num -ge $KERNEL_STABLE ]]; then
         # Kernel 6.16+ - GPU workarounds obsolete
         echo "gpu_stability_workarounds"
@@ -379,19 +379,19 @@ Library Information:
 
 Example Usage:
   source gz302-lib/kernel-compat.sh
-
+  
   # Check kernel version
   if kernel_meets_minimum; then
       echo "Kernel meets minimum requirements"
   fi
-
+  
   # Check if workarounds needed
   if kernel_requires_wifi_workaround; then
       echo "Apply WiFi ASPM workaround"
   else
       echo "Use native WiFi support"
   fi
-
+  
   # Display status
   kernel_print_status
 

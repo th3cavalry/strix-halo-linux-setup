@@ -1,22 +1,33 @@
 #!/bin/bash
 
 # ==============================================================================
-# ASUS ROG Flow Z13 (GZ302) Linux Setup — Unified Installer
+# Strix Halo Linux Setup — Unified Installer
 # Author: th3cavalry using Copilot
-# Version: 6.4.2
+# Version: 6.6.5
 #
-# Supported Models:
-# - GZ302EA-XS99 (128GB RAM)
-# - GZ302EA-XS98 (64GB RAM)
-# - GZ302EA-XS96 (32GB RAM)
+# Supported devices (Strix Halo platform — AMD Ryzen AI MAX / MAX+):
+# BEGIN AUTO-GENERATED SUPPORTED DEVICES
+# AUTO-GENERATED from gz302-lib/device-profile-data.sh via scripts/sync-device-matrix.sh.
+# - ASUS ROG Flow Z13 (GZ302) — full support
+# - HP ZBook Ultra G1a — partial support
+# - HP Mini Workstation (Z2 G1a) — partial support
+# - Framework Desktop — partial support
+# - ASUS TUF Gaming A14 — partial support
+# - Sixunited AXP77 — experimental
+# - GMKtec EVO-X2 — experimental
+# - Minisforum MS-S1 Max — experimental
+# - AYANEO NEXT 2 — experimental
+# - GPD Win 5 — experimental
+# - Other confirmed Strix Halo — experimental baseline
+# END AUTO-GENERATED SUPPORTED DEVICES
 #
-# Single unified installer for the ASUS ROG Flow Z13 (GZ302) with
-# AMD Ryzen AI MAX+ 395 (Strix Halo). Replaces gz302-main.sh,
-# gz302-minimal.sh, and install-command-center.sh.
+# Hardware detection automatically selects only the relevant fixes and
+# sections for the running device.
 #
 # Hardware control backend: z13ctl (https://github.com/dahui/z13ctl)
 # Protocol reference: g-helper (https://github.com/seerge/g-helper)
 # GUI inspiration: Strix-Halo-Control (https://github.com/TechnoDaimon/Strix-Halo-Control)
+# AI toolboxes: amd-strix-halo-toolboxes (https://github.com/kyuz0/amd-strix-halo-toolboxes)
 #
 # REQUIRED: Linux kernel 6.14+ minimum (6.17+ strongly recommended)
 # ==============================================================================
@@ -29,6 +40,35 @@ SKIP_FIXES=false
 SKIP_Z13CTL=false
 SKIP_TOOLS=false
 SKIP_MODULES=false
+SKIP_AI=false
+
+print_supported_device_help() {
+    # BEGIN AUTO-GENERATED SUPPORTED DEVICES HELP
+    # AUTO-GENERATED from gz302-lib/device-profile-data.sh via scripts/sync-device-matrix.sh.
+    printf '%s
+' 'ASUS ROG Flow Z13 (GZ302) — Full'
+    printf '%s
+' 'HP ZBook Ultra G1a — Partial'
+    printf '%s
+' 'HP Mini Workstation (Z2 G1a) — Partial'
+    printf '%s
+' 'Framework Desktop — Partial'
+    printf '%s
+' 'ASUS TUF Gaming A14 — Partial'
+    printf '%s
+' 'Sixunited AXP77 — Experimental'
+    printf '%s
+' 'GMKtec EVO-X2 — Experimental'
+    printf '%s
+' 'Minisforum MS-S1 Max — Experimental'
+    printf '%s
+' 'AYANEO NEXT 2 — Experimental'
+    printf '%s
+' 'GPD Win 5 — Experimental'
+    printf '%s
+' 'Other confirmed Strix Halo — Experimental baseline'
+    # END AUTO-GENERATED SUPPORTED DEVICES HELP
+}
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -41,7 +81,7 @@ while [[ $# -gt 0 ]]; do
         --no-modules)    SKIP_MODULES=true; shift ;;
         -h|--help)
             cat << 'EOF'
-ASUS ROG Flow Z13 (GZ302) Linux Setup — Unified Installer v6.4.1
+Strix Halo Linux Setup — Unified Installer v6.6.5
 
 Usage: sudo ./gz302-setup.sh [OPTIONS]
 
@@ -57,12 +97,16 @@ Options:
 
 Sections (each prompted with Y/n):
   1. Hardware Fixes    WiFi, GPU, Input, Audio, Display, Suspend
-  2. z13ctl           RGB, power profiles, TDP, fan curves, battery
-  3. Display & Tools   Refresh rate control, system tray app
-  4. Optional Modules  Gaming, AI/LLM, Hypervisor
+    2. Command Center   z13ctl on supported ASUS devices; GZ302 tray app when applicable
+  3. Gaming           Steam, Lutris, MangoHUD, GameMode, Proton-GE
+  4. AI / LLM         Ollama, ROCm, vLLM, ComfyUI, PyTorch
+  5. Other Tools      Hypervisor (KVM/QEMU), community integrations
 
 Hardware control powered by z13ctl: https://github.com/dahui/z13ctl
 EOF
+                        echo
+                        echo "Supported devices:"
+                        print_supported_device_help | sed 's/^/  /'
             exit 0
             ;;
         --) shift; break ;;
@@ -73,6 +117,9 @@ done
 
 # --- GitHub base URL ---
 GITHUB_RAW_URL="https://raw.githubusercontent.com/th3cavalry/GZ302-Linux-Setup/main"
+
+# --- Version (read once at startup) ---
+SETUP_VERSION="6.6.5"
 
 # --- Script directory detection ---
 resolve_script_dir() {
@@ -137,14 +184,16 @@ load_library() {
 }
 
 info "Loading libraries..."
-load_library "kernel-compat.sh"  || warning "Failed to load kernel-compat.sh"
-load_library "state-manager.sh"  || warning "Failed to load state-manager.sh"
-load_library "distro-manager.sh" || warning "Failed to load distro-manager.sh"
-load_library "wifi-manager.sh"   || warning "Failed to load wifi-manager.sh"
-load_library "gpu-manager.sh"    || warning "Failed to load gpu-manager.sh"
-load_library "input-manager.sh"  || warning "Failed to load input-manager.sh"
-load_library "audio-manager.sh"  || warning "Failed to load audio-manager.sh"
-load_library "display-fix.sh"    || warning "Failed to load display-fix.sh"
+load_library "kernel-compat.sh"   || warning "Failed to load kernel-compat.sh"
+load_library "state-manager.sh"   || warning "Failed to load state-manager.sh"
+load_library "distro-manager.sh"  || warning "Failed to load distro-manager.sh"
+load_library "device-profile-data.sh" || warning "Failed to load device-profile-data.sh"
+load_library "device-manager.sh"  || warning "Failed to load device-manager.sh"
+load_library "wifi-manager.sh"    || warning "Failed to load wifi-manager.sh"
+load_library "gpu-manager.sh"     || warning "Failed to load gpu-manager.sh"
+load_library "input-manager.sh"   || warning "Failed to load input-manager.sh"
+load_library "audio-manager.sh"   || warning "Failed to load audio-manager.sh"
+load_library "display-fix.sh"     || warning "Failed to load display-fix.sh"
 load_library "display-manager.sh" || warning "Failed to load display-manager.sh"
 
 state_init >/dev/null 2>&1 || true
@@ -276,7 +325,7 @@ cleanup_legacy_install() {
 
 apply_hardware_fixes() {
     print_section "Section 1: Hardware Fixes"
-    info "Applying kernel-level fixes for GZ302 hardware..."
+    info "Applying Strix Halo hardware fixes..."
 
     local distro
     distro=$(detect_distribution)
@@ -347,18 +396,26 @@ install_suspend_fix() {
 }
 
 # ==============================================================================
-# Section 2: z13ctl — Hardware Control Backend
+# Section 2: ASUS Control Backend + GZ302 Command Center
 # ==============================================================================
 
 install_z13ctl() {
-    print_section "Section 2: z13ctl — Hardware Control"
-    info "z13ctl provides RGB lighting, power profiles, TDP, fan curves,"
-    info "battery charge limit, undervolt, and sleep/resume recovery."
-    info "Project: https://github.com/dahui/z13ctl"
-    echo
-
     local distro
     distro=$(detect_distribution)
+
+    if [[ "${CAP_STRIX_HALO:-false}" != "true" ]]; then
+        info "Confirmed Strix Halo signatures were not detected — skipping z13ctl install."
+        return 0
+    fi
+
+    # Only install z13ctl on ASUS Strix Halo devices (uses ASUS HID interface)
+    if [[ "${CAP_Z13CTL:-false}" != "true" ]]; then
+        info "z13ctl is not applicable for ${DEVICE_VENDOR:-this} devices — skipping z13ctl install."
+        info "See docs/technical/external-integrations-catalog.md for device-specific control tools."
+        return 0
+    fi
+
+    info "Installing z13ctl for ASUS hardware control..."
 
     # Check if already installed
     if command -v z13ctl >/dev/null 2>&1; then
@@ -714,7 +771,12 @@ EOF
 # ==============================================================================
 
 install_display_tools() {
-    print_section "Section 3: Display & Tools"
+    if [[ "${CAP_COMMAND_CENTER:-false}" != "true" ]]; then
+        info "The GZ302 command-center tray app is not offered for ${DEVICE_MODEL:-this profile}."
+        return 0
+    fi
+
+    print_section "Section 2: GZ302 Command Center"
 
     local distro
     distro=$(detect_distribution)
@@ -791,31 +853,179 @@ install_tray_app() {
 }
 
 # ==============================================================================
-# Section 4: Optional Modules
+# Section 3: Gaming Module
 # ==============================================================================
 
-install_optional_modules() {
-    print_section "Section 4: Optional Modules"
+install_gaming_module() {
+    print_section "Section 3: Gaming (Steam, Lutris, MangoHUD, GameMode)"
 
     local distro
     distro=$(detect_distribution)
 
-    info "Optional modules provide additional features like Gaming, AI, or Hypervisor support."
+    info "Gaming packages: Steam, Lutris, MangoHUD, GameMode, Wine, Proton-GE"
     echo
 
-    if prompt_section "Install Gaming module? (Steam, Lutris, MangoHUD, GameMode)" N; then
-        download_and_execute_module "gz302-gaming" "$distro"
-    fi
+    download_and_execute_module "gz302-gaming" "$distro"
+}
 
-    if prompt_section "Install AI / LLM module? (Ollama, LM Studio, ROCm, PyTorch)" N; then
-        download_and_execute_module "gz302-llm" "$distro"
-    fi
+# ==============================================================================
+# Section 4: AI / LLM Module
+# ==============================================================================
 
-    if prompt_section "Install Hypervisor module? (KVM/QEMU, libvirt)" N; then
+install_ai_module() {
+    print_section "Section 4: AI / LLM (Ollama, ROCm, vLLM, ComfyUI)"
+
+    local distro
+    distro=$(detect_distribution)
+
+    info "AI packages: Ollama, LM Studio, ROCm, PyTorch, vLLM, ComfyUI"
+    echo
+    if [[ "${CAP_ROCM:-false}" == "true" ]]; then
+        success "Radeon 8060S (gfx1151) detected — ROCm GPU compute is available"
+    else
+        warning "AMD GPU not confirmed — ROCm packages will be installed but may not be functional"
+    fi
+    echo
+
+    download_and_execute_module "gz302-llm" "$distro"
+}
+
+# ==============================================================================
+# Section 5: Other Tools (Hypervisor + Community Integrations)
+# ==============================================================================
+
+install_other_tools() {
+    print_section "Section 5: Other Tools"
+
+    local distro
+    distro=$(detect_distribution)
+
+    if prompt_section "Install Hypervisor? (KVM/QEMU, libvirt, virt-manager)" N; then
         download_and_execute_module "gz302-hypervisor" "$distro"
     fi
 
-    success "Optional modules processing complete"
+    echo
+    install_community_integrations "$distro"
+}
+
+# Present the curated Strix Halo community integrations catalog and let the
+# user choose which (if any) to install.
+install_community_integrations() {
+    local distro="${1:-unknown}"
+
+    if [[ "${CAP_STRIX_HALO:-false}" != "true" ]]; then
+        info "Skipping Strix Halo community integrations — confirmed Strix Halo hardware was not detected."
+        return 0
+    fi
+
+    print_section "Community Integrations (Strix Halo Ecosystem)"
+    info "The following third-party projects have been verified to work on"
+    info "Strix Halo hardware. All are opt-in. Nothing is installed by default."
+    echo
+    info "Full catalog: docs/technical/external-integrations-catalog.md"
+    echo
+
+    # --- Strix-Halo-Control (GTK4 GUI for ASUS devices) ---------------------
+    if [[ "${CAP_Z13CTL:-false}" == "true" ]]; then
+        echo "  ${SYMBOL_BULLET:-•} Strix-Halo-Control — GTK4 GUI for z13ctl (RGB, fans, power)"
+        echo "    URL: https://github.com/TechnoDaimon/Strix-Halo-Control"
+        echo "    Trust: community-verified | Devices: ASUS ROG"
+        if prompt_section "  Install Strix-Halo-Control?" N; then
+            _install_strix_halo_control "$distro"
+        fi
+        echo
+    fi
+
+    # --- amd-strix-halo-toolboxes (AI containers) ---------------------------
+    echo "  ${SYMBOL_BULLET:-•} amd-strix-halo-toolboxes — container AI workflows (Ollama, vLLM, ComfyUI)"
+    echo "    URL: https://github.com/kyuz0/amd-strix-halo-toolboxes"
+    echo "    Trust: community-verified | Devices: all Strix Halo"
+    if prompt_section "  Install amd-strix-halo-toolboxes?" N; then
+        _install_strix_halo_toolboxes "$distro"
+    fi
+    echo
+
+    success "Community integrations processing complete"
+}
+
+_install_strix_halo_control() {
+    local distro="$1"
+    info "Installing Strix-Halo-Control dependencies..."
+
+    case "$distro" in
+        arch)
+            pacman -S --noconfirm --needed gtk4 python python-gobject 2>/dev/null || true
+            ;;
+        debian|ubuntu)
+            apt install -y python3-gi python3-gi-cairo gir1.2-gtk-4.0 2>/dev/null || true
+            ;;
+        fedora)
+            dnf install -y gtk4 python3-gobject 2>/dev/null || true
+            ;;
+        opensuse)
+            zypper install -y gtk4 python3-gobject 2>/dev/null || true
+            ;;
+    esac
+
+    info "Cloning Strix-Halo-Control..."
+    local install_dir="/opt/strix-halo-control"
+    if [[ -d "$install_dir" ]]; then
+        info "Updating existing install at ${install_dir}..."
+        git -C "$install_dir" pull --ff-only 2>/dev/null || true
+    else
+        git clone --depth 1 https://github.com/TechnoDaimon/Strix-Halo-Control.git "$install_dir" 2>/dev/null || {
+            warning "Could not clone Strix-Halo-Control — check network connectivity"
+            return 1
+        }
+    fi
+
+    # Create a launcher wrapper
+    cat > /usr/local/bin/strix-halo-control << 'EOF'
+#!/bin/bash
+# Strix-Halo-Control launcher — installed by Strix Halo Linux Setup
+exec python3 /opt/strix-halo-control/main.py "$@"
+EOF
+    chmod 755 /usr/local/bin/strix-halo-control
+    success "Strix-Halo-Control installed → run: strix-halo-control"
+}
+
+_install_strix_halo_toolboxes() {
+    local distro="$1"
+    info "Installing Distrobox / Toolbx for container-based AI workflows..."
+
+    case "$distro" in
+        arch)
+            pacman -S --noconfirm --needed distrobox 2>/dev/null || true
+            ;;
+        debian|ubuntu)
+            apt install -y distrobox 2>/dev/null || \
+                curl -s https://raw.githubusercontent.com/89luca89/distrobox/main/install | sh -s -- --prefix /usr/local 2>/dev/null || true
+            ;;
+        fedora)
+            dnf install -y distrobox 2>/dev/null || true
+            ;;
+        opensuse)
+            zypper install -y distrobox 2>/dev/null || true
+            ;;
+    esac
+
+    if ! command -v distrobox >/dev/null 2>&1; then
+        warning "distrobox not found after install — AI toolboxes require distrobox or toolbox"
+        info "See: https://github.com/kyuz0/amd-strix-halo-toolboxes for manual setup"
+        return 1
+    fi
+
+    info "Pulling the latest Strix Halo ROCm toolbox image..."
+    info "This downloads a container image (~3-5 GB) — it may take a while."
+    distrobox create --name strix-halo-ai \
+        --image kyuz0/amd-strix-halo-toolboxes:rocm-7.2.3 \
+        --yes 2>/dev/null || {
+        warning "Could not create Strix Halo AI toolbox — see https://strix-halo-toolboxes.com for troubleshooting"
+        return 1
+    }
+
+    info "Toolbox created. Enter it with: distrobox enter strix-halo-ai"
+    success "amd-strix-halo-toolboxes installed"
 }
 
 download_and_execute_module() {
@@ -897,25 +1107,43 @@ setup_distro_base() {
 main() {
     check_root
     print_banner
-    print_section "GZ302 Linux Setup v$(cat "${SCRIPT_DIR}/VERSION" 2>/dev/null || echo '5.0.0')"
+    print_section "Strix Halo Linux Setup v$(cat "${SCRIPT_DIR}/VERSION" 2>/dev/null || echo "${SETUP_VERSION}")"
     echo
 
-    # System checks
-    print_step 1 3 "Validating system..."
+    # --- Step 1: Hardware & system detection ---------------------------------
+    print_step 1 4 "Detecting hardware..."
+    # Run device detection (populates DEVICE_* and CAP_* globals)
+    if declare -f device_detect >/dev/null 2>&1; then
+        device_detect
+        device_print_profile
+        if ! device_is_strix_halo; then
+            warning "Confirmed Strix Halo CPU/GPU signatures were not detected."
+            warning "Hardware fixes, ASUS control paths, and Strix Halo AI flows will be skipped."
+            info "Gaming and hypervisor modules remain available if you want the generic software installs only."
+            SKIP_FIXES=true
+            SKIP_Z13CTL=true
+            SKIP_TOOLS=true
+            SKIP_AI=true
+        fi
+    else
+        warning "device-manager library not loaded — skipping hardware profile detection"
+    fi
+
+    print_step 2 4 "Validating kernel..."
     check_kernel_version >/dev/null
 
-    print_step 2 3 "Checking network..."
+    print_step 3 4 "Checking network..."
     check_network || warning "Network connectivity limited — some downloads may fail"
 
-    print_step 3 3 "Detecting distribution..."
+    print_step 4 4 "Detecting distribution..."
     local distro
     distro=$(detect_distribution)
     success "Detected: ${distro}"
     echo
 
     print_keyval "Distribution" "$distro"
-    print_keyval "Kernel" "$(uname -r)"
-    print_keyval "z13ctl" "$(command -v z13ctl >/dev/null 2>&1 && z13ctl --version 2>/dev/null || echo 'not installed')"
+    print_keyval "Kernel"       "$(uname -r)"
+    print_keyval "z13ctl"       "$(command -v z13ctl >/dev/null 2>&1 && z13ctl --version 2>/dev/null || echo 'not installed')"
     echo
 
     # Pre-flight: clean legacy v3/v4 artifacts
@@ -926,55 +1154,83 @@ main() {
         setup_distro_base "$distro"
     fi
 
-    # Section 1: Hardware Fixes
+    # --- Step 2: Hardware fixes (kernel-level) --------------------------------
     if [[ "$SKIP_FIXES" != "true" ]]; then
         echo
-        if prompt_section "Apply hardware fixes? (WiFi, GPU, Input, Audio, Display) (Y/n): " Y; then
+        if prompt_section "Apply hardware fixes? (WiFi, GPU, Input, Audio, Display, Suspend) (Y/n): " Y; then
             apply_hardware_fixes
         else
             info "Skipping hardware fixes"
         fi
     fi
 
-    # Section 2: z13ctl
-    if [[ "$SKIP_Z13CTL" != "true" ]]; then
+    # --- Step 3: Command Center / ASUS control paths -------------------------
+    if [[ "$SKIP_Z13CTL" != "true" ]] || [[ "$SKIP_TOOLS" != "true" ]]; then
         echo
-        if prompt_section "Install z13ctl? (RGB, power profiles, TDP, fan curves) (Y/n): " Y; then
-            install_z13ctl
-        else
-            info "Skipping z13ctl"
+        local cc_prompt=""
+        if [[ "${CAP_COMMAND_CENTER:-false}" == "true" ]] && [[ "$SKIP_Z13CTL" != "true" ]] && [[ "$SKIP_TOOLS" != "true" ]]; then
+            cc_prompt="Install Command Center? (z13ctl hardware control + tray app)"
+        elif [[ "${CAP_COMMAND_CENTER:-false}" == "true" ]] && [[ "$SKIP_TOOLS" != "true" ]]; then
+            cc_prompt="Install GZ302 Command Center tray app?"
+        elif [[ "${CAP_Z13CTL:-false}" == "true" ]] && [[ "$SKIP_Z13CTL" != "true" ]]; then
+            cc_prompt="Install ASUS control backend? (z13ctl CLI + daemon)"
+            info "The GZ302 tray app is not offered on this device profile."
+        fi
+
+        if [[ -n "$cc_prompt" ]] && prompt_section "$cc_prompt (Y/n): " Y; then
+            if [[ "$SKIP_Z13CTL" != "true" ]]; then
+                install_z13ctl
+            fi
+            if [[ "$SKIP_TOOLS" != "true" ]]; then
+                install_display_tools
+            fi
+        elif [[ -n "$cc_prompt" ]]; then
+            info "Skipping Command Center"
+        elif [[ "${CAP_STRIX_HALO:-false}" == "true" ]]; then
+            info "No ASUS command-center path is available for ${DEVICE_MODEL:-this device} — skipping."
         fi
     fi
 
-    # Section 3: Display Tools & Tray
-    if [[ "$SKIP_TOOLS" != "true" ]]; then
-        echo
-        if prompt_section "Install display tools and system tray app? (Y/n): " Y; then
-            install_display_tools
-        else
-            info "Skipping display tools"
-        fi
-    fi
-
-    # Section 4: Optional Modules
+    # --- Step 4: Gaming -------------------------------------------------------
     if [[ "$SKIP_MODULES" != "true" ]]; then
         echo
-        if prompt_section "Browse optional modules? (Gaming, AI, Hypervisor) (y/N): " N; then
-            install_optional_modules
+        if prompt_section "Install Gaming packages? (Steam, Lutris, MangoHUD, GameMode) (y/N): " N; then
+            install_gaming_module
         else
-            info "Skipping optional modules"
+            info "Skipping Gaming"
+        fi
+
+        # --- Step 5: AI / LLM -------------------------------------------------
+        echo
+        if [[ "$SKIP_AI" != "true" ]]; then
+            if prompt_section "Install AI / LLM packages? (Ollama, ROCm, vLLM, ComfyUI) (y/N): " N; then
+                install_ai_module
+            else
+                info "Skipping AI / LLM"
+            fi
+        else
+            info "Skipping AI / LLM — confirmed Strix Halo hardware not detected"
+        fi
+
+        # --- Step 6: Other tools ----------------------------------------------
+        echo
+        if prompt_section "Browse other tools? (Hypervisor, community integrations) (y/N): " N; then
+            install_other_tools
+        else
+            info "Skipping other tools"
         fi
     fi
 
-    # Done
+    # --- Done -----------------------------------------------------------------
     echo
     print_section "Setup Complete"
     echo
+    completed_item "Device: ${DEVICE_MODEL:-unknown} (${DEVICE_SUPPORT_TIER:-unknown} support)"
     completed_item "Kernel $(uname -r)"
     completed_item "Distribution: ${distro}"
     [[ "$SKIP_FIXES" != "true" ]] && completed_item "Hardware fixes applied"
     command -v z13ctl >/dev/null 2>&1 && completed_item "z13ctl — RGB, power, TDP, fan curves"
-    command -v pwrcfg >/dev/null 2>&1 && completed_item "pwrcfg — power profile switching"
+    command -v pwrcfg  >/dev/null 2>&1 && completed_item "pwrcfg — power profile switching"
     command -v gz302-rgb >/dev/null 2>&1 && completed_item "gz302-rgb — RGB lighting control"
     [[ -f /usr/local/bin/rrcfg ]] && completed_item "rrcfg — refresh rate control"
     echo
@@ -982,10 +1238,18 @@ main() {
     print_box "🚀 SETUP COMPLETE! 🚀" "$C_BOLD_GREEN"
     warning "A REBOOT is recommended to apply all changes"
     echo
-    info "Quick start:"
-    info "  z13ctl apply --color cyan --brightness high"
-    info "  z13ctl profile --set balanced"
-    info "  z13ctl status"
+    if [[ "${CAP_Z13CTL:-false}" == "true" ]]; then
+        info "Quick start (ASUS z13ctl):"
+        info "  z13ctl apply --color cyan --brightness high"
+        info "  z13ctl profile --set balanced"
+        info "  z13ctl status"
+    elif [[ "${CAP_STRIX_HALO:-false}" == "true" ]]; then
+        info "Quick start:"
+        info "  cat docs/technical/external-integrations-catalog.md"
+    else
+        info "Quick start:"
+        info "  ./gz302-setup.sh --help"
+    fi
     echo
 }
 

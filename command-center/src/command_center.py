@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-GZ302 Command Center — Strix Halo Edition (v6.4.1)
+GZ302 Command Center — Strix Halo Edition (v6.6.5)
 Unified Dashboard and System Tray Controller.
 Inspired by G-Helper and Strix-Halo-Control.
 """
@@ -37,7 +37,7 @@ from modules.rgb_controller import RGBController
 from modules.power_controller import PowerController
 
 TRAY_ICON_SIZE = 24
-VERSION = "6.4.2"
+VERSION = "6.6.5"
 DASHBOARD_WINDOW_TITLE = "GZ302 Dashboard"
 DASHBOARD_WINDOW_ROLE = "gz302-dashboard"
 KWIN_DASHBOARD_SCRIPT_NAME = "gz302_dashboard_anchor"
@@ -599,11 +599,11 @@ class CommandCenterApp(QSystemTrayIcon):
         self.notifier = NotificationManager(self)
         self.rgb = RGBController(self.notifier)
         self.power = PowerController(self.notifier)
-
+        
         self.dashboard = DashboardWindow(self.power, self.rgb, self.config, self.notifier)
         self._kwin_script_loaded = False
         self._setup_kwin_dashboard_positioner()
-
+        
         self.menu = QMenu()
         self.menu.aboutToShow.connect(self.setup_menu)
         self.setup_menu()
@@ -614,11 +614,11 @@ class CommandCenterApp(QSystemTrayIcon):
         self.activated.connect(self._on_activated)
         self.update_icon()
         self.show()
-
+        
         self.timer = QTimer()
         self.timer.timeout.connect(self.poll_status)
         self.timer.start(3000)
-
+        
         self.notifier.notify("Strix Halo", "Control Panel Ready", "success", 2000)
 
     def _build_color_icon(self, hex_color):
@@ -701,7 +701,7 @@ class CommandCenterApp(QSystemTrayIcon):
             self.rgb.set_lightbar_color,
             self.rgb.turn_off_lightbar,
         )
-
+        
         # Brightness Submenu
         bright_menu = rgb_menu.addMenu("⌨️ Keyboard Brightness")
         for label, val in [("Off", 0), ("Low", 1), ("Medium", 2), ("High", 3)]:
@@ -714,7 +714,7 @@ class CommandCenterApp(QSystemTrayIcon):
             a = QAction(label, self)
             a.triggered.connect(lambda _, v=val: self.rgb.set_window_backlight(v))
             lightbar_menu.addAction(a)
-
+            
         # Effects Submenu
         effects_menu = rgb_menu.addMenu("✨ Keyboard Effects")
         for label, effect in [("Rainbow", "rainbow"), ("Color Cycle", "colorcycle"), ("Breathing", "breathing")]:
@@ -728,7 +728,7 @@ class CommandCenterApp(QSystemTrayIcon):
             a.triggered.connect(lambda _, e=effect: self.rgb.start_window_animation(e))
             lightbar_fx_menu.addAction(a)
         lightbar_fx_menu.addAction("Off").triggered.connect(self.rgb.turn_off_lightbar)
-
+            
         rgb_menu.addAction("❌ Turn Off All").triggered.connect(self.rgb.turn_off)
 
         self.menu.addSeparator()
@@ -854,13 +854,13 @@ def main():
     app = QApplication(sys.argv)
     app.setApplicationName("GZ302 Dashboard")
     app.setQuitOnLastWindowClosed(False)
-
+    
     if not QSystemTrayIcon.isSystemTrayAvailable():
         for _ in range(10):
             import time
             time.sleep(1)
             if QSystemTrayIcon.isSystemTrayAvailable(): break
-
+            
     tray = CommandCenterApp(app)
     sys.exit(app.exec())
 

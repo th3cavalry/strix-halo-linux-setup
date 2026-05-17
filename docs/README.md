@@ -40,7 +40,7 @@ Documentation for the ASUS ROG Flow Z13 (GZ302) Linux Setup project.
 
 ```text
 GZ302-Linux-Setup/
-├── gz302-setup.sh         # Unified installer (v6.4.1)
+├── gz302-setup.sh         # Unified installer (v6.6.5)
 ├── gz302-lib/             # Shared bash libraries
 ├── modules/               # Optional modules (gaming, AI, hypervisor)
 ├── scripts/               # Standalone tools & utilities

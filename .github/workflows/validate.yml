@@ -1,15 +1,10 @@
-name: Shell Script Validation
+name: Repository Validation
 
 on:
   push:
     branches: [ main, develop ]
-    paths:
-      - '**.sh'
-      - '.github/workflows/validate.yml'
   pull_request:
     branches: [ main ]
-    paths:
-      - '**.sh'
   workflow_dispatch:
 
 jobs:
@@ -25,14 +20,14 @@ jobs:
         run: |
           echo "Validating bash syntax..."
           errors=0
-          
-          for script in $(find . -name "*.sh" -type f); do
+
+          while IFS= read -r -d '' script; do
             echo "  Checking: $script"
-            if ! bash -n "$script" 2>&1; then
+            if ! bash -n "$script"; then
               echo "  Syntax error in: $script"
               errors=$((errors + 1))
             fi
-          done
+          done < <(find . -name "*.sh" -type f -print0)
           
           if [ $errors -gt 0 ]; then
             echo "Found $errors script(s) with syntax errors"
@@ -49,10 +44,34 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Install ShellCheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
       - name: Run ShellCheck
-        uses: ludeeus/action-shellcheck@master
-        with:
-          severity: warning
+        run: find . -name '*.sh' -type f -print0 | xargs -0 shellcheck
+
+  device-profile-regressions:
+    name: Device Profile Regression Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run device detection regression script
+        run: bash tests/device-manager-detection.sh
+
+  python-sanity:
+    name: Command Center Python Sanity
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Compile command-center sources
+        run: |
+          find command-center/src -name '*.py' -type f -print0 | xargs -0 python3 -m py_compile
 
   version-check:
     name: Version Consistency Check
@@ -63,32 +82,17 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Check version consistency
+        run: bash tests/validate-version-sync.sh
+
+  generated-content-check:
+    name: Generated Content Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify generated device matrix blocks are up to date
         run: |
-          echo "Checking version consistency..."
-          main_version=$(grep "^# Version:" gz302-setup.sh | head -1 | sed 's/# Version: //')
-          version_file=$(cat VERSION)
-          echo "Main script version: $main_version"
-          echo "VERSION file: $version_file"
-          errors=0
-
-          if [ "$main_version" != "$version_file" ]; then
-            echo "Version mismatch: VERSION file has $version_file (expected $main_version)"
-            errors=$((errors + 1))
-          fi
-
-          for script in gz302-lib/*.sh modules/*.sh; do
-            if [ -f "$script" ]; then
-              version=$(grep "^# Version:" "$script" | head -1 | sed 's/# Version: //')
-              if [ -n "$version" ] && [ "$version" != "$main_version" ]; then
-                echo "Version mismatch: $script has $version (expected $main_version)"
-                errors=$((errors + 1))
-              fi
-            fi
-          done
-
-          if [ $errors -gt 0 ]; then
-            echo "Found $errors version mismatch(es)"
-            exit 1
-          else
-            echo "All versions match: $main_version"
-          fi
+          bash scripts/sync-device-matrix.sh
+          git diff --exit-code

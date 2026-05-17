@@ -2,7 +2,7 @@
 
 # ==============================================================================
 # GZ302 LLM/AI Software Module
-# Version: 6.4.2
+# Version: 6.6.5
 #
 # This module installs LLM backends for the ASUS ROG Flow Z13 (GZ302)
 # Uses official installation methods - no custom builds
@@ -49,7 +49,7 @@ else
         echo "Error: curl or wget not found. Cannot download utils."
         exit 1
     fi
-
+    
     if [[ -f "${SCRIPT_DIR}/gz302-utils.sh" ]]; then
         chmod +x "${SCRIPT_DIR}/gz302-utils.sh"
         # shellcheck source=/dev/null
@@ -85,20 +85,20 @@ get_rocm_version() {
 rocm_has_native_gfx1151() {
     local version
     version=$(get_rocm_version)
-
+    
     if [[ "$version" == "unknown" ]]; then
         return 1
     fi
-
+    
     local major minor
     major=$(echo "$version" | cut -d. -f1)
     minor=$(echo "$version" | cut -d. -f2)
-
+    
     # ROCm 7.2+ has native gfx1151 support
     if [[ $major -gt 7 ]] || { [[ $major -eq 7 ]] && [[ $minor -ge 2 ]]; }; then
         return 0
     fi
-
+    
     return 1
 }
 
@@ -106,10 +106,10 @@ configure_amd_gpu_env() {
     local env_file="/etc/profile.d/gz302-rocm.sh"
     local rocm_version
     rocm_version=$(get_rocm_version)
-
+    
     info "Configuring AMD ROCm environment for Strix Halo (gfx1151)..."
     info "Detected ROCm version: ${rocm_version:-not installed}"
-
+    
     if rocm_has_native_gfx1151; then
         # ROCm 7.2+ - native gfx1151 support, no HSA override needed
         info "ROCm 7.2+ detected - using native gfx1151 support (no HSA override)"
@@ -134,7 +134,7 @@ export AMD_SERIALIZE_KERNEL=0
 export AMD_SERIALIZE_COPY=0
 EOF
     fi
-
+    
     chmod 644 "$env_file"
     # shellcheck disable=SC1090
     source "$env_file"
@@ -147,18 +147,18 @@ EOF
 
 install_ollama() {
     print_section "Installing Ollama"
-
+    
     if command -v ollama &>/dev/null; then
         info "Ollama already installed: $(ollama --version 2>/dev/null || echo 'unknown')"
         return 0
     fi
-
+    
     info "Running official Ollama install script..."
     curl -fsSL https://ollama.com/install.sh | sh
-
+    
     info "Configuring Ollama for AMD Strix Halo GPU..."
     mkdir -p "$(dirname "$OLLAMA_ENV_FILE")"
-
+    
     if rocm_has_native_gfx1151; then
         # ROCm 7.2+ - native gfx1151 support
         cat > "$OLLAMA_ENV_FILE" << 'EOF'
@@ -179,36 +179,36 @@ Environment="GPU_MAX_HW_QUEUES=8"
 Environment="OLLAMA_HOST=0.0.0.0"
 EOF
     fi
-
+    
     systemctl daemon-reload
     systemctl enable --now ollama
-
+    
     success "Ollama installed and configured"
     info "API: http://localhost:11434"
 }
 
 install_lmstudio() {
     print_section "Installing LM Studio"
-
+    
     if [[ -f "$LMSTUDIO_APPIMAGE" ]]; then
         info "LM Studio already installed at $LMSTUDIO_APPIMAGE"
         return 0
     fi
-
+    
     info "Downloading LM Studio AppImage..."
     mkdir -p "$(dirname "$LMSTUDIO_APPIMAGE")"
-
+    
     # Fetch latest version dynamically; fall back to manual download
     local download_url="https://lmstudio.ai/download/linux"
-
+    
     if ! curl -fsSL -o "$LMSTUDIO_APPIMAGE" "$download_url"; then
         warning "Could not download LM Studio automatically"
         info "Please download manually from: https://lmstudio.ai/download"
         return 1
     fi
-
+    
     chmod +x "$LMSTUDIO_APPIMAGE"
-
+    
     mkdir -p "${HOME}/.local/share/applications"
     cat > "${HOME}/.local/share/applications/lmstudio.desktop" << EOF
 [Desktop Entry]
@@ -220,30 +220,30 @@ Type=Application
 Categories=Development;Utility;
 Terminal=false
 EOF
-
+    
     success "LM Studio installed"
 }
 
 install_llamacpp() {
     print_section "Installing llama.cpp"
-
+    
     if command -v llama-cli &>/dev/null || command -v llama-server &>/dev/null; then
         info "llama.cpp already installed"
         return 0
     fi
-
+    
     info "Fetching latest llama.cpp release..."
-
+    
     local version
     version=$(curl -fsSL https://api.github.com/repos/ggerganov/llama.cpp/releases/latest | grep -oP '"tag_name": "\K[^"]+' || echo "b8043")
-
+    
     # Linux releases are .tar.gz; Vulkan build supports AMD GPUs via Vulkan compute
     local vulkan_url="https://github.com/ggerganov/llama.cpp/releases/download/${version}/llama-${version}-bin-ubuntu-vulkan-x64.tar.gz"
     local fallback_url="https://github.com/ggerganov/llama.cpp/releases/download/${version}/llama-${version}-bin-ubuntu-x64.tar.gz"
-
+    
     local tmpdir
     tmpdir=$(mktemp -d)
-
+    
     info "Downloading llama.cpp ${version}..."
     if curl -fsSL "$vulkan_url" -o "${tmpdir}/llama.tar.gz" 2>/dev/null; then
         info "Using Vulkan-enabled build (AMD GPU acceleration)"
@@ -254,38 +254,38 @@ install_llamacpp() {
         rm -rf "$tmpdir"
         return 1
     fi
-
+    
     tar -xzf "${tmpdir}/llama.tar.gz" -C "${tmpdir}"
     find "${tmpdir}" -type f -name "llama-*" -exec install -m 755 {} /usr/local/bin/ \;
     # Also install shared libraries if present (needed for Vulkan build)
     find "${tmpdir}" -type f -name "*.so*" -exec install -m 644 {} /usr/local/lib/ \; 2>/dev/null || true
     ldconfig 2>/dev/null || true
     rm -rf "$tmpdir"
-
+    
     success "llama.cpp installed"
 }
 
 install_vllm() {
     print_section "Installing vLLM"
-
+    
     if [[ -d "$VLLM_VENV" ]] && "${VLLM_VENV}/bin/python" -c "import vllm" 2>/dev/null; then
         info "vLLM already installed in $VLLM_VENV"
         return 0
     fi
-
+    
     local python_cmd="python3"
     if ! command -v "$python_cmd" &>/dev/null; then
         error "Python 3 not found"
         return 1
     fi
-
+    
     info "Creating vLLM virtual environment..."
     "$python_cmd" -m venv "$VLLM_VENV"
-
+    
     info "Installing vLLM..."
     "${VLLM_VENV}/bin/pip" install --upgrade pip
     "${VLLM_VENV}/bin/pip" install vllm
-
+    
     if rocm_has_native_gfx1151; then
         cat > "${VLLM_VENV}/activate-vllm" << 'EOF'
 #!/bin/bash
@@ -303,19 +303,19 @@ echo "vLLM environment activated"
 EOF
     fi
     chmod +x "${VLLM_VENV}/activate-vllm"
-
+    
     success "vLLM installed"
     info "Activate: source ${VLLM_VENV}/activate-vllm"
 }
 
 install_lemonade() {
     print_section "Installing Lemonade SDK"
-
+    
     if command -v lemonade-server &>/dev/null; then
         info "Lemonade SDK already installed"
         return 0
     fi
-
+    
     info "Installing Lemonade SDK via AUR..."
     # Check for AUR helpers
     local aur_helper=""
@@ -324,22 +324,22 @@ install_lemonade() {
     elif command -v yay &>/dev/null; then
         aur_helper="yay"
     fi
-
+    
     if [[ -n "$aur_helper" ]]; then
         $aur_helper -S --needed --noconfirm lemonade-desktop lemonade-server fastflowlm
     else
         warning "No AUR helper found. Cannot install lemonade-desktop automatically."
         return 1
     fi
-
+    
     # Configure NPU access
     info "Configuring NPU memory limits..."
     mkdir -p /etc/security/limits.d
     printf '* soft memlock unlimited\n* hard memlock unlimited\n' | tee /etc/security/limits.d/99-xrt.conf
-
+    
     # Enable and start service
     systemctl enable --now lemonade-server
-
+    
     success "Lemonade SDK installed and configured for NPU"
 }
 
@@ -351,18 +351,18 @@ install_docker_if_needed() {
     if command -v docker &>/dev/null; then
         return 0
     fi
-
+    
     info "Installing Docker..."
     local distro
     distro=$(detect_distribution)
-
+    
     case "$distro" in
         arch)   pacman -S --noconfirm docker docker-compose ;;
         debian|ubuntu) apt-get update && apt-get install -y docker.io docker-compose ;;
         fedora) dnf install -y docker docker-compose ;;
         opensuse) zypper install -y docker docker-compose ;;
     esac
-
+    
     systemctl enable --now docker
     usermod -aG docker "$SUDO_USER" 2>/dev/null || true
     success "Docker installed"
@@ -370,16 +370,16 @@ install_docker_if_needed() {
 
 install_openwebui() {
     print_section "Installing Open WebUI"
-
+    
     install_docker_if_needed
-
+    
     if docker ps --format '{{.Names}}' | grep -q "^open-webui$"; then
         info "Open WebUI already running"
         return 0
     fi
-
+    
     docker rm -f open-webui 2>/dev/null || true
-
+    
     info "Deploying Open WebUI..."
     docker run -d \
         --name open-webui \
@@ -388,23 +388,23 @@ install_openwebui() {
         --add-host=host.docker.internal:host-gateway \
         -v open-webui:/app/backend/data \
         ghcr.io/open-webui/open-webui:main
-
+    
     success "Open WebUI installed"
     info "Access: http://localhost:3000"
 }
 
 install_sillytavern() {
     print_section "Installing SillyTavern"
-
+    
     install_docker_if_needed
-
+    
     if docker ps --format '{{.Names}}' | grep -q "^sillytavern$"; then
         info "SillyTavern already running"
         return 0
     fi
-
+    
     docker rm -f sillytavern 2>/dev/null || true
-
+    
     info "Deploying SillyTavern..."
     docker run -d \
         --name sillytavern \
@@ -414,32 +414,32 @@ install_sillytavern() {
         -v sillytavern-config:/home/node/app/config \
         -v sillytavern-data:/home/node/app/data \
         ghcr.io/sillytavern/sillytavern:latest
-
+    
     success "SillyTavern installed"
     info "Access: http://localhost:8000"
 }
 
 install_textgenwebui() {
     print_section "Installing Text Generation WebUI"
-
+    
     local install_dir="/opt/text-generation-webui"
-
+    
     if [[ -d "$install_dir" ]]; then
         info "Text Generation WebUI already installed at $install_dir"
         return 0
     fi
-
+    
     info "Cloning Text Generation WebUI..."
     git clone https://github.com/oobabooga/text-generation-webui.git "$install_dir"
-
+    
     cd "$install_dir"
     info "Running installer (this may take a while)..."
-
+    
     # Use AMD ROCm option
     export GPU_CHOICE="B"  # AMD ROCm
     export CUDA_VERSION="N/A"
     bash start_linux.sh --install-only || true
-
+    
     # Create launcher script
     if rocm_has_native_gfx1151; then
         cat > /usr/local/bin/textgen-webui << 'EOF'
@@ -458,34 +458,34 @@ cd /opt/text-generation-webui
 EOF
     fi
     chmod +x /usr/local/bin/textgen-webui
-
+    
     success "Text Generation WebUI installed"
     info "Launch: textgen-webui"
 }
 
 install_librechat() {
     print_section "Installing LibreChat"
-
+    
     install_docker_if_needed
-
+    
     local install_dir="/opt/librechat"
-
+    
     if [[ -d "$install_dir" ]]; then
         info "LibreChat already installed at $install_dir"
         return 0
     fi
-
+    
     info "Cloning LibreChat..."
     git clone https://github.com/danny-avila/LibreChat.git "$install_dir"
-
+    
     cd "$install_dir"
-
+    
     # Copy default env
     cp .env.example .env
-
+    
     info "Starting LibreChat with Docker Compose..."
     docker compose up -d
-
+    
     success "LibreChat installed"
     info "Access: http://localhost:3080"
 }
@@ -496,23 +496,23 @@ install_librechat() {
 
 install_python_ai_libs() {
     print_section "Installing Python AI Libraries"
-
+    
     local venv_path="${HOME}/.gz302-ai"
-
+    
     if [[ -d "$venv_path" ]]; then
         info "Python AI environment already exists at $venv_path"
         read -r -p "Reinstall? (y/N): " reinstall
         [[ ! "$reinstall" =~ ^[Yy] ]] && return 0
         rm -rf "$venv_path"
     fi
-
+    
     info "Creating Python AI virtual environment..."
     python3 -m venv "$venv_path"
-
+    
     info "Installing PyTorch with ROCm support..."
     "${venv_path}/bin/pip" install --upgrade pip
     "${venv_path}/bin/pip" install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm7.2
-
+    
     info "Installing AI/ML libraries..."
     "${venv_path}/bin/pip" install \
         transformers \
@@ -525,7 +525,7 @@ install_python_ai_libs() {
         peft \
         trl \
         einops
-
+    
     if rocm_has_native_gfx1151; then
         cat > "${venv_path}/activate-ai" << EOF
 #!/bin/bash
@@ -543,7 +543,7 @@ echo "Python AI environment activated"
 EOF
     fi
     chmod +x "${venv_path}/activate-ai"
-
+    
     success "Python AI libraries installed"
     info "Activate: source ${venv_path}/activate-ai"
 }
@@ -566,9 +566,9 @@ ask_backends() {
     echo "  7) Skip"
     echo
     read -r -p "Choice (comma-separated, e.g., 1,2 or 7 to skip): " choice || choice="7"
-
+    
     [[ "$choice" == "7" || -z "$choice" ]] && return
-
+    
     IFS=',' read -ra choices <<< "$choice"
     for c in "${choices[@]}"; do
         c=$(echo "$c" | tr -d ' ')
@@ -603,9 +603,9 @@ ask_frontends() {
     echo "  6) Skip"
     echo
     read -r -p "Choice (comma-separated, e.g., 1,2 or 6 to skip): " choice || choice="6"
-
+    
     [[ "$choice" == "6" || -z "$choice" ]] && return
-
+    
     IFS=',' read -ra choices <<< "$choice"
     for c in "${choices[@]}"; do
         c=$(echo "$c" | tr -d ' ')
@@ -636,7 +636,7 @@ ask_libraries() {
     echo "  - HuggingFace Hub integration"
     echo
     read -r -p "Install Python AI libraries? (y/N): " choice || choice="n"
-
+    
     if [[ "$choice" =~ ^[Yy] ]]; then
         install_python_ai_libs
     fi
@@ -647,23 +647,23 @@ show_summary() {
     print_box "Installation Complete"
     echo
     info "Installed Components:"
-
+    
     # Backends
     command -v lemonade-server &>/dev/null && echo "  ✓ Lemonade SDK: lemonade-desktop"
     command -v ollama &>/dev/null && echo "  ✓ Ollama: ollama run llama3.2"
     [[ -f "$LMSTUDIO_APPIMAGE" ]] && echo "  ✓ LM Studio: $LMSTUDIO_APPIMAGE"
     command -v llama-cli &>/dev/null && echo "  ✓ llama.cpp: llama-cli / llama-server"
     [[ -d "$VLLM_VENV" ]] && echo "  ✓ vLLM: source ${VLLM_VENV}/activate-vllm"
-
+    
     # Frontends
     docker ps --format '{{.Names}}' 2>/dev/null | grep -q "^open-webui$" && echo "  ✓ Open WebUI: http://localhost:3000"
     docker ps --format '{{.Names}}' 2>/dev/null | grep -q "^sillytavern$" && echo "  ✓ SillyTavern: http://localhost:8000"
     [[ -d "/opt/text-generation-webui" ]] && echo "  ✓ Text Gen WebUI: textgen-webui"
     [[ -d "/opt/librechat" ]] && echo "  ✓ LibreChat: http://localhost:3080"
-
+    
     # Libraries
     [[ -d "${HOME}/.gz302-ai" ]] && echo "  ✓ Python AI: source ~/.gz302-ai/activate-ai"
-
+    
     echo
     info "GPU configured for AMD Radeon 8060S (Strix Halo)"
     echo
@@ -675,18 +675,18 @@ main() {
         error "This script must be run as root (use sudo)"
         exit 1
     fi
-
+    
     print_box "GZ302 LLM/AI Module v${LLM_VERSION}"
     echo
-
+    
     # Configure GPU environment first
     configure_amd_gpu_env
-
+    
     # Sequential flow
     ask_backends
     ask_frontends
     ask_libraries
-
+    
     # Summary
     show_summary
 }

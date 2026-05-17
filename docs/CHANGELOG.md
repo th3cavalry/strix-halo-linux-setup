@@ -2,6 +2,105 @@
 
 All notable changes to GZ302-Linux-Setup will be documented in this file.
 
+## [6.6.5] - 2026-05-16
+
+### Fixed
+- **MT7925 WiFi detection**: `device_detect_mt7925()` now passes unescaped ERE `|` alternation to `_lspci_has` and `_lsusb_has` (which use `grep -E` internally); the previous `\|` was interpreted as a literal pipe character, causing `CAP_MT7925` to silently never be set.
+- **CS35L41 audio detection**: Simplified `device_detect_cs35l41()` grep pattern from `"CS35L41\|cs35l41"` to `"cs35l41"` since `-i` already handles case-insensitive matching.
+
+## [6.6.4] - 2026-05-16
+
+### Fixed
+- **ShellCheck cleanup**: `gz302-lib/display-manager.sh` now reads tracked config files with direct redirection, and `gz302-lib/utils.sh` now uses explicit backup copy loops instead of `&& ... || true` chains.
+- **Detection and validation stability**: `gz302-lib/device-manager.sh` no longer treats unsupported hardware probes as fatal during profile detection, and `tests/validate-version-sync.sh` now records missing version fields as mismatches instead of aborting early.
+
+## [6.6.3] - 2026-05-16
+
+### Fixed
+- **Generated-content permission drift**: `scripts/sync-device-matrix.sh` now preserves the original file mode when rewriting marker blocks, so regenerating the installer matrix no longer drops the executable bit from `gz302-setup.sh` in CI.
+
+### Changed
+- **Release metadata sync**: Version references across the installer, libraries, modules, package metadata, command center, and docs are now aligned at 6.6.3.
+
+## [6.6.2] - 2026-05-16
+
+### Fixed
+- **Unknown ASUS control-path scoping**: Generic ASUS Strix Halo fallback profiles no longer imply `z13ctl` applicability. Only explicitly validated ASUS profiles in `gz302-lib/device-profile-data.sh` now expose the z13ctl backend by default.
+- **Version validation completeness**: `tests/validate-version-sync.sh` now verifies the `docs/README.md` installer version reference plus `display_fix_lib_version()` and `display_fix_lib_help()` in `gz302-lib/display-fix.sh`, closing the remaining release-metadata gaps in CI coverage.
+
+## [6.6.1] - 2026-05-16
+
+### Changed
+- **Validation coverage hardened**: `.github/workflows/validate.yml` now runs bash syntax checks and ShellCheck recursively across all shell scripts, including nested helper scripts, instead of validating only a subset of paths.
+- **Generated matrix sections annotated**: Auto-generated device-matrix blocks now include explicit provenance comments pointing back to `gz302-lib/device-profile-data.sh` and `scripts/sync-device-matrix.sh`.
+- **Contributor guidance synced**: `CONTRIBUTING.md` and `docs/testing-guide.md` now reflect the recursive validation commands used by CI.
+
+## [6.6.0] - 2026-05-16
+
+### Added
+- **Manifest-driven device matrix**: Added `gz302-lib/device-profile-data.sh` as the single source of truth for the known Strix Halo device matrix, with shared profile metadata for detection, capabilities, and documentation.
+- **Generated matrix sync helper**: Added `scripts/sync-device-matrix.sh` to regenerate the README support table, installer supported-device help text, and external integrations catalog from the shared device-profile manifest.
+- **Repository version validator**: Added `tests/validate-version-sync.sh` to enforce the full version contract used by this repository.
+
+### Changed
+- **Device manager profile application**: `gz302-lib/device-manager.sh` now applies exact known-device metadata from the shared profile manifest before falling back to vendor-level generic profiles.
+- **Repository validation workflow**: `.github/workflows/validate.yml` now runs shell syntax checks, shellcheck, device-profile regressions, command-center Python compile checks, version validation, and generated-content drift detection.
+- **Contributor templates**: Pull request and issue templates now ask for device-profile regressions, generated matrix sync, version validation, and DMI/device-profile diagnostics where relevant.
+- **Testing documentation**: Contribution and testing docs now describe the generated-content sync and version-validation workflows, and the stale `--status` mention has been removed.
+
+## [6.5.3] - 2026-05-16
+
+### Fixed
+- **Allowlisted DMI fallback**: `gz302-lib/device-manager.sh` now treats DMI-only Strix Halo matches as an exact known-device allowlist instead of matching broad tokens like `max`, which reduces false positives on unrelated systems.
+- **ASUS TUF A14 profile scoping**: The A14 profile now requires an A14/TUF combination instead of matching any ASUS `tuf` or `a14` substring independently, so unknown ASUS Strix Halo devices fall back to the generic ASUS profile instead of being mislabeled.
+
+### Added
+- **Device-detection regression runner**: Added `tests/device-manager-detection.sh`, a dependency-free regression script that exercises the Strix Halo platform gate, known-device aliases, fallback behavior, and ASUS capability scoping.
+
+### Changed
+- **Testing guidance**: Updated `CONTRIBUTING.md`, `gz302-lib/README.md`, and `docs/testing-guide.md` to include the new device-detection regression workflow.
+
+## [6.5.2] - 2026-05-16
+
+### Added
+- **Broader known-device profile coverage**: `gz302-lib/device-manager.sh` now explicitly recognizes HP Mini Workstation (Z2 G1a), Sixunited AXP77, GMKtec EVO-X2, Minisforum MS-S1 Max, AYANEO NEXT 2, and GPD Win 5 in addition to the already-supported GZ302, HP ZBook Ultra G1a, Framework Desktop, and ASUS TUF Gaming A14 profiles.
+
+### Changed
+- **Board-name aware detection**: Strix Halo profile matching now incorporates DMI `board_name` along with vendor, product, and family strings so OEM systems that expose the model through board identifiers are classified more reliably.
+- **Installer and README support matrix**: The user-facing device inventory now lists the broader Strix Halo matrix instead of collapsing most mini-PC and handheld coverage into a generic “other” bucket.
+
+## [6.5.1] - 2026-05-16
+
+### Fixed
+- **Strix Halo platform detection tightened**: `gz302-lib/device-manager.sh` now requires confirmed Strix Halo CPU/GPU signatures before enabling hardware-fix, AI, and ASUS control paths. Generic AMD graphics detection no longer marks unrelated systems as supported.
+- **ASUS control-path scoping**: `gz302-setup.sh` now treats `z13ctl` as an ASUS-only backend and limits the GZ302 command-center tray app to profiles where it is actually applicable. Non-ASUS Strix Halo devices no longer see a misleading generic tray-app install path.
+- **Conservative ASUS support tiers**: ASUS non-GZ302 Strix Halo profiles are now marked partial until the control stack is validated on those devices.
+- **Debian/Ubuntu Distrobox fallback**: The installer now uses a system prefix when falling back to the upstream Distrobox installer, so `distrobox` is resolvable immediately after install during root-run setup flows.
+- **Command-center version sync**: `command-center/src/command_center.py` now reports the same release version as the rest of the tree.
+
+## [6.5.0] - 2026-05-15
+
+### Added
+- **Strix Halo platform broadening**: The installer now supports all AMD Strix Halo (Ryzen AI MAX / MAX+) devices, not just the ASUS ROG Flow Z13 (GZ302). Hardware auto-detection determines the device profile and applies only the relevant fixes.
+- **`gz302-lib/device-manager.sh`** — new library that reads DMI, lspci, and kernel module state to produce a normalized device profile (`DEVICE_VENDOR`, `DEVICE_MODEL`, `DEVICE_CLASS`, `DEVICE_SUPPORT_TIER`) and capability flags (`CAP_ASUS_WMI`, `CAP_DETACHABLE_KB`, `CAP_INTERNAL_OLED`, `CAP_MT7925`, `CAP_CS35L41`, `CAP_Z13CTL`, `CAP_ROCM`). Known device profiles: ASUS ROG Flow Z13 (GZ302), HP ZBook Ultra G1a, Framework Desktop, ASUS TUF Gaming A14, and experimental mini-PC / handheld classes.
+- **`docs/technical/external-integrations-catalog.md`** — curated catalog of Strix Halo community projects: z13ctl, Strix-Halo-Control, amd-strix-halo-toolboxes (kyuz0), vLLM, ComfyUI, GameMode, and MangoHUD. Includes device compatibility, install method, trust level, and known kernel bug/fix table.
+- **New installer workflow** — the main flow is now:
+  1. Hardware + system detection (device profile, kernel, distro, bootloader)
+  2. Hardware fixes (kernel-level patches/params)
+  3. Command Center (z13ctl gated to ASUS devices + tray app for all devices)
+  4. Gaming packages (Steam, Lutris, MangoHUD, GameMode)
+  5. AI / LLM packages (Ollama, ROCm, vLLM, ComfyUI)
+  6. Other tools (Hypervisor + community integrations)
+- **Community integrations section** — the installer presents the ecosystem catalog and lets users opt-in to Strix-Halo-Control and amd-strix-halo-toolboxes (via Distrobox).
+- **z13ctl capability gating** — z13ctl is now only offered and installed on devices where `CAP_Z13CTL=true` (ASUS ROG hardware). Non-ASUS users are directed to the integrations catalog.
+- **ROCm capability detection** — the AI section shows whether the Radeon 8060S was confirmed before suggesting ROCm workloads.
+
+### Changed
+- **Project branding**: README title updated to "Strix Halo Linux Setup"; banner subtitle updated to "AMD Ryzen AI MAX Platform"; supported device table added.
+- **`gz302-setup.sh` help text**: Updated to list new sections and all supported device classes.
+- **`gz302-lib/utils.sh` banner**: Subtitle now reads "Strix Halo Linux Setup — AMD Ryzen AI MAX Platform" instead of GZ302-specific text.
+- **Section 3 header**: "Display & Tools" renamed to "Display & Command Center".
+
 ## [6.4.2] - 2026-05-15
 
 ### Fixed

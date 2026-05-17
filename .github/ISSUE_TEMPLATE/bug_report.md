@@ -20,6 +20,23 @@ assignees: ''
 <!-- Paste output of: lspci | grep VGA -->
 ```
 
+**DMI identity:**
+```text
+<!-- Paste output of:
+for field in sys_vendor product_name product_family board_name; do
+	printf "%s: " "$field"
+	cat "/sys/class/dmi/id/$field" 2>/dev/null || echo "unavailable"
+done
+-->
+```
+
+**Detected device profile:**
+```text
+<!-- If you cloned the repo locally, paste output of:
+sudo bash -lc 'source gz302-lib/device-manager.sh && device_detect && device_print_profile'
+-->
+```
+
 ## Steps to Reproduce
 1. 
 2. 
@@ -47,3 +64,4 @@ assignees: ''
 - [ ] I am using one of the supported distributions (Arch, Debian/Ubuntu, Fedora, OpenSUSE)
 - [ ] I ran the script with sudo privileges
 - [ ] I have an active internet connection
+- [ ] I included DMI identity fields and the detected device profile above when this issue is hardware-specific

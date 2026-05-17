@@ -4,7 +4,7 @@ set -euo pipefail
 
 # ==============================================================================
 # GZ302 WiFi Manager Library
-# Version: 6.4.2
+# Version: 6.6.5
 #
 # This library provides hardware detection, configuration, and management
 # functions for the MediaTek MT7925e WiFi controller in the GZ302.
@@ -30,11 +30,11 @@ set -euo pipefail
 # Output: PCI device information if found
 wifi_detect_hardware() {
     local pci_id="14c3:0616"  # MediaTek MT7925e PCI ID
-
+    
     # Get device info once to avoid duplicate lspci calls
     local device_info
     device_info=$(lspci -nn 2>/dev/null | grep "$pci_id")
-
+    
     if [[ -n "$device_info" ]]; then
         echo "$device_info"
         return 0
@@ -127,29 +127,29 @@ wifi_get_state() {
     local powersave_disabled="false"
     local firmware="unknown"
     local requires_workaround="false"
-
+    
     if wifi_detect_hardware >/dev/null 2>&1; then
         hardware_present="true"
     fi
-
+    
     if wifi_module_loaded; then
         module_loaded="true"
     fi
-
+    
     if wifi_aspm_workaround_applied >/dev/null 2>&1; then
         aspm_workaround="true"
     fi
-
+    
     if wifi_powersave_disabled; then
         powersave_disabled="true"
     fi
-
+    
     firmware=$(wifi_get_firmware_version)
-
+    
     if wifi_requires_aspm_workaround; then
         requires_workaround="true"
     fi
-
+    
     cat <<EOF
 {
     "hardware_present": "$hardware_present",
@@ -171,7 +171,7 @@ wifi_apply_aspm_workaround() {
     if wifi_aspm_workaround_applied >/dev/null 2>&1; then
         return 0  # Already applied, nothing to do
     fi
-
+    
     # Create modprobe configuration
     cat > /etc/modprobe.d/mt7925.conf <<'EOF'
 # MediaTek MT7925 Wi-Fi fix for GZ302
@@ -179,19 +179,19 @@ wifi_apply_aspm_workaround() {
 # Based on community findings from EndeavourOS forums and kernel patches
 options mt7925e disable_aspm=1
 EOF
-
+    
     # Verify creation
     if [[ ! -f /etc/modprobe.d/mt7925.conf ]]; then
         return 1
     fi
-
+    
     # Reload module if currently loaded
     if wifi_module_loaded; then
         modprobe -r mt7925e 2>/dev/null || true
         sleep 1
         modprobe mt7925e 2>/dev/null || true
     fi
-
+    
     return 0
 }
 
@@ -202,21 +202,21 @@ wifi_remove_aspm_workaround() {
     if ! wifi_aspm_workaround_applied >/dev/null 2>&1; then
         return 0  # Already removed, nothing to do
     fi
-
+    
     # Create clean configuration noting native support
     cat > /etc/modprobe.d/mt7925.conf <<'EOF'
 # MediaTek MT7925 Wi-Fi configuration for GZ302
 # Kernel 6.17+ has native ASPM support - no workarounds needed
 # WiFi 7 MLO support and enhanced stability included natively
 EOF
-
+    
     # Reload module if currently loaded
     if wifi_module_loaded; then
         modprobe -r mt7925e 2>/dev/null || true
         sleep 1
         modprobe mt7925e 2>/dev/null || true
     fi
-
+    
     return 0
 }
 
@@ -227,7 +227,7 @@ wifi_disable_powersave() {
     if wifi_powersave_disabled; then
         return 0  # Already disabled
     fi
-
+    
     # Create NetworkManager configuration
     mkdir -p /etc/NetworkManager/conf.d/
     cat > /etc/NetworkManager/conf.d/wifi-powersave.conf <<'EOF'
@@ -235,12 +235,12 @@ wifi_disable_powersave() {
 # Disable WiFi power saving for stability (2 = disabled)
 wifi.powersave = 2
 EOF
-
+    
     # Restart NetworkManager if running
     if systemctl is-active NetworkManager >/dev/null 2>&1; then
         systemctl reload NetworkManager 2>/dev/null || true
     fi
-
+    
     return 0
 }
 
@@ -249,13 +249,13 @@ EOF
 # Output: Status messages
 wifi_apply_configuration() {
     local status=0
-
+    
     # Always disable power saving (beneficial on all kernels)
     if ! wifi_disable_powersave; then
         echo "WARNING: Failed to disable WiFi power saving"
         status=1
     fi
-
+    
     # Apply kernel-specific configuration
     if wifi_requires_aspm_workaround; then
         echo "Kernel < 6.17 detected: Applying ASPM workaround"
@@ -278,7 +278,7 @@ wifi_apply_configuration() {
             echo "Native ASPM support already configured"
         fi
     fi
-
+    
     return $status
 }
 
@@ -289,35 +289,35 @@ wifi_apply_configuration() {
 # Output: Status information
 wifi_verify_working() {
     local status=0
-
+    
     # Check hardware present
     if ! wifi_detect_hardware >/dev/null 2>&1; then
         echo "ERROR: MT7925e WiFi hardware not detected"
         return 1
     fi
-
+    
     # Check module loaded
     if ! wifi_module_loaded; then
         echo "WARNING: mt7925e kernel module not loaded"
         status=1
     fi
-
+    
     # Check for kernel errors
     if dmesg | tail -100 | grep -qi "mt7925.*error\|mt7925.*fail"; then
         echo "WARNING: Recent WiFi errors in kernel log"
         status=1
     fi
-
+    
     # Check WiFi interface exists
     if ! ip link show | grep -q "wl"; then
         echo "WARNING: No wireless interface found"
         status=1
     fi
-
+    
     if [[ $status -eq 0 ]]; then
         echo "WiFi verification passed"
     fi
-
+    
     return $status
 }
 
@@ -328,34 +328,34 @@ wifi_verify_working() {
 wifi_print_status() {
     local state
     state=$(wifi_get_state)
-
+    
     local hardware_present
     local module_loaded
     local aspm_workaround
     local requires_workaround
     local powersave_disabled
     local firmware
-
+    
     hardware_present=$(echo "$state" | grep "hardware_present" | cut -d'"' -f4)
     module_loaded=$(echo "$state" | grep "module_loaded" | cut -d'"' -f4)
     aspm_workaround=$(echo "$state" | grep "aspm_workaround_applied" | cut -d'"' -f4)
     requires_workaround=$(echo "$state" | grep "aspm_workaround_required" | cut -d'"' -f4)
     powersave_disabled=$(echo "$state" | grep "powersave_disabled" | cut -d'"' -f4)
     firmware=$(echo "$state" | grep "firmware_version" | cut -d'"' -f4)
-
+    
     echo "WiFi Status (MediaTek MT7925e):"
     echo "  Hardware Present:    $hardware_present"
     echo "  Module Loaded:       $module_loaded"
     echo "  Firmware Version:    $firmware"
     echo "  ASPM Workaround:     $aspm_workaround (required: $requires_workaround)"
     echo "  Power Save Disabled: $powersave_disabled"
-
+    
     # Check for misconfigurations
     if [[ "$aspm_workaround" == "true" && "$requires_workaround" == "false" ]]; then
         echo "  ⚠️  WARNING: ASPM workaround applied on kernel 6.17+ (harmful to battery life)"
         echo "      Run 'wifi_apply_configuration' to remove obsolete workaround"
     fi
-
+    
     if [[ "$aspm_workaround" == "false" && "$requires_workaround" == "true" ]]; then
         echo "  ⚠️  WARNING: ASPM workaround needed but not applied (WiFi may be unstable)"
         echo "      Run 'wifi_apply_configuration' to apply workaround"

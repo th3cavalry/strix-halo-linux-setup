@@ -4,6 +4,8 @@
 
 This document analyzes the obsolescence status of GZ302-Linux-Setup components as of April 2026, based on upstream Linux kernel support evolution (6.14-6.19+). The repository has fully transitioned from a **hardware enablement tool** (fixing broken hardware) to a **performance optimization toolkit** (tuning working hardware).
 
+As the repository broadens toward Strix Halo platform support, hardware-fix, AI/LLM, and ASUS control-stack paths must remain gated behind confirmed Strix Halo CPU/GPU signatures. The known-device matrix now lives in `gz302-lib/device-profile-data.sh`, and the device manager uses that allowlisted DMI vendor/product/family/board metadata before falling back to CPU/GPU signatures for unknown devices. This reduces false positives without shrinking the supported Strix Halo matrix. The z13ctl-based command-center tray app also remains a GZ302-first path until additional ASUS profiles are validated.
+
 **Last Updated:** April 4, 2026 
 **Analysis Period:** Early 2025 (Kernel 6.14) → April 2026 (Kernel 6.19+) 
 **Target Hardware:** ASUS ROG Flow Z13 (GZ302EA-XS99/XS98/XS96)

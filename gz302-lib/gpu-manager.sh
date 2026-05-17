@@ -4,7 +4,7 @@ set -euo pipefail
 
 # ==============================================================================
 # GZ302 GPU Manager Library
-# Version: 6.4.2
+# Version: 6.6.5
 #
 # This library manages AMD Radeon 8060S (RDNA 3.5) integrated GPU configuration
 # for the GZ302 (Strix Halo platform).
@@ -74,7 +74,7 @@ gpu_firmware_exists() {
     local fw_file="$1"
     local fw_dir
     fw_dir=$(gpu_get_firmware_dir)
-
+    
     # Check for uncompressed, zst, or xz compressed versions
     if [[ -f "$fw_dir/$fw_file" ]] || \
        [[ -f "$fw_dir/${fw_file}.zst" ]] || \
@@ -91,7 +91,7 @@ gpu_firmware_exists() {
 gpu_verify_firmware() {
     local all_present=true
     local gc_ver="11_5_1"
-
+    
     # Try to detect actual GC version from dmesg or debugfs
     if dmesg | grep -q "gc_11_5_2"; then
         gc_ver="11_5_2"
@@ -104,7 +104,7 @@ gpu_verify_firmware() {
     fi
 
     echo "GPU Firmware Verification (GC $gc_ver):"
-
+    
     # Core graphics firmware components
     local required_files=(
         "gc_${gc_ver}_pfp.bin"
@@ -112,10 +112,10 @@ gpu_verify_firmware() {
         "gc_${gc_ver}_rlc.bin"
         "gc_${gc_ver}_mec.bin"
     )
-
+    
     # Add common IP block firmware
     required_files+=("sdma_6_1_0.bin" "psp_14_0_4_ta.bin")
-
+    
     # DCN version might vary
     if gpu_firmware_exists "dcn_3_5_1_dmcub.bin"; then
         required_files+=("dcn_3_5_1_dmcub.bin")
@@ -131,7 +131,7 @@ gpu_verify_firmware() {
             all_present=false
         fi
     done
-
+    
     if [[ "$all_present" == true ]]; then
         return 0
     else
@@ -170,14 +170,14 @@ gpu_get_ppfeaturemask() {
 gpu_kernel_params_set() {
     local grub_set=false
     local cmdline_set=false
-
+    
     # Check GRUB
     if [[ -f /etc/default/grub ]]; then
         if grep -q "amdgpu.ppfeaturemask=0xffff7fff" /etc/default/grub 2>/dev/null; then
             grub_set=true
         fi
     fi
-
+    
     # Check kernel cmdline (systemd-boot)
     if [[ -f /etc/kernel/cmdline ]]; then
         if grep -q "amdgpu.ppfeaturemask=0xffff7fff" /etc/kernel/cmdline 2>/dev/null; then
@@ -220,28 +220,28 @@ gpu_get_state() {
     local kernel_params_set="false"
     local firmware_complete="false"
     local device_id="unknown"
-
+    
     if gpu_detect_hardware >/dev/null 2>&1; then
         hardware_present="true"
         device_id=$(gpu_get_device_id)
     fi
-
+    
     if gpu_module_loaded; then
         module_loaded="true"
     fi
-
+    
     if gpu_ppfeaturemask_configured; then
         ppfeaturemask_configured="true"
     fi
-
+    
     if gpu_kernel_params_set; then
         kernel_params_set="true"
     fi
-
+    
     if gpu_verify_firmware >/dev/null 2>&1; then
         firmware_complete="true"
     fi
-
+    
     cat <<EOF
 {
     "hardware_present": "$hardware_present",
@@ -264,7 +264,7 @@ gpu_apply_modprobe_config() {
     if gpu_ppfeaturemask_configured; then
         return 0  # Already configured
     fi
-
+    
     # Create modprobe configuration
     cat > /etc/modprobe.d/amdgpu.conf <<'EOF'
 # AMD GPU configuration for Radeon 8060S (RDNA 3.5, integrated)
@@ -286,7 +286,7 @@ options amdgpu sg_display=0
 # caused by register file synchronization issues in early 2026 kernels.
 options amdgpu cwsr_enable=0
 EOF
-
+    
     # Verify creation
     if [[ ! -f /etc/modprobe.d/amdgpu.conf ]]; then
         return 1
@@ -295,7 +295,7 @@ EOF
     if ! gpu_regenerate_initramfs; then
         return 1
     fi
-
+    
     return 0
 }
 
@@ -370,22 +370,22 @@ gpu_regenerate_initramfs() {
 # Note: Kernel parameters handled by main script bootloader logic
 gpu_apply_configuration() {
     echo "Configuring AMD Radeon 8060S GPU (RDNA 3.5)..."
-
+    
     if ! gpu_apply_modprobe_config; then
         echo "ERROR: Failed to apply GPU modprobe configuration"
         return 1
     fi
-
+    
     # Configure Early KMS for Arch-based distros
     gpu_configure_early_kms
-
+    
     if gpu_ppfeaturemask_configured; then
         echo "GPU ppfeaturemask configured successfully"
     else
         echo "WARNING: GPU configuration may not have applied"
         return 1
     fi
-
+    
     return 0
 }
 
@@ -401,16 +401,16 @@ gpu_configure_early_kms() {
     # Read the MODULES line
     local modules_line
     modules_line=$(grep "^MODULES=" /etc/mkinitcpio.conf)
-
+    
     if [[ "$modules_line" != *"amdgpu"* ]]; then
         echo "Enabling Early KMS for amdgpu (fixes boot/reboot freeze)..."
         # Backup
         cp /etc/mkinitcpio.conf /etc/mkinitcpio.conf.bak
-
+        
         # Add amdgpu to MODULES. Robustly handles () or (module1 module2)
         sed -i -E 's/^MODULES=\((.*)\)/MODULES=(\1 amdgpu)/' /etc/mkinitcpio.conf
         sed -i 's/MODULES=( amdgpu)/MODULES=(amdgpu)/' /etc/mkinitcpio.conf
-
+        
         echo "Regenerating initramfs..."
         if command -v mkinitcpio >/dev/null 2>&1; then
             if mkinitcpio -P; then
@@ -438,35 +438,35 @@ gpu_configure_early_kms() {
 # Output: Status information
 gpu_verify_working() {
     local status=0
-
+    
     # Check hardware present
     if ! gpu_detect_hardware >/dev/null 2>&1; then
         echo "ERROR: AMD GPU not detected"
         return 1
     fi
-
+    
     # Check module loaded
     if ! gpu_module_loaded; then
         echo "WARNING: amdgpu kernel module not loaded"
         status=1
     fi
-
+    
     # Check for kernel errors
     if dmesg | tail -200 | grep -qi "amdgpu.*error\|amdgpu.*fail"; then
         echo "WARNING: Recent GPU errors in kernel log"
         status=1
     fi
-
+    
     # Check DRM device exists
     if [[ ! -d /sys/class/drm/card0 ]]; then
         echo "WARNING: DRM device not found"
         status=1
     fi
-
+    
     if [[ $status -eq 0 ]]; then
         echo "GPU verification passed"
     fi
-
+    
     return $status
 }
 
@@ -477,21 +477,21 @@ gpu_verify_working() {
 gpu_print_status() {
     local state
     state=$(gpu_get_state)
-
+    
     local hardware_present
     local device_id
     local module_loaded
     local ppfeaturemask_configured
     local firmware_complete
     local current_mask
-
+    
     hardware_present=$(echo "$state" | grep "hardware_present" | cut -d'"' -f4)
     device_id=$(echo "$state" | grep "device_id" | cut -d'"' -f4)
     module_loaded=$(echo "$state" | grep "module_loaded" | cut -d'"' -f4)
     ppfeaturemask_configured=$(echo "$state" | grep "ppfeaturemask_configured" | cut -d'"' -f4)
     firmware_complete=$(echo "$state" | grep "firmware_complete" | cut -d'"' -f4)
     current_mask=$(echo "$state" | grep "current_ppfeaturemask" | cut -d'"' -f4)
-
+    
     echo "GPU Status (AMD Radeon 8060S):"
     echo "  Hardware Present:    $hardware_present"
     echo "  Device ID:           $device_id"
@@ -499,18 +499,18 @@ gpu_print_status() {
     echo "  PPFeatureMask:       $ppfeaturemask_configured"
     echo "  Current Mask:        $current_mask"
     echo "  Firmware Complete:   $firmware_complete"
-
+    
     # Check for issues
     if [[ "$ppfeaturemask_configured" == "false" ]]; then
         echo "  ⚠️  WARNING: PPFeatureMask not configured"
         echo "      Run 'gpu_apply_configuration' to configure"
     fi
-
+    
     if [[ "$firmware_complete" == "false" ]]; then
         echo "  ⚠️  WARNING: Some firmware files missing"
         echo "      GPU may not function optimally"
     fi
-
+    
     if [[ "$module_loaded" == "false" && "$hardware_present" == "true" ]]; then
         echo "  ⚠️  WARNING: GPU hardware present but module not loaded"
     fi
@@ -556,18 +556,18 @@ Library Information:
 
 Example Usage:
   source gz302-lib/gpu-manager.sh
-
+  
   # Detect hardware
   if gpu_detect_hardware; then
       echo "GPU found"
   fi
-
+  
   # Apply configuration
   gpu_apply_configuration
-
+  
   # Verify firmware
   gpu_verify_firmware
-
+  
   # Check status
   gpu_print_status
 
