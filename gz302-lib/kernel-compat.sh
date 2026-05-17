@@ -4,7 +4,7 @@ set -euo pipefail
 
 # ==============================================================================
 # GZ302 Kernel Compatibility Library
-# Version: 6.6.3
+# Version: 6.6.4
 #
 # This library provides central kernel version detection and compatibility
 # logic for all other libraries. It determines what workarounds are needed

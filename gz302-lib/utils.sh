@@ -9,7 +9,7 @@ set -euo pipefail
 
 # ==============================================================================
 # Strix Halo Shared Utilities Library
-# Version: 6.6.3
+# Version: 6.6.4
 #
 # This library contains shared functions for the Strix Halo Linux Setup scripts.
 # It is sourced by gz302-setup.sh and all optional modules.
@@ -468,9 +468,12 @@ create_config_backup() {
         modprobe_files=$(find /etc/modprobe.d -name "*gz302*" -o -name "*mt7925*" -o -name "*amdgpu*" 2>/dev/null || true)
         if [[ -n "$modprobe_files" ]]; then
             mkdir -p "$backup_subdir/modprobe.d"
-            echo "$modprobe_files" | while read -r f; do
-                [[ -f "$f" ]] && cp "$f" "$backup_subdir/modprobe.d/" && ((backed_up++)) || true
-            done
+            while IFS= read -r f; do
+                if [[ -f "$f" ]]; then
+                    cp "$f" "$backup_subdir/modprobe.d/"
+                    ((backed_up++))
+                fi
+            done <<< "$modprobe_files"
             completed_item "Modprobe configurations"
         fi
     fi
@@ -481,9 +484,12 @@ create_config_backup() {
         systemd_files=$(find "$SYSTEMD_DIR" -name "*gz302*" 2>/dev/null || true)
         if [[ -n "$systemd_files" ]]; then
             mkdir -p "$backup_subdir/systemd"
-            echo "$systemd_files" | while read -r f; do
-                [[ -f "$f" ]] && cp "$f" "$backup_subdir/systemd/" && ((backed_up++)) || true
-            done
+            while IFS= read -r f; do
+                if [[ -f "$f" ]]; then
+                    cp "$f" "$backup_subdir/systemd/"
+                    ((backed_up++))
+                fi
+            done <<< "$systemd_files"
             completed_item "Systemd services"
         fi
     fi
@@ -494,9 +500,12 @@ create_config_backup() {
         sudoers_files=$(find "$SUDOERS_DIR" -name "*gz302*" -o -name "*pwrcfg*" -o -name "*rrcfg*" 2>/dev/null || true)
         if [[ -n "$sudoers_files" ]]; then
             mkdir -p "$backup_subdir/sudoers.d"
-            echo "$sudoers_files" | while read -r f; do
-                [[ -f "$f" ]] && cp "$f" "$backup_subdir/sudoers.d/" && ((backed_up++)) || true
-            done
+            while IFS= read -r f; do
+                if [[ -f "$f" ]]; then
+                    cp "$f" "$backup_subdir/sudoers.d/"
+                    ((backed_up++))
+                fi
+            done <<< "$sudoers_files"
             completed_item "Sudoers configurations"
         fi
     fi
@@ -507,9 +516,12 @@ create_config_backup() {
         script_files=$(find "$BIN_DIR" -name "*gz302*" -o -name "pwrcfg" -o -name "rrcfg" 2>/dev/null || true)
         if [[ -n "$script_files" ]]; then
             mkdir -p "$backup_subdir/bin"
-            echo "$script_files" | while read -r f; do
-                [[ -f "$f" ]] && cp "$f" "$backup_subdir/bin/" && ((backed_up++)) || true
-            done
+            while IFS= read -r f; do
+                if [[ -f "$f" ]]; then
+                    cp "$f" "$backup_subdir/bin/"
+                    ((backed_up++))
+                fi
+            done <<< "$script_files"
             completed_item "Custom scripts"
         fi
     fi

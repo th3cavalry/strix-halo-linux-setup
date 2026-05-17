@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-GZ302 Command Center — Strix Halo Edition (v6.6.3)
+GZ302 Command Center — Strix Halo Edition (v6.6.4)
 Unified Dashboard and System Tray Controller.
 Inspired by G-Helper and Strix-Halo-Control.
 """
@@ -37,7 +37,7 @@ from modules.rgb_controller import RGBController
 from modules.power_controller import PowerController
 
 TRAY_ICON_SIZE = 24
-VERSION = "6.6.3"
+VERSION = "6.6.4"
 DASHBOARD_WINDOW_TITLE = "GZ302 Dashboard"
 DASHBOARD_WINDOW_ROLE = "gz302-dashboard"
 KWIN_DASHBOARD_SCRIPT_NAME = "gz302_dashboard_anchor"

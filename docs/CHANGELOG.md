@@ -2,6 +2,12 @@
 
 All notable changes to GZ302-Linux-Setup will be documented in this file.
 
+## [6.6.4] - 2026-05-16
+
+### Fixed
+- **ShellCheck cleanup**: `gz302-lib/display-manager.sh` now reads tracked config files with direct redirection, and `gz302-lib/utils.sh` now uses explicit backup copy loops instead of `&& ... || true` chains.
+- **Detection and validation stability**: `gz302-lib/device-manager.sh` no longer treats unsupported hardware probes as fatal during profile detection, and `tests/validate-version-sync.sh` now records missing version fields as mismatches instead of aborting early.
+
 ## [6.6.3] - 2026-05-16
 
 ### Fixed

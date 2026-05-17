@@ -4,7 +4,7 @@ set -euo pipefail
 
 # ==============================================================================
 # GZ302 Display Manager Library
-# Version: 6.6.3
+# Version: 6.6.4
 #
 # This library provides refresh rate management and display control for the
 # ASUS ROG Flow Z13 (GZ302) with its 180Hz display.
@@ -287,7 +287,7 @@ display_vrr_disable() {
 # Returns: profile name or "unknown"
 display_get_current_profile() {
     if [[ -f "$DISPLAY_CURRENT_PROFILE_FILE" ]]; then
-        cat "$DISPLAY_CURRENT_PROFILE_FILE" 2>/dev/null | tr -d ' \n'
+        tr -d ' \n' < "$DISPLAY_CURRENT_PROFILE_FILE" 2>/dev/null
     else
         echo "unknown"
     fi
@@ -480,7 +480,7 @@ display_print_status() {
     display_vrr_supported && echo "  VRR: Supported" || echo "  VRR: Not supported"
     display_vrr_enabled && echo "  VRR Enabled: Yes" || echo "  VRR Enabled: No"
     if [[ -f "$DISPLAY_VRR_RANGES_FILE" ]]; then
-        echo "  VRR Range: $(cat "$DISPLAY_VRR_RANGES_FILE" 2>/dev/null | tr ':' '-')Hz"
+        echo "  VRR Range: $(tr ':' '-' < "$DISPLAY_VRR_RANGES_FILE" 2>/dev/null)Hz"
     fi
     
     echo ""

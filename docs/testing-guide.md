@@ -1,6 +1,6 @@
 # GZ302 Testing Guide — Strix Halo Edition
 
-**Current Version:** 6.6.3  
+**Current Version:** 6.6.4  
 **Status:** Unified Testing Framework for GZ302 & Strix Halo Platform
 
 ---
