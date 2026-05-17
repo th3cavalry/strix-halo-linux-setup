@@ -4,7 +4,7 @@ set -euo pipefail
 
 # ==============================================================================
 # Strix Halo Device Manager Library
-# Version: 6.6.2
+# Version: 6.6.3
 #
 # Detects the running hardware and produces a normalized device profile for
 # the Strix Halo (AMD Ryzen AI MAX / MAX+) platform.  All installer sections
@@ -123,7 +123,7 @@ device_detect_strix_halo_platform() {
     fi
 
     CAP_STRIX_HALO="false"
-    return 1
+    return 0
 }
 
 # --- Hardware Detection ---
@@ -162,14 +162,14 @@ device_detect_cs35l41() {
 device_detect_rocm() {
     if [[ "$CAP_STRIX_HALO" != "true" ]]; then
         CAP_ROCM="false"
-        return 1
+        return 0
     fi
     if _lspci_has 'Strix Halo|Radeon 8050S|Radeon 8060S|1002:1586'; then
         CAP_ROCM="true"
         return 0
     fi
     CAP_ROCM="false"
-    return 1
+    return 0
 }
 
 # Detect asus-wmi kernel interface availability

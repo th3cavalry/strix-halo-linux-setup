@@ -2,6 +2,14 @@
 
 All notable changes to GZ302-Linux-Setup will be documented in this file.
 
+## [6.6.3] - 2026-05-16
+
+### Fixed
+- **Generated-content permission drift**: `scripts/sync-device-matrix.sh` now preserves the original file mode when rewriting marker blocks, so regenerating the installer matrix no longer drops the executable bit from `gz302-setup.sh` in CI.
+
+### Changed
+- **Release metadata sync**: Version references across the installer, libraries, modules, package metadata, command center, and docs are now aligned at 6.6.3.
+
 ## [6.6.2] - 2026-05-16
 
 ### Fixed

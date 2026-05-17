@@ -106,11 +106,13 @@ replace_block() {
     local start_marker="$2"
     local end_marker="$3"
     local content="$4"
+    local file_mode
     local tmp_file
     local seen_start="false"
     local seen_end="false"
     local in_block="false"
 
+    file_mode=$(stat -c '%a' "$file_path")
     tmp_file=$(mktemp)
 
     while IFS= read -r line || [[ -n "$line" ]]; do
@@ -143,6 +145,7 @@ replace_block() {
     fi
 
     mv "$tmp_file" "$file_path"
+    chmod "$file_mode" "$file_path"
 }
 
 main() {
