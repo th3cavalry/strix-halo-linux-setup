@@ -4,7 +4,7 @@ set -euo pipefail
 
 # ==============================================================================
 # Strix Halo Device Manager Library
-# Version: 6.6.4
+# Version: 6.6.5
 #
 # Detects the running hardware and produces a normalized device profile for
 # the Strix Halo (AMD Ryzen AI MAX / MAX+) platform.  All installer sections
@@ -130,11 +130,11 @@ device_detect_strix_halo_platform() {
 
 # Detect MediaTek MT7925 WiFi (USB or PCIe)
 device_detect_mt7925() {
-    if _lspci_has "MT7925\|14c3:0616\|14c3:0617"; then
+    if _lspci_has "MT7925|14c3:0616|14c3:0617"; then
         CAP_MT7925="true"
         return 0
     fi
-    if _lsusb_has "0e8d:7925\|MT7925"; then
+    if _lsusb_has "0e8d:7925|MT7925"; then
         CAP_MT7925="true"
         return 0
     fi
@@ -143,7 +143,7 @@ device_detect_mt7925() {
 
 # Detect Cirrus Logic CS35L41 smart amplifier
 device_detect_cs35l41() {
-    if aplay -l 2>/dev/null | grep -qi "CS35L41\|cs35l41"; then
+    if aplay -l 2>/dev/null | grep -qi "cs35l41"; then
         CAP_CS35L41="true"
         return 0
     fi

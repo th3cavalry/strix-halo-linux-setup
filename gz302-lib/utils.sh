@@ -9,7 +9,7 @@ set -euo pipefail
 
 # ==============================================================================
 # Strix Halo Shared Utilities Library
-# Version: 6.6.4
+# Version: 6.6.5
 #
 # This library contains shared functions for the Strix Halo Linux Setup scripts.
 # It is sourced by gz302-setup.sh and all optional modules.

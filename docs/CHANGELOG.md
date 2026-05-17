@@ -2,6 +2,12 @@
 
 All notable changes to GZ302-Linux-Setup will be documented in this file.
 
+## [6.6.5] - 2026-05-16
+
+### Fixed
+- **MT7925 WiFi detection**: `device_detect_mt7925()` now passes unescaped ERE `|` alternation to `_lspci_has` and `_lsusb_has` (which use `grep -E` internally); the previous `\|` was interpreted as a literal pipe character, causing `CAP_MT7925` to silently never be set.
+- **CS35L41 audio detection**: Simplified `device_detect_cs35l41()` grep pattern from `"CS35L41\|cs35l41"` to `"cs35l41"` since `-i` already handles case-insensitive matching.
+
 ## [6.6.4] - 2026-05-16
 
 ### Fixed
