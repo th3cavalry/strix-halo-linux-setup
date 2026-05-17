@@ -2,6 +2,11 @@
 
 All notable changes to Strix Halo Linux Setup will be documented in this file.
 
+## [6.7.1] - 2026-05-16
+
+### Changed
+- **GitHub repository renamed**: `th3cavalry/GZ302-Linux-Setup` → `th3cavalry/strix-halo-linux-setup`. All in-tree URL references updated.
+
 ## [6.7.0] - 2026-05-16
 
 ### Changed

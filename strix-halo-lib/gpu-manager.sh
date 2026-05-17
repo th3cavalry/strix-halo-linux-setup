@@ -4,7 +4,7 @@ set -euo pipefail
 
 # ==============================================================================
 # GZ302 GPU Manager Library
-# Version: 6.7.0
+# Version: 6.7.1
 #
 # This library manages AMD Radeon 8060S (RDNA 3.5) integrated GPU configuration
 # for the GZ302 (Strix Halo platform).

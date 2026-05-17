@@ -1,6 +1,6 @@
 # Strix Halo Linux Setup
 
-![Version](https://img.shields.io/badge/version-6.7.0-blue?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-6.7.1-blue?style=for-the-badge)
 ![Kernel](https://img.shields.io/badge/Kernel-6.14%2B-orange?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/Platform-AMD%20Strix%20Halo-red?style=for-the-badge)
@@ -39,7 +39,7 @@ Supports the known Strix Halo device matrix below plus other confirmed Strix Hal
 One script handles everything. It auto-detects your hardware and selects the relevant sections:
 
 ```bash
-curl -L https://raw.githubusercontent.com/th3cavalry/GZ302-Linux-Setup/main/strix-halo-setup.sh -o strix-halo-setup.sh
+curl -L https://raw.githubusercontent.com/th3cavalry/strix-halo-linux-setup/main/strix-halo-setup.sh -o strix-halo-setup.sh
 chmod +x strix-halo-setup.sh
 sudo ./strix-halo-setup.sh
 ```
@@ -212,7 +212,7 @@ This removes all GZ302 tools, z13ctl daemon/config, systemd services, udev rules
 
 - **Documentation:** See the [docs/](docs/) directory for user guides and [docs/technical/](docs/technical/) for hardware research.
 - **AI Guidelines:** Strict rules for LLM/Copilot contributions are in [.github/copilot-instructions.md](.github/copilot-instructions.md).
-- **Issues:** Report bugs on the [Issues page](https://github.com/th3cavalry/GZ302-Linux-Setup/issues).
+- **Issues:** Report bugs on the [Issues page](https://github.com/th3cavalry/strix-halo-linux-setup/issues).
 - **Development:** See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 **License:** MIT

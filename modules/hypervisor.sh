@@ -2,7 +2,7 @@
 
 # ==============================================================================
 # Strix Halo Hypervisor Module
-# Version: 6.7.0
+# Version: 6.7.1
 #
 # This module installs hypervisor software for the ASUS ROG Flow Z13 (GZ302)
 # Includes: Full KVM/QEMU stack, VirtualBox
@@ -36,7 +36,7 @@ elif [[ -f "${SCRIPT_DIR}/strix-halo-utils.sh" ]]; then
 else
     echo "strix-halo-utils.sh not found. Downloading..."
     mkdir -p "$(dirname "${SCRIPT_DIR}/strix-halo-utils.sh")" || { echo "Error: Failed to create directory"; exit 1; }
-    GITHUB_RAW_URL="${GITHUB_RAW_URL:-https://raw.githubusercontent.com/th3cavalry/GZ302-Linux-Setup/main}"
+    GITHUB_RAW_URL="${GITHUB_RAW_URL:-https://raw.githubusercontent.com/th3cavalry/strix-halo-linux-setup/main}"
     if command -v curl >/dev/null 2>&1; then
         curl -fsSL "${GITHUB_RAW_URL}/strix-halo-lib/utils.sh" -o "${SCRIPT_DIR}/strix-halo-utils.sh" || { echo "Error: curl failed"; exit 1; }
     elif command -v wget >/dev/null 2>&1; then

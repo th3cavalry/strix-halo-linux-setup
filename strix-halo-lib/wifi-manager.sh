@@ -4,7 +4,7 @@ set -euo pipefail
 
 # ==============================================================================
 # GZ302 WiFi Manager Library
-# Version: 6.7.0
+# Version: 6.7.1
 #
 # This library provides hardware detection, configuration, and management
 # functions for the MediaTek MT7925e WiFi controller in the GZ302.

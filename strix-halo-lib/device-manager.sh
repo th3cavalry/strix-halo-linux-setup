@@ -4,7 +4,7 @@ set -euo pipefail
 
 # ==============================================================================
 # Strix Halo Device Manager Library
-# Version: 6.7.0
+# Version: 6.7.1
 #
 # Detects the running hardware and produces a normalized device profile for
 # the Strix Halo (AMD Ryzen AI MAX / MAX+) platform.  All installer sections
