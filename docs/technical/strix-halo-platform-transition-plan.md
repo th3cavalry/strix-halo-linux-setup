@@ -54,7 +54,7 @@
 
 ## 4.1 Add Device & Capability Abstraction Layer
 
-Create a new manager library (for example `gz302-lib/device-manager.sh`) to produce one normalized **device profile** from:
+Create a new manager library (for example `strix-halo-lib/device-manager.sh`) to produce one normalized **device profile** from:
 
 - DMI: `/sys/class/dmi/id/{sys_vendor,product_name,product_family,board_name}`
 - CPU/APU identity: `lscpu`, `lspci`, relevant AMD identifiers

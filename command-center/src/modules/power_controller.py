@@ -16,8 +16,8 @@ POWER_PROFILES = {
     "maximum":     {"z13ctl_profile": "performance", "tdp": 90},
 }
 
-_AUTO_CONFIG_FILE = Path.home() / ".config" / "gz302" / "auto.conf"
-_PROFILE_CACHE_FILE = Path.home() / ".config" / "gz302" / "tray-profile.conf"
+_AUTO_CONFIG_FILE = Path.home() / ".config" / "strix-halo" / "auto.conf"
+_PROFILE_CACHE_FILE = Path.home() / ".config" / "strix-halo" / "tray-profile.conf"
 
 
 class PowerController:

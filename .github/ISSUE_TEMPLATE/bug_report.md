@@ -12,7 +12,7 @@ assignees: ''
 ## System Information
 **Distribution:** <!-- e.g., Arch Linux, Ubuntu 24.04, Fedora 40 -->
 **Kernel Version:** <!-- Output of: uname -r -->
-**Script Version:** <!-- Check header of gz302-setup.sh or run: grep 'Version:' gz302-setup.sh -->
+**Script Version:** <!-- Check header of strix-halo-setup.sh or run: grep 'Version:' strix-halo-setup.sh -->
 
 **Hardware:**
 ```
@@ -33,7 +33,7 @@ done
 **Detected device profile:**
 ```text
 <!-- If you cloned the repo locally, paste output of:
-sudo bash -lc 'source gz302-lib/device-manager.sh && device_detect && device_print_profile'
+sudo bash -lc 'source strix-halo-lib/device-manager.sh && device_detect && device_print_profile'
 -->
 ```
 

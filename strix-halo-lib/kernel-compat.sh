@@ -4,7 +4,7 @@ set -euo pipefail
 
 # ==============================================================================
 # GZ302 Kernel Compatibility Library
-# Version: 6.6.5
+# Version: 6.7.0
 #
 # This library provides central kernel version detection and compatibility
 # logic for all other libraries. It determines what workarounds are needed
@@ -21,7 +21,7 @@ set -euo pipefail
 # Last Updated: April 2026
 #
 # Usage:
-#   source gz302-lib/kernel-compat.sh
+#   source strix-halo-lib/kernel-compat.sh
 #   kernel_get_version_num
 #   kernel_requires_wifi_workaround
 #   kernel_requires_input_workaround
@@ -378,7 +378,7 @@ Library Information:
   kernel_lib_help                    - Show this help
 
 Example Usage:
-  source gz302-lib/kernel-compat.sh
+  source strix-halo-lib/kernel-compat.sh
   
   # Check kernel version
   if kernel_meets_minimum; then

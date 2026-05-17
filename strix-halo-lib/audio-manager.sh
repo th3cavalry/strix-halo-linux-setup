@@ -4,7 +4,7 @@ set -euo pipefail
 
 # ==============================================================================
 # GZ302 Audio Manager Library
-# Version: 6.6.5
+# Version: 6.7.0
 #
 # This library manages audio configuration for the GZ302, including:
 # - Sound Open Firmware (SOF) installation
@@ -18,7 +18,7 @@ set -euo pipefail
 # - SOF DSP firmware
 #
 # Usage:
-#   source gz302-lib/audio-manager.sh
+#   source strix-halo-lib/audio-manager.sh
 #   audio_detect_hardware
 #   audio_install_sof_firmware "arch"
 #   audio_apply_configuration
@@ -500,7 +500,7 @@ Library Information:
   audio_lib_help                - Show this help
 
 Example Usage:
-  source gz302-lib/audio-manager.sh
+  source strix-halo-lib/audio-manager.sh
   
   # Detect hardware
   if audio_detect_controller; then

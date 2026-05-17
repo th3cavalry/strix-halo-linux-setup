@@ -3,11 +3,11 @@
 # ==============================================================================
 # Strix Halo Linux Setup — Unified Installer
 # Author: th3cavalry using Copilot
-# Version: 6.6.5
+# Version: 6.7.0
 #
 # Supported devices (Strix Halo platform — AMD Ryzen AI MAX / MAX+):
 # BEGIN AUTO-GENERATED SUPPORTED DEVICES
-# AUTO-GENERATED from gz302-lib/device-profile-data.sh via scripts/sync-device-matrix.sh.
+# AUTO-GENERATED from strix-halo-lib/device-profile-data.sh via scripts/sync-device-matrix.sh.
 # - ASUS ROG Flow Z13 (GZ302) — full support
 # - HP ZBook Ultra G1a — partial support
 # - HP Mini Workstation (Z2 G1a) — partial support
@@ -44,7 +44,7 @@ SKIP_AI=false
 
 print_supported_device_help() {
     # BEGIN AUTO-GENERATED SUPPORTED DEVICES HELP
-    # AUTO-GENERATED from gz302-lib/device-profile-data.sh via scripts/sync-device-matrix.sh.
+    # AUTO-GENERATED from strix-halo-lib/device-profile-data.sh via scripts/sync-device-matrix.sh.
     printf '%s
 ' 'ASUS ROG Flow Z13 (GZ302) — Full'
     printf '%s
@@ -81,9 +81,9 @@ while [[ $# -gt 0 ]]; do
         --no-modules)    SKIP_MODULES=true; shift ;;
         -h|--help)
             cat << 'EOF'
-Strix Halo Linux Setup — Unified Installer v6.6.5
+Strix Halo Linux Setup — Unified Installer v6.7.0
 
-Usage: sudo ./gz302-setup.sh [OPTIONS]
+Usage: sudo ./strix-halo-setup.sh [OPTIONS]
 
 Options:
   -y, --assume-yes   Accept all defaults (non-interactive)
@@ -119,7 +119,7 @@ done
 GITHUB_RAW_URL="https://raw.githubusercontent.com/th3cavalry/GZ302-Linux-Setup/main"
 
 # --- Version (read once at startup) ---
-SETUP_VERSION="6.6.5"
+SETUP_VERSION="6.7.0"
 
 # --- Script directory detection ---
 resolve_script_dir() {
@@ -135,22 +135,22 @@ resolve_script_dir() {
 SCRIPT_DIR="${SCRIPT_DIR:-$(resolve_script_dir)}"
 
 # --- Load Shared Utilities ---
-if [[ -f "${SCRIPT_DIR}/gz302-lib/utils.sh" ]]; then
+if [[ -f "${SCRIPT_DIR}/strix-halo-lib/utils.sh" ]]; then
     # shellcheck disable=SC1091
-    source "${SCRIPT_DIR}/gz302-lib/utils.sh"
+    source "${SCRIPT_DIR}/strix-halo-lib/utils.sh"
 else
-    echo "gz302-lib/utils.sh not found. Downloading..."
-    mkdir -p "${SCRIPT_DIR}/gz302-lib"
+    echo "strix-halo-lib/utils.sh not found. Downloading..."
+    mkdir -p "${SCRIPT_DIR}/strix-halo-lib"
     if command -v curl >/dev/null 2>&1; then
-        curl -fsSL "${GITHUB_RAW_URL}/gz302-lib/utils.sh" -o "${SCRIPT_DIR}/gz302-lib/utils.sh"
+        curl -fsSL "${GITHUB_RAW_URL}/strix-halo-lib/utils.sh" -o "${SCRIPT_DIR}/strix-halo-lib/utils.sh"
     elif command -v wget >/dev/null 2>&1; then
-        wget -q "${GITHUB_RAW_URL}/gz302-lib/utils.sh" -O "${SCRIPT_DIR}/gz302-lib/utils.sh"
+        wget -q "${GITHUB_RAW_URL}/strix-halo-lib/utils.sh" -O "${SCRIPT_DIR}/strix-halo-lib/utils.sh"
     else
         echo "Error: curl or wget not found."
         exit 1
     fi
     # shellcheck disable=SC1091
-    source "${SCRIPT_DIR}/gz302-lib/utils.sh"
+    source "${SCRIPT_DIR}/strix-halo-lib/utils.sh"
 fi
 
 # --- Load Libraries ---
@@ -158,7 +158,7 @@ fi
 
 load_library() {
     local lib_name="$1"
-    local lib_path="${SCRIPT_DIR}/gz302-lib/${lib_name}"
+    local lib_path="${SCRIPT_DIR}/strix-halo-lib/${lib_name}"
 
     # Only use remote download if the file is missing locally
     if [[ -f "$lib_path" ]]; then
@@ -169,11 +169,11 @@ load_library() {
 
     warning "Library ${lib_name} missing locally. Cloning the repository is recommended."
     info "Downloading ${lib_name} from GitHub..."
-    mkdir -p "${SCRIPT_DIR}/gz302-lib"
+    mkdir -p "${SCRIPT_DIR}/strix-halo-lib"
     if command -v curl >/dev/null 2>&1; then
-        curl -fsSL "${GITHUB_RAW_URL}/gz302-lib/${lib_name}" -o "$lib_path" || return 1
+        curl -fsSL "${GITHUB_RAW_URL}/strix-halo-lib/${lib_name}" -o "$lib_path" || return 1
     elif command -v wget >/dev/null 2>&1; then
-        wget -q "${GITHUB_RAW_URL}/gz302-lib/${lib_name}" -O "$lib_path" || return 1
+        wget -q "${GITHUB_RAW_URL}/strix-halo-lib/${lib_name}" -O "$lib_path" || return 1
     else
         error "curl or wget not found."
     fi
@@ -204,7 +204,7 @@ state_init >/dev/null 2>&1 || true
 
 check_root() {
     if [[ ${EUID:-$(id -u)} -ne 0 ]]; then
-        error "This script must be run as root. Please run: sudo ./gz302-setup.sh"
+        error "This script must be run as root. Please run: sudo ./strix-halo-setup.sh"
     fi
 }
 
@@ -272,7 +272,7 @@ cleanup_legacy_install() {
 
     # Remove old sudoers fragments
     local f
-    for f in /etc/sudoers.d/gz302-pwrcfg /etc/sudoers.d/gz302-rgb; do
+    for f in /etc/sudoers.d/strix-halo-pwrcfg /etc/sudoers.d/strix-halo-rgb; do
         if [[ -f "$f" ]]; then
             rm -f "$f"
             found_legacy=true
@@ -288,7 +288,7 @@ cleanup_legacy_install() {
         fi
     done
 
-    # Remove v3/v4 modprobe configurations (replaced by gz302-lib modular configs)
+    # Remove v3/v4 modprobe configurations (replaced by strix-halo-lib modular configs)
     for f in /etc/modprobe.d/gz302-wifi.conf /etc/modprobe.d/gz302-gpu.conf /etc/modprobe.d/gz302-input.conf; do
         if [[ -f "$f" ]]; then
             rm -f "$f"
@@ -396,7 +396,7 @@ install_suspend_fix() {
 }
 
 # ==============================================================================
-# Section 2: ASUS Control Backend + GZ302 Command Center
+# Section 2: ASUS Control Backend + Strix Halo Command Center
 # ==============================================================================
 
 install_z13ctl() {
@@ -743,10 +743,10 @@ RGBWRAP
     z13ctl_bin=$(z13ctl_get_binary)
     [[ -n "$z13ctl_bin" ]] || z13ctl_bin="/usr/local/bin/z13ctl"
     # Clean up old sudoers fragments from v3/v4
-    rm -f /etc/sudoers.d/gz302-pwrcfg /etc/sudoers.d/gz302-rgb 2>/dev/null || true
+    rm -f /etc/sudoers.d/strix-halo-pwrcfg /etc/sudoers.d/strix-halo-rgb 2>/dev/null || true
 
     # Write sudoers atomically with validation
-    local sudoers_file="/etc/sudoers.d/gz302"
+    local sudoers_file="/etc/sudoers.d/strix-halo"
     local sudoers_tmp
     sudoers_tmp=$(mktemp /tmp/gz302-sudoers.XXXXXX)
     cat > "$sudoers_tmp" << EOF
@@ -776,7 +776,7 @@ install_display_tools() {
         return 0
     fi
 
-    print_section "Section 2: GZ302 Command Center"
+    print_section "Section 2: Strix Halo Command Center"
 
     local distro
     distro=$(detect_distribution)
@@ -784,9 +784,9 @@ install_display_tools() {
     # Refresh rate control (rrcfg)
     info "Installing refresh rate control (rrcfg)..."
     if declare -f display_get_rrcfg_script >/dev/null 2>&1; then
-        local lib_dest="/usr/local/share/gz302/gz302-lib"
+        local lib_dest="/usr/local/share/gz302/strix-halo-lib"
         mkdir -p "$lib_dest"
-        install -Dm644 "${SCRIPT_DIR}/gz302-lib/display-manager.sh" "${lib_dest}/display-manager.sh"
+        install -Dm644 "${SCRIPT_DIR}/strix-halo-lib/display-manager.sh" "${lib_dest}/display-manager.sh"
         display_get_rrcfg_script > /usr/local/bin/rrcfg
         chmod 755 /usr/local/bin/rrcfg
         success "rrcfg installed"
@@ -839,9 +839,9 @@ install_tray_app() {
         bash "${tray_dir}/install-tray.sh"
     fi
 
-    # Sync tray source files to /opt/gz302-control-center if that install exists
-    # (handles the system-level launcher at /usr/local/bin/gz302-control-center)
-    local opt_dir="/opt/gz302-control-center"
+    # Sync tray source files to /opt/strix-halo-control-center if that install exists
+    # (handles the system-level launcher at /usr/local/bin/strix-halo-control-center)
+    local opt_dir="/opt/strix-halo-control-center"
     if [[ -d "$opt_dir" ]]; then
         info "Updating system-level tray install at $opt_dir ..."
         cp -a "${tray_dir}/src/"* "$opt_dir/src/"
@@ -1171,7 +1171,7 @@ main() {
         if [[ "${CAP_COMMAND_CENTER:-false}" == "true" ]] && [[ "$SKIP_Z13CTL" != "true" ]] && [[ "$SKIP_TOOLS" != "true" ]]; then
             cc_prompt="Install Command Center? (z13ctl hardware control + tray app)"
         elif [[ "${CAP_COMMAND_CENTER:-false}" == "true" ]] && [[ "$SKIP_TOOLS" != "true" ]]; then
-            cc_prompt="Install GZ302 Command Center tray app?"
+            cc_prompt="Install Strix Halo Command Center tray app?"
         elif [[ "${CAP_Z13CTL:-false}" == "true" ]] && [[ "$SKIP_Z13CTL" != "true" ]]; then
             cc_prompt="Install ASUS control backend? (z13ctl CLI + daemon)"
             info "The GZ302 tray app is not offered on this device profile."
@@ -1248,7 +1248,7 @@ main() {
         info "  cat docs/technical/external-integrations-catalog.md"
     else
         info "Quick start:"
-        info "  ./gz302-setup.sh --help"
+        info "  ./strix-halo-setup.sh --help"
     fi
     echo
 }

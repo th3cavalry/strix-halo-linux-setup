@@ -4,7 +4,7 @@ set -euo pipefail
 
 # ==============================================================================
 # GZ302 WiFi Manager Library
-# Version: 6.6.5
+# Version: 6.7.0
 #
 # This library provides hardware detection, configuration, and management
 # functions for the MediaTek MT7925e WiFi controller in the GZ302.
@@ -16,7 +16,7 @@ set -euo pipefail
 # - Cleanup functions (remove obsolete workarounds)
 #
 # Usage:
-#   source gz302-lib/wifi-manager.sh
+#   source strix-halo-lib/wifi-manager.sh
 #   wifi_detect_hardware
 #   wifi_check_state
 #   wifi_apply_fix
@@ -400,7 +400,7 @@ Library Information:
   wifi_lib_help                 - Show this help
 
 Example Usage:
-  source gz302-lib/wifi-manager.sh
+  source strix-halo-lib/wifi-manager.sh
   wifi_detect_hardware && echo "WiFi found"
   wifi_get_state
   wifi_apply_configuration

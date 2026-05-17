@@ -5,7 +5,7 @@ SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 REPO_ROOT=$(cd -- "${SCRIPT_DIR}/.." && pwd)
 
 # shellcheck source=/dev/null
-source "${REPO_ROOT}/gz302-lib/device-profile-data.sh"
+source "${REPO_ROOT}/strix-halo-lib/device-profile-data.sh"
 
 support_tier_label() {
     case "$1" in
@@ -26,7 +26,7 @@ setup_support_tier_label() {
 }
 
 render_readme_table() {
-    printf '<!-- AUTO-GENERATED from gz302-lib/device-profile-data.sh via scripts/sync-device-matrix.sh -->\n'
+    printf '<!-- AUTO-GENERATED from strix-halo-lib/device-profile-data.sh via scripts/sync-device-matrix.sh -->\n'
     printf '| Device | APU | Class | Support tier |\n'
     printf '| :--- | :--- | :--- | :--- |\n'
 
@@ -50,7 +50,7 @@ render_readme_table() {
 }
 
 render_catalog_table() {
-    printf '<!-- AUTO-GENERATED from gz302-lib/device-profile-data.sh via scripts/sync-device-matrix.sh -->\n'
+    printf '<!-- AUTO-GENERATED from strix-halo-lib/device-profile-data.sh via scripts/sync-device-matrix.sh -->\n'
     printf '| Device | APU | Class | Support tier |\n'
     printf '|---|---|---|---|\n'
 
@@ -68,7 +68,7 @@ render_catalog_table() {
 }
 
 render_setup_comment_block() {
-    printf '# AUTO-GENERATED from gz302-lib/device-profile-data.sh via scripts/sync-device-matrix.sh.\n'
+    printf '# AUTO-GENERATED from strix-halo-lib/device-profile-data.sh via scripts/sync-device-matrix.sh.\n'
     while IFS= read -r record; do
         local _id _vendor_tokens _profile_vendor _device_model doc_name _device_class
         local _doc_class support_tier _apu _cap_z13ctl _cap_command_center
@@ -85,7 +85,7 @@ render_setup_comment_block() {
 }
 
 render_setup_help_function() {
-    printf "    # AUTO-GENERATED from gz302-lib/device-profile-data.sh via scripts/sync-device-matrix.sh.\n"
+    printf "    # AUTO-GENERATED from strix-halo-lib/device-profile-data.sh via scripts/sync-device-matrix.sh.\n"
     while IFS= read -r record; do
         local _id _vendor_tokens _profile_vendor _device_model doc_name _device_class
         local _doc_class support_tier _apu _cap_z13ctl _cap_command_center
@@ -156,13 +156,13 @@ main() {
         "$(render_readme_table)"
 
     replace_block \
-        "${REPO_ROOT}/gz302-setup.sh" \
+        "${REPO_ROOT}/strix-halo-setup.sh" \
         "# BEGIN AUTO-GENERATED SUPPORTED DEVICES" \
         "# END AUTO-GENERATED SUPPORTED DEVICES" \
         "$(render_setup_comment_block)"
 
     replace_block \
-        "${REPO_ROOT}/gz302-setup.sh" \
+        "${REPO_ROOT}/strix-halo-setup.sh" \
         "    # BEGIN AUTO-GENERATED SUPPORTED DEVICES HELP" \
         "    # END AUTO-GENERATED SUPPORTED DEVICES HELP" \
         "$(render_setup_help_function)"

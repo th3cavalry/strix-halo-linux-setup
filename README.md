@@ -1,6 +1,6 @@
 # Strix Halo Linux Setup
 
-![Version](https://img.shields.io/badge/version-6.6.5-blue?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-6.7.0-blue?style=for-the-badge)
 ![Kernel](https://img.shields.io/badge/Kernel-6.14%2B-orange?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/Platform-AMD%20Strix%20Halo-red?style=for-the-badge)
@@ -16,7 +16,7 @@ Supports the known Strix Halo device matrix below plus other confirmed Strix Hal
 ## Supported Devices
 
 <!-- BEGIN:SUPPORTED_DEVICE_TABLE -->
-<!-- AUTO-GENERATED from gz302-lib/device-profile-data.sh via scripts/sync-device-matrix.sh -->
+<!-- AUTO-GENERATED from strix-halo-lib/device-profile-data.sh via scripts/sync-device-matrix.sh -->
 | Device | APU | Class | Support tier |
 | :--- | :--- | :--- | :--- |
 | **ASUS ROG Flow Z13 (GZ302)** | Ryzen AI Max+ 395 / Max 390 | Tablet / Gaming 2-in-1 | Full |
@@ -39,9 +39,9 @@ Supports the known Strix Halo device matrix below plus other confirmed Strix Hal
 One script handles everything. It auto-detects your hardware and selects the relevant sections:
 
 ```bash
-curl -L https://raw.githubusercontent.com/th3cavalry/GZ302-Linux-Setup/main/gz302-setup.sh -o gz302-setup.sh
-chmod +x gz302-setup.sh
-sudo ./gz302-setup.sh
+curl -L https://raw.githubusercontent.com/th3cavalry/GZ302-Linux-Setup/main/strix-halo-setup.sh -o strix-halo-setup.sh
+chmod +x strix-halo-setup.sh
+sudo ./strix-halo-setup.sh
 ```
 
 The installer detects your device, distribution, kernel, and capabilities, then walks you through:
@@ -57,10 +57,10 @@ The installer detects your device, distribution, kernel, and capabilities, then 
 ### CLI Flags
 
 ```bash
-sudo ./gz302-setup.sh -y              # Accept all defaults (non-interactive)
-sudo ./gz302-setup.sh --fixes-only    # Hardware fixes only
-sudo ./gz302-setup.sh --no-z13ctl     # Skip z13ctl installation
-sudo ./gz302-setup.sh --help          # Show all options
+sudo ./strix-halo-setup.sh -y              # Accept all defaults (non-interactive)
+sudo ./strix-halo-setup.sh --fixes-only    # Hardware fixes only
+sudo ./strix-halo-setup.sh --no-z13ctl     # Skip z13ctl installation
+sudo ./strix-halo-setup.sh --help          # Show all options
 ```
 
 ---
@@ -102,7 +102,7 @@ On ASUS devices where `z13ctl` is supported, the installer creates `pwrcfg` and 
 
 ---
 
-## GZ302 Command Center
+## Strix Halo Command Center
 
 On ASUS ROG Flow Z13 (GZ302) systems, after installation, look for **"ASUS ROG Flow Z13 (GZ302) Command Center"** in your system tray.
 
@@ -148,8 +148,8 @@ The scripts automatically detect your kernel and adapt:
 
 ```text
 GZ302-Linux-Setup/
-├── gz302-setup.sh             # Unified installer (single entry point)
-├── gz302-lib/                 # Core libraries (manager-based)
+├── strix-halo-setup.sh             # Unified installer (single entry point)
+├── strix-halo-lib/                 # Core libraries (manager-based)
 │   ├── utils.sh               # Shared utilities, logging, backups
 │   ├── device-manager.sh      # Hardware detection, device profiles, capabilities (NEW)
 │   ├── device-profile-data.sh # Known-device matrix and profile capability data
@@ -201,7 +201,7 @@ All AI agents MUST read and follow the strict mandates in [.github/copilot-instr
 ## Uninstall
 
 ```bash
-sudo bash scripts/uninstall/gz302-uninstall.sh
+sudo bash scripts/uninstall/uninstall.sh
 ```
 
 This removes all GZ302 tools, z13ctl daemon/config, systemd services, udev rules, and configuration files.

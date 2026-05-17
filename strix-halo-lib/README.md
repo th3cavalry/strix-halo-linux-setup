@@ -15,9 +15,9 @@ verify_everything()
 **Library-First Approach (Modular):**
 ```bash
 # Separate libraries for each subsystem
-source gz302-lib/wifi-manager.sh
-source gz302-lib/audio-manager.sh
-source gz302-lib/input-manager.sh
+source strix-halo-lib/wifi-manager.sh
+source strix-halo-lib/audio-manager.sh
+source strix-halo-lib/input-manager.sh
 
 # Detection separate from application
 wifi_detect_hardware
@@ -131,15 +131,15 @@ Manages display refresh rates and VRR.
 ✅ Power & RGB migrated to z13ctl (external backend)
 
 ### Phase 5: Unified Installer ✅ Complete
-✅ gz302-setup.sh replaces all old entry points
+✅ strix-halo-setup.sh replaces all old entry points
 ✅ z13ctl installed as hardware control backend
-✅ All libraries integrated into gz302-setup.sh
+✅ All libraries integrated into strix-halo-setup.sh
 
 ## Usage Examples
 
 ### Basic Detection
 ```bash
-source gz302-lib/wifi-manager.sh
+source strix-halo-lib/wifi-manager.sh
 
 if wifi_detect_hardware >/dev/null 2>&1; then
     echo "WiFi hardware found"
@@ -157,7 +157,7 @@ z13ctl off
 
 ### Apply Configuration
 ```bash
-source gz302-lib/wifi-manager.sh
+source strix-halo-lib/wifi-manager.sh
 
 # Apply appropriate config for kernel version
 wifi_apply_configuration
@@ -170,7 +170,7 @@ fi
 
 ### Check Status
 ```bash
-source gz302-lib/wifi-manager.sh
+source strix-halo-lib/wifi-manager.sh
 
 # Display formatted status
 wifi_print_status
@@ -178,7 +178,7 @@ wifi_print_status
 
 ### Idempotency Demonstration
 ```bash
-source gz302-lib/wifi-manager.sh
+source strix-halo-lib/wifi-manager.sh
 
 # First run: applies configuration
 wifi_apply_configuration
@@ -209,7 +209,7 @@ The current regression script validates:
 - CPU/GPU signature fallback for unknown Strix Halo hardware
 - correct ASUS profile separation between the generic ASUS path and the A14-specific path
 
-Known-device metadata now lives in `gz302-lib/device-profile-data.sh`, which also feeds the generated support tables in the README, installer help text, and external catalog.
+Known-device metadata now lives in `strix-halo-lib/device-profile-data.sh`, which also feeds the generated support tables in the README, installer help text, and external catalog.
 
 ### Future Expansion
 ```bash

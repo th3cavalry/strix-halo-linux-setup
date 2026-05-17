@@ -9,14 +9,14 @@ set -euo pipefail
 
 # ==============================================================================
 # Strix Halo Shared Utilities Library
-# Version: 6.6.5
+# Version: 6.7.0
 #
 # This library contains shared functions for the Strix Halo Linux Setup scripts.
-# It is sourced by gz302-setup.sh and all optional modules.
+# It is sourced by strix-halo-setup.sh and all optional modules.
 # ==============================================================================
 
 # --- System Paths (Single Source of Truth) ---
-export CONFIG_DIR="/etc/gz302"
+export CONFIG_DIR="/etc/strix-halo"
 export BIN_DIR="/usr/local/bin"
 export STATE_DIR="/var/lib/gz302"
 export LOG_DIR="/var/log/gz302"
@@ -527,7 +527,7 @@ create_config_backup() {
     fi
     
     # Backup config directories
-    for config_dir in "$CONFIG_DIR" "/etc/gz302-tdp" "/etc/gz302-refresh" "/etc/gz302-rgb"; do
+    for config_dir in "$CONFIG_DIR" "/etc/strix-halo-tdp" "/etc/strix-halo-refresh" "/etc/strix-halo-rgb"; do
         if [[ -d "$config_dir" ]]; then
             local dir_name
             dir_name=$(basename "$config_dir")

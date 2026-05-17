@@ -4,7 +4,7 @@
 
 This document analyzes the obsolescence status of GZ302-Linux-Setup components as of April 2026, based on upstream Linux kernel support evolution (6.14-6.19+). The repository has fully transitioned from a **hardware enablement tool** (fixing broken hardware) to a **performance optimization toolkit** (tuning working hardware).
 
-As the repository broadens toward Strix Halo platform support, hardware-fix, AI/LLM, and ASUS control-stack paths must remain gated behind confirmed Strix Halo CPU/GPU signatures. The known-device matrix now lives in `gz302-lib/device-profile-data.sh`, and the device manager uses that allowlisted DMI vendor/product/family/board metadata before falling back to CPU/GPU signatures for unknown devices. This reduces false positives without shrinking the supported Strix Halo matrix. The z13ctl-based command-center tray app also remains a GZ302-first path until additional ASUS profiles are validated.
+As the repository broadens toward Strix Halo platform support, hardware-fix, AI/LLM, and ASUS control-stack paths must remain gated behind confirmed Strix Halo CPU/GPU signatures. The known-device matrix now lives in `strix-halo-lib/device-profile-data.sh`, and the device manager uses that allowlisted DMI vendor/product/family/board metadata before falling back to CPU/GPU signatures for unknown devices. This reduces false positives without shrinking the supported Strix Halo matrix. The z13ctl-based command-center tray app also remains a GZ302-first path until additional ASUS profiles are validated.
 
 **Last Updated:** April 4, 2026 
 **Analysis Period:** Early 2025 (Kernel 6.14) → April 2026 (Kernel 6.19+) 
@@ -45,7 +45,7 @@ As the repository broadens toward Strix Halo platform support, hardware-fix, AI/
 
 ### 1. WiFi (MediaTek MT7925)
 
-#### Repository Implementation (gz302-setup.sh)
+#### Repository Implementation (strix-halo-setup.sh)
 ```bash
 # Applies modprobe configuration
 options mt7925e disable_aspm=1
@@ -117,10 +117,10 @@ softdep snd_hda_intel post: cs35l41_hda
 
 **Analysis:**
 - **Kernels 6.14-6.18:** GZ302 subsystem ID (`1043:1fb3`) missing from upstream quirk list; `softdep snd_hda_intel post: cs35l41_hda` required
-- **Kernel 6.19+:** GZ302 CS35L41 quirk merged upstream — `gz302-setup.sh` auto-removes the modprobe config when detected
+- **Kernel 6.19+:** GZ302 CS35L41 quirk merged upstream — `strix-halo-setup.sh` auto-removes the modprobe config when detected
 - **Distribution Impact:** Fedora 44+, Ubuntu 26.04+, Arch rolling (post-April 2026) ship 6.19+
 
-**Verdict:** **OBSOLETE for Kernel 6.19+** | **Auto-removed by gz302-setup.sh**
+**Verdict:** **OBSOLETE for Kernel 6.19+** | **Auto-removed by strix-halo-setup.sh**
 
 **Note:** CachyOS with `linux-g14` patchset included this quirk earlier (6.17+)
 
@@ -282,7 +282,7 @@ amd_iommu=off          # Disable IOMMU for lower latency
 
 **Use kernel-aware installation:**
 
-The updated `gz302-setup.sh` script now detects your kernel version and applies **only necessary fixes**.
+The updated `strix-halo-setup.sh` script now detects your kernel version and applies **only necessary fixes**.
 
 **What happens automatically:**
 - Kernel < 6.17: Full hardware workarounds applied

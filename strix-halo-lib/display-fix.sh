@@ -4,7 +4,7 @@ set -euo pipefail
 
 # ==============================================================================
 # GZ302 Display Fix Library
-# Version: 6.6.5
+# Version: 6.7.0
 #
 # This library provides display-specific fixes for OLED panels on GZ302.
 # Focuses on all eDP power-saving features that can cause display artifacts.
@@ -22,7 +22,7 @@ set -euo pipefail
 # - amdgpu.abmlevel=0:   ABM disabled for OLED panels (DPCD capability)
 #
 # Usage:
-#   source gz302-lib/display-fix.sh
+#   source strix-halo-lib/display-fix.sh
 #   display_fix_psr_su_enabled
 #   display_apply_psr_su_fix
 # ==============================================================================
@@ -540,7 +540,7 @@ display_print_psr_su_status() {
     echo "  amdgpu.sg_display=0 (disables scatter-gather display for APU)"
     echo ""
     echo "To apply fix:"
-    echo "  source gz302-lib/display-fix.sh"
+    echo "  source strix-halo-lib/display-fix.sh"
     echo "  display_apply_psr_su_fix"
     echo "  sudo reboot"
 }
@@ -548,12 +548,12 @@ display_print_psr_su_status() {
 # --- Library Information ---
 
 display_fix_lib_version() {
-    echo "6.6.5"
+    echo "6.7.0"
 }
 
 display_fix_lib_help() {
     cat <<'HELP'
-GZ302 Display Fix Library v6.6.5
+GZ302 Display Fix Library v6.7.0
 
 PSR/Replay/IPS Detection Functions:
   display_psr_su_enabled        - Check if display fix bits are set
@@ -586,7 +586,7 @@ Kernel-aware Display Fix Information:
     options amdgpu abmlevel=0     (OLED ABM disable)
 
 Example Usage:
-  source gz302-lib/display-fix.sh
+  source strix-halo-lib/display-fix.sh
 
   # Check current status
   display_print_psr_su_status

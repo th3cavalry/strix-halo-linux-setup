@@ -108,7 +108,7 @@ This is a known kernel MMC driver issue. Apply the fix:
 bash scripts/fix-suspend.sh
 
 # Or rerun the main installer (reinstalls the suspend hook)
-sudo bash gz302-setup.sh --fixes-only
+sudo bash strix-halo-setup.sh --fixes-only
 ```
 
 The fix unbinds the MMC device before suspend and rebinds it on resume.

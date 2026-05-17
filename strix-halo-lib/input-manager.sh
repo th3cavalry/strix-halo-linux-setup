@@ -4,7 +4,7 @@ set -euo pipefail
 
 # ==============================================================================
 # GZ302 Input Manager Library
-# Version: 6.6.5
+# Version: 6.7.0
 #
 # This library manages ASUS HID devices (keyboard, touchpad) and tablet mode
 # functionality for the GZ302.
@@ -17,7 +17,7 @@ set -euo pipefail
 # - Kernel-aware workaround application
 #
 # Usage:
-#   source gz302-lib/input-manager.sh
+#   source strix-halo-lib/input-manager.sh
 #   input_detect_hardware
 #   input_apply_configuration
 #   input_verify_working
@@ -619,7 +619,7 @@ Library Information:
   input_lib_help                    - Show this help
 
 Example Usage:
-  source gz302-lib/input-manager.sh
+  source strix-halo-lib/input-manager.sh
   
   # Detect hardware
   if input_detect_hid_devices; then

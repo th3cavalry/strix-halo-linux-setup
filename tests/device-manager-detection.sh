@@ -4,7 +4,7 @@ set -euo pipefail
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 
 # shellcheck source=/dev/null
-source "${SCRIPT_DIR}/../gz302-lib/device-manager.sh"
+source "${SCRIPT_DIR}/../strix-halo-lib/device-manager.sh"
 
 ASSERTIONS_PASSED=0
 ASSERTIONS_FAILED=0

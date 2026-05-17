@@ -118,7 +118,7 @@ class RGBController:
             QTimer.singleShot(0, lambda m=msg: self.notifier.notify_error("RGB Error", m))
         except FileNotFoundError:
             QTimer.singleShot(0, lambda: self.notifier.notify_error(
-                "RGB Error", "z13ctl not found. Run gz302-setup.sh"
+                "RGB Error", "z13ctl not found. Run strix-halo-setup.sh"
             ))
             self.keyboard_available = False
             self.window_available = False
@@ -145,7 +145,7 @@ class RGBController:
     def set_static_color(self, device, hex_color):
         if not self._device_available(device):
             self.notifier.notify_error(
-                self._zone_label(device), "z13ctl not installed. Run: sudo ./gz302-setup.sh"
+                self._zone_label(device), "z13ctl not installed. Run: sudo ./strix-halo-setup.sh"
             )
             return
 

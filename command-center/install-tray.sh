@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Install a Desktop launcher and Autostart entry for the GZ302 Command Center
+# Install a Desktop launcher and Autostart entry for the Strix Halo Command Center
 # This script can be run as a regular user for user-specific installation
 # or with sudo for system-wide installation
 
@@ -12,10 +12,10 @@ SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 # This ensures the script works both when run directly and from the main setup
 if [[ -f "$SCRIPT_DIR/src/command_center.py" ]]; then
   APP_DIR="$SCRIPT_DIR"
-elif [[ -f "/usr/local/share/gz302/control-center/src/command_center.py" ]]; then
-  APP_DIR="/usr/local/share/gz302/control-center"
-elif [[ -f "/usr/local/share/gz302/command-center/src/command_center.py" ]]; then
-  APP_DIR="/usr/local/share/gz302/command-center"
+elif [[ -f "/usr/local/share/strix-halo/control-center/src/command_center.py" ]]; then
+  APP_DIR="/usr/local/share/strix-halo/control-center"
+elif [[ -f "/usr/local/share/strix-halo/command-center/src/command_center.py" ]]; then
+  APP_DIR="/usr/local/share/strix-halo/command-center"
 else
   APP_DIR="$SCRIPT_DIR"
 fi
@@ -46,14 +46,14 @@ mkdir -p "$AUTOSTART_DIR" "$DESKTOP_DIR"
 
 # Cleanup old/conflicting desktop files - be aggressive to fix "2 listings"
 OLD_DESKTOP_FILES=(
-  "/usr/share/applications/gz302-control-center.desktop"
-  "/usr/share/applications/gz302-tray.desktop"
-  "$DESKTOP_DIR/gz302-control-center.desktop"
-  "$DESKTOP_DIR/gz302-tray.desktop"
-  "/etc/xdg/autostart/gz302-control-center.desktop"
-  "/etc/xdg/autostart/gz302-tray.desktop"
-  "$AUTOSTART_DIR/gz302-control-center.desktop"
-  "$AUTOSTART_DIR/gz302-tray.desktop"
+  "/usr/share/applications/strix-halo-control-center.desktop"
+  "/usr/share/applications/strix-halo-tray.desktop"
+  "$DESKTOP_DIR/strix-halo-control-center.desktop"
+  "$DESKTOP_DIR/strix-halo-tray.desktop"
+  "/etc/xdg/autostart/strix-halo-control-center.desktop"
+  "/etc/xdg/autostart/strix-halo-tray.desktop"
+  "$AUTOSTART_DIR/strix-halo-control-center.desktop"
+  "$AUTOSTART_DIR/strix-halo-tray.desktop"
 )
 
 for f in "${OLD_DESKTOP_FILES[@]}"; do
@@ -64,7 +64,7 @@ for f in "${OLD_DESKTOP_FILES[@]}"; do
 done
 
 # Install icon to system location for proper XDG integration
-ICON_NAME="gz302-power-manager"
+ICON_NAME="strix-halo-power-manager"
 ICON_SRC="$APP_DIR/assets/profile-b.svg"
 
 # Try to install icon to system-wide location if running as root
@@ -94,10 +94,10 @@ elif [[ -f "$ICON_SRC" ]]; then
 fi
 
 # Use python3 explicitly in Exec line for better compatibility across desktop environments
-# Respect APP_NAME setting from /etc/gz302/tray.conf if present
-APP_NAME_DEFAULT="GZ302 Dashboard"
+# Respect APP_NAME setting from /etc/strix-halo/tray.conf if present
+APP_NAME_DEFAULT="Strix Halo Dashboard"
 APP_NAME="$APP_NAME_DEFAULT"
-if [[ -f /etc/gz302/tray.conf ]]; then
+if [[ -f /etc/strix-halo/tray.conf ]]; then
   # shellcheck disable=SC1091
   while IFS='=' read -r k v; do
     k=$(echo "$k" | tr -d ' "')
@@ -105,7 +105,7 @@ if [[ -f /etc/gz302/tray.conf ]]; then
     if [[ "$k" == "APP_NAME" && -n "$v" ]]; then
       APP_NAME="$v"
     fi
-  done < /etc/gz302/tray.conf
+  done < /etc/strix-halo/tray.conf
 fi
 
 DESKTOP_FILE_CONTENT="[Desktop Entry]
@@ -116,13 +116,13 @@ Exec=python3 $APP_PY
 Icon=$ICON_NAME
 Terminal=false
 Categories=Utility;System;Settings;HardwareSettings;
-Keywords=power;battery;profile;asus;rog;gz302;
+Keywords=power;battery;profile;asus;rog;strix-halo;
 StartupNotify=false
 X-GNOME-Autostart-enabled=true
 "
 
 # Install desktop launcher to user directory
-DESKTOP_FILE="$DESKTOP_DIR/gz302-tray.desktop"
+DESKTOP_FILE="$DESKTOP_DIR/strix-halo-tray.desktop"
 printf "%s" "$DESKTOP_FILE_CONTENT" > "$DESKTOP_FILE"
 chmod 644 "$DESKTOP_FILE"
 
@@ -135,13 +135,13 @@ fi
 
 # Install autostart entry
 # Skip user-level autostart if system-level autostart exists (prevents duplicates)
-AUTOSTART_FILE="$AUTOSTART_DIR/gz302-tray.desktop"
-SYSTEM_AUTOSTART="/etc/xdg/autostart/gz302-control-center.desktop"
+AUTOSTART_FILE="$AUTOSTART_DIR/strix-halo-tray.desktop"
+SYSTEM_AUTOSTART="/etc/xdg/autostart/strix-halo-control-center.desktop"
 if [[ -f "$SYSTEM_AUTOSTART" ]]; then
   echo "System-level autostart exists at $SYSTEM_AUTOSTART - skipping user autostart"
   # Remove any existing user autostart to prevent duplicates
   rm -f "$AUTOSTART_FILE" 2>/dev/null || true
-  rm -f "$AUTOSTART_DIR/gz302-control-center.desktop" 2>/dev/null || true
+  rm -f "$AUTOSTART_DIR/strix-halo-control-center.desktop" 2>/dev/null || true
 else
   printf "%s" "$DESKTOP_FILE_CONTENT" > "$AUTOSTART_FILE"
   chmod 644 "$AUTOSTART_FILE"
@@ -159,7 +159,7 @@ fi
 if [[ ${EUID:-$(id -u)} -eq 0 ]]; then
   SYSTEM_DESKTOP_DIR="/usr/share/applications"
   mkdir -p "$SYSTEM_DESKTOP_DIR"
-  SYSTEM_DESKTOP_FILE="$SYSTEM_DESKTOP_DIR/gz302-tray.desktop"
+  SYSTEM_DESKTOP_FILE="$SYSTEM_DESKTOP_DIR/strix-halo-tray.desktop"
   printf "%s" "$DESKTOP_FILE_CONTENT" > "$SYSTEM_DESKTOP_FILE"
   chmod 644 "$SYSTEM_DESKTOP_FILE"
   echo "Installed system-wide desktop launcher: $SYSTEM_DESKTOP_FILE"
@@ -178,12 +178,12 @@ fi
 echo "Installed desktop launcher: $DESKTOP_FILE"
 echo ""
 
-echo "Registering APP_NAME to /etc/gz302/tray.conf and notifying running tray (if any)..."
+echo "Registering APP_NAME to /etc/strix-halo/tray.conf and notifying running tray (if any)..."
 # Ensure config dir exists
-mkdir -p /etc/gz302
-if [[ ! -f /etc/gz302/tray.conf ]] || ! grep -q "APP_NAME" /etc/gz302/tray.conf 2>/dev/null; then
-  echo "APP_NAME=\"$APP_NAME\"" > /etc/gz302/tray.conf
-  chmod 644 /etc/gz302/tray.conf
+mkdir -p /etc/strix-halo
+if [[ ! -f /etc/strix-halo/tray.conf ]] || ! grep -q "APP_NAME" /etc/strix-halo/tray.conf 2>/dev/null; then
+  echo "APP_NAME=\"$APP_NAME\"" > /etc/strix-halo/tray.conf
+  chmod 644 /etc/strix-halo/tray.conf
 fi
 
 # ==============================================================================
@@ -195,7 +195,7 @@ if ! command -v z13ctl >/dev/null 2>&1; then
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo "z13ctl Backend Missing"
     echo "The Command Center requires z13ctl for RGB and power control."
-    echo "Run gz302-setup.sh first, or install z13ctl manually:"
+    echo "Run strix-halo-setup.sh first, or install z13ctl manually:"
     echo "  https://github.com/dahui/z13ctl"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""

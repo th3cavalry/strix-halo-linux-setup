@@ -10,7 +10,7 @@ method, trust level, and last verified date.
 
 ## How to Use This Catalog
 
-The Strix Halo Setup installer (`gz302-setup.sh`) reads this catalog and
+The Strix Halo Setup installer (`strix-halo-setup.sh`) reads this catalog and
 presents relevant entries for the detected device and distribution.  Each
 entry is **opt-in only** — nothing from this list is installed automatically.
 
@@ -142,7 +142,7 @@ Trust levels:
 ## Known Strix Halo Devices (as of 2026-05-16)
 
 <!-- BEGIN:KNOWN_STRIX_HALO_DEVICE_TABLE -->
-<!-- AUTO-GENERATED from gz302-lib/device-profile-data.sh via scripts/sync-device-matrix.sh -->
+<!-- AUTO-GENERATED from strix-halo-lib/device-profile-data.sh via scripts/sync-device-matrix.sh -->
 | Device | APU | Class | Support tier |
 |---|---|---|---|
 | ASUS ROG Flow Z13 (GZ302) | Ryzen AI Max+ 395 / Max 390 | Tablet / Gaming 2-in-1 | Full |

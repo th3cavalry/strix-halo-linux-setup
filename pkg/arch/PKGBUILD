@@ -1,6 +1,6 @@
 # Maintainer: th3cavalry <github.com/th3cavalry>
-pkgname=gz302-linux-setup
-pkgver=6.6.5
+pkgname=strix-halo-setup
+pkgver=6.7.0
 pkgrel=1
 pkgdesc="Linux optimization suite for ASUS ROG Flow Z13 (GZ302) — z13ctl backend"
 arch=('any')
@@ -21,24 +21,24 @@ package() {
     cd "$srcdir/GZ302-Linux-Setup-main"
 
     # Install main setup script
-    install -Dm755 gz302-setup.sh "$pkgdir/usr/local/bin/gz302-setup"
+    install -Dm755 strix-halo-setup.sh "$pkgdir/usr/local/bin/strix-halo-setup"
 
     # Install libraries
-    install -d "$pkgdir/usr/local/share/gz302/gz302-lib"
-    install -Dm644 gz302-lib/*.sh "$pkgdir/usr/local/share/gz302/gz302-lib/"
-    install -Dm644 VERSION "$pkgdir/usr/local/share/gz302/VERSION"
+    install -d "$pkgdir/usr/local/share/strix-halo/strix-halo-lib"
+    install -Dm644 strix-halo-lib/*.sh "$pkgdir/usr/local/share/strix-halo/strix-halo-lib/"
+    install -Dm644 VERSION "$pkgdir/usr/local/share/strix-halo/VERSION"
 
     # Install optional modules
-    install -d "$pkgdir/usr/local/share/gz302/modules"
-    install -Dm644 modules/*.sh "$pkgdir/usr/local/share/gz302/modules/"
+    install -d "$pkgdir/usr/local/share/strix-halo/modules"
+    install -Dm644 modules/*.sh "$pkgdir/usr/local/share/strix-halo/modules/"
 
     # Install tray app
-    install -d "$pkgdir/usr/local/share/gz302/command-center"
-    cp -r command-center/* "$pkgdir/usr/local/share/gz302/command-center/"
+    install -d "$pkgdir/usr/local/share/strix-halo/command-center"
+    cp -r command-center/* "$pkgdir/usr/local/share/strix-halo/command-center/"
 
     # Install scripts
-    install -d "$pkgdir/usr/local/share/gz302/scripts"
-    install -Dm755 scripts/fix-suspend.sh "$pkgdir/usr/local/share/gz302/scripts/"
-    install -d "$pkgdir/usr/local/share/gz302/scripts/uninstall"
-    install -Dm755 scripts/uninstall/gz302-uninstall.sh "$pkgdir/usr/local/share/gz302/scripts/uninstall/"
+    install -d "$pkgdir/usr/local/share/strix-halo/scripts"
+    install -Dm755 scripts/fix-suspend.sh "$pkgdir/usr/local/share/strix-halo/scripts/"
+    install -d "$pkgdir/usr/local/share/strix-halo/scripts/uninstall"
+    install -Dm755 scripts/uninstall/uninstall.sh "$pkgdir/usr/local/share/strix-halo/scripts/uninstall/"
 }

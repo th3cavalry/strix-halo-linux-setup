@@ -19,7 +19,7 @@ assignees: ''
 <!-- Is this specific to GZ302 hardware, or more general? -->
 
 ## Device Matrix Impact
-<!-- Should this add or change a known Strix Halo device profile in gz302-lib/device-profile-data.sh? -->
+<!-- Should this add or change a known Strix Halo device profile in strix-halo-lib/device-profile-data.sh? -->
 
 ## Distribution Support
 <!-- Will this work on all supported distributions? -->

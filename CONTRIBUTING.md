@@ -97,7 +97,7 @@ error "Error message (exits script)"
 **Required before committing:**
 ```bash
 # Test individual script
-bash -n gz302-setup.sh
+bash -n strix-halo-setup.sh
 
 # Test all scripts
 find . -name "*.sh" -type f -print0 | xargs -0 -I{} bash -n "{}"
@@ -108,7 +108,7 @@ find . -name "*.sh" -type f -print0 | xargs -0 -I{} bash -n "{}"
 **Required before committing:**
 ```bash
 # Lint individual script
-shellcheck gz302-setup.sh
+shellcheck strix-halo-setup.sh
 
 # Lint all scripts
 find . -name "*.sh" -type f -print0 | xargs -0 shellcheck
@@ -130,7 +130,7 @@ This covers the Strix Halo platform gate, known-device DMI aliases, generic fall
 **Required when changing the supported-device matrix or profile metadata:**
 ```bash
 bash scripts/sync-device-matrix.sh
-git diff -- README.md gz302-setup.sh docs/technical/external-integrations-catalog.md
+git diff -- README.md strix-halo-setup.sh docs/technical/external-integrations-catalog.md
 ```
 
 ### 5. Version Consistency
@@ -158,7 +158,7 @@ You can use virtual machines or containers for testing.
 3. **Test thoroughly**:
    - Run syntax validation: `bash -n script.sh`
    - Run shellcheck: `shellcheck script.sh`
-    - Run device-profile regression checks when touching `gz302-lib/device-manager.sh`: `bash tests/device-manager-detection.sh`
+    - Run device-profile regression checks when touching `strix-halo-lib/device-manager.sh`: `bash tests/device-manager-detection.sh`
     - Run generated-content sync when changing supported devices: `bash scripts/sync-device-matrix.sh`
     - Run version validation: `bash tests/validate-version-sync.sh`
    - Test on target hardware or VM if possible
@@ -313,8 +313,8 @@ For new features:
    ```
 
 2. **Sync to ALL locations** (use search/replace to ensure consistency):
-   - `gz302-setup.sh` — Header: `# Version: 5.1.2` + help text version display
-   - `gz302-lib/*.sh` — All library files: `# Version: 5.1.2`
+   - `strix-halo-setup.sh` — Header: `# Version: 5.1.2` + help text version display
+   - `strix-halo-lib/*.sh` — All library files: `# Version: 5.1.2`
    - `modules/*.sh` — All modules: `# Version: 5.1.2`
    - `command-center/VERSION` — `5.1.2`
    - `command-center/src/command_center.py` — Update About dialog version string
@@ -325,7 +325,7 @@ For new features:
 3. **Verify version sync**:
    ```bash
    # Check all version headers match
-   grep -rn "Version:" gz302-setup.sh gz302-lib/ modules/ | grep -v "Kernel Version"
+   grep -rn "Version:" strix-halo-setup.sh strix-halo-lib/ modules/ | grep -v "Kernel Version"
    cat VERSION command-center/VERSION
    grep "pkgver=" pkg/arch/PKGBUILD
    ```

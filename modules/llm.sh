@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # ==============================================================================
-# GZ302 LLM/AI Software Module
-# Version: 6.6.5
+# Strix Halo LLM/AI Module
+# Version: 6.7.0
 #
 # This module installs LLM backends for the ASUS ROG Flow Z13 (GZ302)
 # Uses official installation methods - no custom builds
@@ -31,31 +31,31 @@ resolve_script_dir() {
 SCRIPT_DIR="${SCRIPT_DIR:-$(resolve_script_dir)}"
 
 # --- Load Shared Utilities ---
-if [[ -f "${SCRIPT_DIR}/../gz302-lib/utils.sh" ]]; then
+if [[ -f "${SCRIPT_DIR}/../strix-halo-lib/utils.sh" ]]; then
     # shellcheck source=/dev/null
-    source "${SCRIPT_DIR}/../gz302-lib/utils.sh"
-elif [[ -f "${SCRIPT_DIR}/gz302-utils.sh" ]]; then
+    source "${SCRIPT_DIR}/../strix-halo-lib/utils.sh"
+elif [[ -f "${SCRIPT_DIR}/strix-halo-utils.sh" ]]; then
     # shellcheck source=/dev/null
-    source "${SCRIPT_DIR}/gz302-utils.sh"
+    source "${SCRIPT_DIR}/strix-halo-utils.sh"
 else
-    echo "gz302-utils.sh not found. Downloading..."
-    mkdir -p "$(dirname "${SCRIPT_DIR}/gz302-utils.sh")" || { echo "Error: Failed to create directory"; exit 1; }
+    echo "strix-halo-utils.sh not found. Downloading..."
+    mkdir -p "$(dirname "${SCRIPT_DIR}/strix-halo-utils.sh")" || { echo "Error: Failed to create directory"; exit 1; }
     GITHUB_RAW_URL="${GITHUB_RAW_URL:-https://raw.githubusercontent.com/th3cavalry/GZ302-Linux-Setup/main}"
     if command -v curl >/dev/null 2>&1; then
-        curl -fsSL "${GITHUB_RAW_URL}/gz302-lib/utils.sh" -o "${SCRIPT_DIR}/gz302-utils.sh" || { echo "Error: curl failed"; exit 1; }
+        curl -fsSL "${GITHUB_RAW_URL}/strix-halo-lib/utils.sh" -o "${SCRIPT_DIR}/strix-halo-utils.sh" || { echo "Error: curl failed"; exit 1; }
     elif command -v wget >/dev/null 2>&1; then
-        wget "${GITHUB_RAW_URL}/gz302-lib/utils.sh" -O "${SCRIPT_DIR}/gz302-utils.sh"
+        wget "${GITHUB_RAW_URL}/strix-halo-lib/utils.sh" -O "${SCRIPT_DIR}/strix-halo-utils.sh"
     else
         echo "Error: curl or wget not found. Cannot download utils."
         exit 1
     fi
     
-    if [[ -f "${SCRIPT_DIR}/gz302-utils.sh" ]]; then
-        chmod +x "${SCRIPT_DIR}/gz302-utils.sh"
+    if [[ -f "${SCRIPT_DIR}/strix-halo-utils.sh" ]]; then
+        chmod +x "${SCRIPT_DIR}/strix-halo-utils.sh"
         # shellcheck source=/dev/null
-        source "${SCRIPT_DIR}/gz302-utils.sh"
+        source "${SCRIPT_DIR}/strix-halo-utils.sh"
     else
-        echo "Error: Failed to download gz302-utils.sh"
+        echo "Error: Failed to download strix-halo-utils.sh"
         exit 1
     fi
 fi
@@ -63,9 +63,9 @@ fi
 
 # --- Configuration ---
 LLM_VERSION="6.0.0"
-OLLAMA_ENV_FILE="/etc/systemd/system/ollama.service.d/gz302.conf"
+OLLAMA_ENV_FILE="/etc/systemd/system/ollama.service.d/strix-halo.conf"
 LMSTUDIO_APPIMAGE="${HOME}/Applications/LMStudio.AppImage"
-VLLM_VENV="/opt/gz302-vllm"
+VLLM_VENV="/opt/strix-halo-vllm"
 
 # --- AMD Strix Halo GPU Configuration ---
 
@@ -103,7 +103,7 @@ rocm_has_native_gfx1151() {
 }
 
 configure_amd_gpu_env() {
-    local env_file="/etc/profile.d/gz302-rocm.sh"
+    local env_file="/etc/profile.d/strix-halo-rocm.sh"
     local rocm_version
     rocm_version=$(get_rocm_version)
     
@@ -114,7 +114,7 @@ configure_amd_gpu_env() {
         # ROCm 7.2+ - native gfx1151 support, no HSA override needed
         info "ROCm 7.2+ detected - using native gfx1151 support (no HSA override)"
         cat > "$env_file" << 'EOF'
-# GZ302 ROCm Configuration for AMD Radeon 8060S (Strix Halo gfx1151)
+# Strix Halo ROCm Configuration for AMD Radeon 8060S (Strix Halo gfx1151)
 # ROCm 7.2+ has native gfx1151 support - no HSA override needed
 export HIP_VISIBLE_DEVICES=0
 export GPU_MAX_HW_QUEUES=8
@@ -125,7 +125,7 @@ EOF
         # ROCm < 7.2 - needs HSA override to emulate gfx1100
         info "ROCm < 7.2 - using HSA_OVERRIDE_GFX_VERSION for gfx1100 compatibility"
         cat > "$env_file" << 'EOF'
-# GZ302 ROCm Configuration for AMD Radeon 8060S (Strix Halo gfx1151)
+# Strix Halo ROCm Configuration for AMD Radeon 8060S (Strix Halo gfx1151)
 # Emulate gfx1100 (RDNA3) for ROCm < 7.2 compatibility
 export HSA_OVERRIDE_GFX_VERSION=11.0.0
 export HIP_VISIBLE_DEVICES=0
@@ -289,14 +289,14 @@ install_vllm() {
     if rocm_has_native_gfx1151; then
         cat > "${VLLM_VENV}/activate-vllm" << 'EOF'
 #!/bin/bash
-source /opt/gz302-vllm/bin/activate
+source /opt/strix-halo-vllm/bin/activate
 export HIP_VISIBLE_DEVICES=0
 echo "vLLM environment activated (native gfx1151)"
 EOF
     else
         cat > "${VLLM_VENV}/activate-vllm" << 'EOF'
 #!/bin/bash
-source /opt/gz302-vllm/bin/activate
+source /opt/strix-halo-vllm/bin/activate
 export HSA_OVERRIDE_GFX_VERSION=11.0.0
 export HIP_VISIBLE_DEVICES=0
 echo "vLLM environment activated"
@@ -497,7 +497,7 @@ install_librechat() {
 install_python_ai_libs() {
     print_section "Installing Python AI Libraries"
     
-    local venv_path="${HOME}/.gz302-ai"
+    local venv_path="${HOME}/.strix-halo-ai"
     
     if [[ -d "$venv_path" ]]; then
         info "Python AI environment already exists at $venv_path"
@@ -662,7 +662,7 @@ show_summary() {
     [[ -d "/opt/librechat" ]] && echo "  ✓ LibreChat: http://localhost:3080"
     
     # Libraries
-    [[ -d "${HOME}/.gz302-ai" ]] && echo "  ✓ Python AI: source ~/.gz302-ai/activate-ai"
+    [[ -d "${HOME}/.strix-halo-ai" ]] && echo "  ✓ Python AI: source ~/.strix-halo-ai/activate-ai"
     
     echo
     info "GPU configured for AMD Radeon 8060S (Strix Halo)"
@@ -676,7 +676,7 @@ main() {
         exit 1
     fi
     
-    print_box "GZ302 LLM/AI Module v${LLM_VERSION}"
+    print_box "Strix Halo LLM/AI Module v${LLM_VERSION}"
     echo
     
     # Configure GPU environment first

@@ -1,4 +1,4 @@
-# GZ302 Command Center — Strix Halo Edition
+# Strix Halo Command Center — Strix Halo Edition
 
 A unified system tray and dashboard application for the ASUS ROG Flow Z13 (GZ302) "Strix Halo".
 
@@ -60,7 +60,7 @@ sudo ./install-policy.sh
 ```
 
 This configures `z13ctl` permissions to allow the GUI to make changes without password prompts.
-If you installed through the main `gz302-setup.sh` workflow, the installer already handles the `users` group and the GUI sudoers fallback.
+If you installed through the main `strix-halo-setup.sh` workflow, the installer already handles the `users` group and the GUI sudoers fallback.
 
 ### Step 3: Install Desktop Launcher + Autostart
 

@@ -16,8 +16,8 @@
 # - Configuration files and logs
 #
 # USAGE:
-# 1. Make executable: chmod +x gz302-uninstall.sh
-# 2. Run with sudo: sudo ./gz302-uninstall.sh
+# 1. Make executable: chmod +x uninstall.sh
+# 2. Run with sudo: sudo ./uninstall.sh
 # ==============================================================================
 
 set -euo pipefail
@@ -71,7 +71,7 @@ main() {
     check_root
     
     echo -e "${C_BOLD}ASUS GZ302 Cleanup Utility${C_NC}"
-    echo "This will remove all GZ302 tools, services, and configurations."
+    echo "This will remove all Strix Halo tools, services, and configurations."
     echo
     read -r -p "Are you sure you want to proceed? [y/N] " response
     if [[ ! "$response" =~ ^[yY]$ ]]; then
@@ -129,8 +129,8 @@ main() {
     remove_file "/usr/local/bin/pwrcfg-monitor"
     remove_file "/usr/local/bin/pwrcfg-restore"
     remove_file "/usr/local/bin/rrcfg"
-    remove_file "/usr/share/icons/hicolor/scalable/apps/gz302-control-center.svg"
-    remove_file "/usr/share/icons/hicolor/scalable/apps/gz302-power-manager.svg"
+    remove_file "/usr/share/icons/hicolor/scalable/apps/strix-halo-control-center.svg"
+    remove_file "/usr/share/icons/hicolor/scalable/apps/strix-halo-power-manager.svg"
     
     # Battery Management
     remove_file "/usr/local/bin/set-battery-limit.sh"
@@ -150,36 +150,36 @@ main() {
     echo
     info "Removing Command Center / GUI..."
     remove_dir "/usr/local/share/gz302"
-    remove_file "/usr/local/bin/gz302-control-center"
-    remove_file "/usr/share/applications/gz302-control-center.desktop"
-    remove_file "/etc/xdg/autostart/gz302-control-center.desktop"
-    remove_file "/usr/share/applications/gz302-tray.desktop"  # Legacy name
+    remove_file "/usr/local/bin/strix-halo-control-center"
+    remove_file "/usr/share/applications/strix-halo-control-center.desktop"
+    remove_file "/etc/xdg/autostart/strix-halo-control-center.desktop"
+    remove_file "/usr/share/applications/strix-halo-tray.desktop"  # Legacy name
     
     # Remove from all users' autostart (best effort)
     for home in /home/*; do
-        remove_file "$home/.config/autostart/gz302-control-center.desktop"
-        remove_file "$home/.config/autostart/gz302-tray.desktop"
-        remove_file "$home/.local/share/applications/gz302-tray.desktop"
+        remove_file "$home/.config/autostart/strix-halo-control-center.desktop"
+        remove_file "$home/.config/autostart/strix-halo-tray.desktop"
+        remove_file "$home/.local/share/applications/strix-halo-tray.desktop"
     done
     
     echo
     info "Removing configuration..."
-    remove_dir "/etc/gz302"
+    remove_dir "/etc/strix-halo"
     remove_dir "/var/lib/gz302"
     remove_dir "/var/log/gz302"
 
     # Remove legacy config dirs
-    remove_dir "/etc/gz302-tdp"
-    remove_dir "/etc/gz302-refresh"
-    remove_dir "/etc/gz302-rgb"
+    remove_dir "/etc/strix-halo-tdp"
+    remove_dir "/etc/strix-halo-refresh"
+    remove_dir "/etc/strix-halo-rgb"
 
     echo
     info "Removing system integration..."
     # Sudoers
-    remove_file "/etc/sudoers.d/gz302-pwrcfg"
-    remove_file "/etc/sudoers.d/gz302-rgb"
-    remove_file "/etc/sudoers.d/gz302-command-center"
-    remove_file "/etc/sudoers.d/gz302"
+    remove_file "/etc/sudoers.d/strix-halo-pwrcfg"
+    remove_file "/etc/sudoers.d/strix-halo-rgb"
+    remove_file "/etc/sudoers.d/strix-halo-command-center"
+    remove_file "/etc/sudoers.d/strix-halo"
     remove_file "/etc/sudoers.d/z13ctl"
     remove_file "/etc/sudoers.d/pwrcfg" # Legacy
     

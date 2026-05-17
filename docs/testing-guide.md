@@ -34,7 +34,7 @@ The Command Center is the most visible component and requires rigorous UI/UX val
     - Test animation effects (Rainbow, Color Cycle, Breathing).
     - Verify "Turn Off All" kills both keyboard and lightbar LEDs.
 - [ ] **Battery Limit**: Select 60%, 80%, and 100%. Verify via `z13ctl status`.
-- [ ] **Auto Switch Toggle**: Enable/Disable. Verify state is saved in `~/.config/gz302/auto.conf`.
+- [ ] **Auto Switch Toggle**: Enable/Disable. Verify state is saved in `~/.config/strix-halo/auto.conf`.
 
 ### Dashboard Window
 - [ ] **Visibility**: Left-click tray icon to show/hide.
@@ -48,7 +48,7 @@ The Command Center is the most visible component and requires rigorous UI/UX val
 ## 2. Core Script Testing (z13ctl & Helpers)
 
 ### Installation & Idempotency
-- [ ] **Fresh Install**: Run `sudo ./gz302-setup.sh` on a clean system.
+- [ ] **Fresh Install**: Run `sudo ./strix-halo-setup.sh` on a clean system.
 - [ ] **Idempotency**: Run the script a second time. It should complete in < 5 seconds without re-downloading or re-applying static fixes.
 
 ### Hardware Enablement
@@ -74,7 +74,7 @@ bash tests/device-manager-detection.sh
 
 # Generated content must stay in sync with the profile manifest
 bash scripts/sync-device-matrix.sh
-git diff --exit-code README.md gz302-setup.sh docs/technical/external-integrations-catalog.md
+git diff --exit-code README.md strix-halo-setup.sh docs/technical/external-integrations-catalog.md
 
 # Version contract validation
 bash tests/validate-version-sync.sh
@@ -96,7 +96,7 @@ python3 -m py_compile command-center/src/modules/*.py
 - [ ] Ensure `sudo ./install-policy.sh` updates the sudoers entries for the new binary names.
 
 ### Hardware Profile Regressions
-- [ ] Run `bash tests/device-manager-detection.sh` after changing `gz302-lib/device-manager.sh`.
+- [ ] Run `bash tests/device-manager-detection.sh` after changing `strix-halo-lib/device-manager.sh`.
 - [ ] Confirm that a known-device DMI alias still maps to the expected profile.
 - [ ] Confirm that generic `Max`/marketing strings without CPU or GPU proof do not set `CAP_STRIX_HALO=true`.
 - [ ] Confirm that `bash scripts/sync-device-matrix.sh` produces no unexpected diffs after editing the known-device matrix.
@@ -106,7 +106,7 @@ python3 -m py_compile command-center/src/modules/*.py
 ## Troubleshooting Tests
 
 - **Missing Icons**: On Arch, SVG is bundled in `python-pyqt6`. On Debian/Fedora, install `python3-pyqt6.qtsvg` / `python3-qt6-qtsvg`.
-- **Permission Denied**: Check `/etc/sudoers.d/gz302` and confirm the current user is in the `users` group.
+- **Permission Denied**: Check `/etc/sudoers.d/strix-halo` and confirm the current user is in the `users` group.
 - **z13ctl Timeout**: Ensure the daemon is running: `systemctl --user status z13ctl.service`.
 
 ---

@@ -4,7 +4,7 @@ set -euo pipefail
 
 # ==============================================================================
 # GZ302 GPU Manager Library
-# Version: 6.6.5
+# Version: 6.7.0
 #
 # This library manages AMD Radeon 8060S (RDNA 3.5) integrated GPU configuration
 # for the GZ302 (Strix Halo platform).
@@ -17,7 +17,7 @@ set -euo pipefail
 # - ROCm compatibility setup
 #
 # Usage:
-#   source gz302-lib/gpu-manager.sh
+#   source strix-halo-lib/gpu-manager.sh
 #   gpu_detect_hardware
 #   gpu_apply_configuration
 #   gpu_verify_firmware
@@ -555,7 +555,7 @@ Library Information:
   gpu_lib_help                  - Show this help
 
 Example Usage:
-  source gz302-lib/gpu-manager.sh
+  source strix-halo-lib/gpu-manager.sh
   
   # Detect hardware
   if gpu_detect_hardware; then

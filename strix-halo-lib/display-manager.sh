@@ -4,7 +4,7 @@ set -euo pipefail
 
 # ==============================================================================
 # GZ302 Display Manager Library
-# Version: 6.6.5
+# Version: 6.7.0
 #
 # This library provides refresh rate management and display control for the
 # ASUS ROG Flow Z13 (GZ302) with its 180Hz display.
@@ -21,7 +21,7 @@ set -euo pipefail
 # - DRM fallback
 #
 # Usage:
-#   source gz302-lib/display-manager.sh
+#   source strix-halo-lib/display-manager.sh
 #   display_detect_outputs
 #   display_apply_profile "balanced"
 #   display_print_status
@@ -62,7 +62,7 @@ DISPLAY_VRR_MIN[maximum]="48";    DISPLAY_VRR_MAX[maximum]="180"
 DISPLAY_PROFILE_ORDER="emergency battery efficient balanced performance gaming maximum"
 
 # Configuration paths
-DISPLAY_CONFIG_DIR="/etc/gz302/rrcfg"
+DISPLAY_CONFIG_DIR="/etc/strix-halo/rrcfg"
 DISPLAY_CURRENT_PROFILE_FILE="$DISPLAY_CONFIG_DIR/current-profile"
 DISPLAY_VRR_ENABLED_FILE="$DISPLAY_CONFIG_DIR/vrr-enabled"
 DISPLAY_VRR_RANGES_FILE="$DISPLAY_CONFIG_DIR/vrr-ranges"
@@ -554,7 +554,7 @@ if [[ ${EUID:-$(id -u)} -ne 0 ]]; then
 fi
 
 # Load display-manager library
-LIB_PATH="/usr/local/share/gz302/gz302-lib"
+LIB_PATH="/usr/local/share/gz302/strix-halo-lib"
 if [[ -f "$LIB_PATH/display-manager.sh" ]]; then
     source "$LIB_PATH/display-manager.sh"
 else

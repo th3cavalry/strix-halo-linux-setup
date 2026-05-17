@@ -4,7 +4,7 @@ set -euo pipefail
 
 # ==============================================================================
 # GZ302 State Manager Library
-# Version: 6.6.5
+# Version: 6.7.0
 #
 # This library provides persistent state tracking for the GZ302 toolkit.
 # It tracks what fixes have been applied, when they were applied, and provides
@@ -15,7 +15,7 @@ set -euo pipefail
 # Logs stored in: /var/log/gz302/
 #
 # Usage:
-#   source gz302-lib/state-manager.sh
+#   source strix-halo-lib/state-manager.sh
 #   state_init
 #   state_mark_applied "wifi" "aspm_workaround" "6.16"
 #   state_is_applied "wifi" "aspm_workaround"
@@ -571,7 +571,7 @@ Library Information:
 
 Example Usage:
   # Initialize
-  source gz302-lib/state-manager.sh
+  source strix-halo-lib/state-manager.sh
   state_init
   
   # Mark fix as applied

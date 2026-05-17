@@ -18,7 +18,7 @@ Z13CTL_PATH=$(command -v z13ctl 2>/dev/null || echo "")
 
 if [[ -z "$Z13CTL_PATH" ]]; then
     echo "ERROR: z13ctl not found in PATH!"
-    echo "Please run gz302-setup.sh first to install z13ctl."
+    echo "Please run strix-halo-setup.sh first to install z13ctl."
     exit 1
 fi
 
@@ -26,19 +26,19 @@ echo "Found z13ctl at: $Z13CTL_PATH"
 
 # Find optional wrapper commands
 PWRCFG_PATH=$(command -v pwrcfg 2>/dev/null || echo "")
-GZ302RGB_PATH=$(command -v gz302-rgb 2>/dev/null || echo "")
+STRIX_RGB_PATH=$(command -v gz302-rgb 2>/dev/null || echo "")
 RRCFG_PATH=$(command -v rrcfg 2>/dev/null || echo "")
 
-SUDOERS_FILE="/etc/sudoers.d/gz302"
-TMPFILE=$(mktemp /tmp/gz302-sudoers.XXXXXX)
+SUDOERS_FILE="/etc/sudoers.d/strix-halo"
+TMPFILE=$(mktemp /tmp/strix-halo-sudoers.XXXXXX)
 
 cat > "$TMPFILE" << EOF
-# GZ302 Linux Setup — password-less access for z13ctl and wrappers
+# Strix Halo Linux Setup — password-less access for z13ctl and wrappers
 $REAL_USER ALL=(root) NOPASSWD: $Z13CTL_PATH
 EOF
 
 [[ -n "$PWRCFG_PATH" ]] && echo "$REAL_USER ALL=(root) NOPASSWD: $PWRCFG_PATH" >> "$TMPFILE"
-[[ -n "$GZ302RGB_PATH" ]] && echo "$REAL_USER ALL=(root) NOPASSWD: $GZ302RGB_PATH" >> "$TMPFILE"
+[[ -n "$STRIX_RGB_PATH" ]] && echo "$REAL_USER ALL=(root) NOPASSWD: $STRIX_RGB_PATH" >> "$TMPFILE"
 [[ -n "$RRCFG_PATH" ]] && echo "$REAL_USER ALL=(root) NOPASSWD: $RRCFG_PATH" >> "$TMPFILE"
 
 if visudo -c -f "$TMPFILE"; then

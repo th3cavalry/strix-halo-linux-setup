@@ -1,5 +1,5 @@
-const TARGET_CAPTION = "GZ302 Dashboard";
-const TARGET_ROLE = "gz302-dashboard";
+const TARGET_CAPTION = "Strix Halo Dashboard";
+const TARGET_ROLE = "strix-halo-dashboard";
 const MARGIN = 8;
 
 function isTarget(window) {

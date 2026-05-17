@@ -4,7 +4,7 @@ set -euo pipefail
 
 # ==============================================================================
 # Strix Halo Device Manager Library
-# Version: 6.6.5
+# Version: 6.7.0
 #
 # Detects the running hardware and produces a normalized device profile for
 # the Strix Halo (AMD Ryzen AI MAX / MAX+) platform.  All installer sections
@@ -30,7 +30,7 @@ set -euo pipefail
 #   CAP_ROCM             — ROCm GPU compute is applicable (Radeon 8050S/8060S present)
 #
 # Usage:
-#   source gz302-lib/device-manager.sh
+#   source strix-halo-lib/device-manager.sh
 #   device_detect
 #   device_print_profile
 #   if [[ "$CAP_Z13CTL" == "true" ]]; then install_z13ctl; fi

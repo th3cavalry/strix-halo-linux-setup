@@ -30,7 +30,7 @@ Lemonade SDK is automatically installed during the main installation process. Th
 2. Installs Lemonade SDK via pip with AMD's custom PyPI index
 3. Installs NPU drivers for Ryzen AI support
 4. Installs Vulkan for GPU acceleration
-5. Creates `/etc/gz302/ai/backend` file with the selected backend
+5. Creates `/etc/strix-halo/ai/backend` file with the selected backend
 
 ### Usage
 
@@ -95,13 +95,13 @@ Set `AI_BACKEND` before running the installer:
 
 ```bash
 # Use Lemonade (default)
-sudo AI_BACKEND=lemonade bash gz302-setup.sh
+sudo AI_BACKEND=lemonade bash strix-halo-setup.sh
 
 # Use ROCm
-sudo AI_BACKEND=rocm bash gz302-setup.sh
+sudo AI_BACKEND=rocm bash strix-halo-setup.sh
 
 # Use CPU only
-sudo AI_BACKEND=cpu bash gz302-setup.sh
+sudo AI_BACKEND=cpu bash strix-halo-setup.sh
 ```
 
 ### Supported Backends
@@ -118,10 +118,10 @@ To switch backends after installation:
 
 1. Remove the current backend packages
 2. Install the new backend packages
-3. Update `/etc/gz302/ai/backend`:
+3. Update `/etc/strix-halo/ai/backend`:
 
 ```bash
-echo "rocm" | sudo tee /etc/gz302/ai/backend
+echo "rocm" | sudo tee /etc/strix-halo/ai/backend
 ```
 
 ## Backend Comparison
@@ -202,6 +202,6 @@ If models fail to load:
 ## Version Information
 
 - Lemonade SDK: Latest stable release (installed via pip)
-- AI Backend Config: `/etc/gz302/ai/backend`
+- AI Backend Config: `/etc/strix-halo/ai/backend`
 - Installation Date: Stored in installation logs
 - GZ302 Setup Version: 4.2.0+
