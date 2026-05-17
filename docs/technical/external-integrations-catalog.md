@@ -1,6 +1,6 @@
 # Strix Halo External Integrations Catalog
 
-**Last updated:** 2026-05-15  
+**Last updated:** 2026-05-16  
 **Scope:** Curated list of third-party projects, toolkits, and applications for
 AMD Strix Halo (Ryzen AI MAX / MAX+) devices on Linux.  
 **Format:** Each entry includes its purpose, supported devices/distros, install
@@ -139,20 +139,23 @@ Trust levels:
 
 ---
 
-## Known Strix Halo Devices (as of 2026-05-15)
+## Known Strix Halo Devices (as of 2026-05-16)
 
+<!-- BEGIN:KNOWN_STRIX_HALO_DEVICE_TABLE -->
+<!-- AUTO-GENERATED from gz302-lib/device-profile-data.sh via scripts/sync-device-matrix.sh -->
 | Device | APU | Class | Support tier |
 |---|---|---|---|
-| ASUS ROG Flow Z13 (GZ302) | Ryzen AI Max+ 395 / Max 390 | Tablet/Gaming 2-in-1 | Full |
+| ASUS ROG Flow Z13 (GZ302) | Ryzen AI Max+ 395 / Max 390 | Tablet / Gaming 2-in-1 | Full |
 | HP ZBook Ultra G1a | Ryzen AI Max+ PRO 395 | Workstation laptop | Partial |
 | HP Mini Workstation (Z2 G1a) | Ryzen AI Max+ 395 | Mini workstation | Partial |
 | Framework Desktop | Ryzen AI Max 385 / Max+ 395 | Desktop | Partial |
-| ASUS TUF Gaming A14 | Ryzen AI Max+ 392 | Laptop | Full (ASUS) |
+| ASUS TUF Gaming A14 | Ryzen AI Max+ 392 | Laptop | Partial |
 | Sixunited AXP77 | Ryzen AI Max+ 395 | Mini-PC | Experimental |
 | GMKtec EVO-X2 | Ryzen AI Max+ 395 | Mini-PC | Experimental |
 | Minisforum MS-S1 Max | Ryzen AI Max+ 395 | Mini-PC | Experimental |
 | AYANEO NEXT 2 | Ryzen AI Max+ 395 | Handheld | Experimental |
 | GPD Win 5 | Ryzen AI Max+ 395 | Handheld | Experimental |
+<!-- END:KNOWN_STRIX_HALO_DEVICE_TABLE -->
 
 > **Note:** This list is a living compatibility matrix. Confidence levels:
 > - *Full* — confirmed shipping, tested, all major features working  

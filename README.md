@@ -1,27 +1,36 @@
 # Strix Halo Linux Setup
 
-![Version](https://img.shields.io/badge/version-6.5.0-blue?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-6.6.2-blue?style=for-the-badge)
 ![Kernel](https://img.shields.io/badge/Kernel-6.14%2B-orange?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/Platform-AMD%20Strix%20Halo-red?style=for-the-badge)
 
 **Unified Linux optimization suite for AMD Strix Halo (Ryzen AI MAX / MAX+) devices.**
 
-Hardware auto-detection, per-device fixes, power/TDP management, RGB lighting, fan curves, battery limiting, and a system tray GUI — powered by [z13ctl](https://github.com/dahui/z13ctl).
+Hardware auto-detection, per-device fixes, ASUS hardware control via [z13ctl](https://github.com/dahui/z13ctl), and a GZ302-first command-center tray app.
 
-Supports ASUS ROG Flow Z13 (GZ302), HP ZBook Ultra G1a, Framework Desktop, and other Strix Halo hardware.
+Supports the known Strix Halo device matrix below plus other confirmed Strix Halo hardware through the generic baseline profile.
 
 ---
 
 ## Supported Devices
 
+<!-- BEGIN:SUPPORTED_DEVICE_TABLE -->
+<!-- AUTO-GENERATED from gz302-lib/device-profile-data.sh via scripts/sync-device-matrix.sh -->
 | Device | APU | Class | Support tier |
 | :--- | :--- | :--- | :--- |
 | **ASUS ROG Flow Z13 (GZ302)** | Ryzen AI Max+ 395 / Max 390 | Tablet / Gaming 2-in-1 | Full |
 | **HP ZBook Ultra G1a** | Ryzen AI Max+ PRO 395 | Workstation laptop | Partial |
+| **HP Mini Workstation (Z2 G1a)** | Ryzen AI Max+ 395 | Mini workstation | Partial |
 | **Framework Desktop** | Ryzen AI Max 385 / Max+ 395 | Desktop | Partial |
-| **ASUS TUF Gaming A14** | Ryzen AI Max+ 392 | Laptop | Full (ASUS) |
-| **Other Strix Halo** | Ryzen AI MAX family | Laptop / Mini-PC / Handheld | Experimental |
+| **ASUS TUF Gaming A14** | Ryzen AI Max+ 392 | Laptop | Partial |
+| **Sixunited AXP77** | Ryzen AI Max+ 395 | Mini-PC | Experimental |
+| **GMKtec EVO-X2** | Ryzen AI Max+ 395 | Mini-PC | Experimental |
+| **Minisforum MS-S1 Max** | Ryzen AI Max+ 395 | Mini-PC | Experimental |
+| **AYANEO NEXT 2** | Ryzen AI Max+ 395 | Handheld | Experimental |
+| **GPD Win 5** | Ryzen AI Max+ 395 | Handheld | Experimental |
+| **Other Strix Halo** | Ryzen AI MAX family | Laptop / Mini-PC / Handheld | Experimental baseline |
+<!-- END:SUPPORTED_DEVICE_TABLE -->
 
 ---
 
@@ -40,7 +49,7 @@ The installer detects your device, distribution, kernel, and capabilities, then 
 | Section | What it does |
 | :--- | :--- |
 | **1. Hardware Fixes** | WiFi (MT7925), GPU (Radeon 8060S), Input, Audio (SOF/CS35L41), OLED PSR-SU fix, Suspend fix |
-| **2. Command Center** | z13ctl (ASUS only: RGB, TDP, fan curves, battery) + system tray app (all devices) |
+| **2. Command Center** | z13ctl CLI/daemon on supported ASUS Strix Halo devices; GZ302 tray app and refresh controls where applicable |
 | **3. Gaming** | Steam, Lutris, MangoHUD, GameMode, Wine, Proton-GE |
 | **4. AI / LLM** | Ollama, LM Studio, ROCm, PyTorch, vLLM, ComfyUI |
 | **5. Other Tools** | Hypervisor (KVM/QEMU), community integrations |
@@ -57,6 +66,8 @@ sudo ./gz302-setup.sh --help          # Show all options
 ---
 
 ## Quick Start (after installation)
+
+The commands below apply to ASUS devices where `z13ctl` is supported.
 
 ```bash
 # RGB lighting
@@ -80,7 +91,7 @@ z13ctl status
 
 ### Backward-Compatible Wrappers
 
-The installer creates `pwrcfg` and `gz302-rgb` wrappers that map to z13ctl:
+On ASUS devices where `z13ctl` is supported, the installer creates `pwrcfg` and `gz302-rgb` wrappers:
 
 | Command | Maps to |
 | :--- | :--- |
@@ -91,9 +102,11 @@ The installer creates `pwrcfg` and `gz302-rgb` wrappers that map to z13ctl:
 
 ---
 
-## System Tray App
+## GZ302 Command Center
 
-After installation, look for **"Strix Halo Command Center"** in your system tray.
+On ASUS ROG Flow Z13 (GZ302) systems, after installation, look for **"ASUS ROG Flow Z13 (GZ302) Command Center"** in your system tray.
+
+On non-ASUS or non-GZ302 Strix Halo devices, the installer skips the tray app and only offers the device-appropriate hardware fixes, modules, and community integrations.
 
 - **Left-click:** Toggle Dashboard Window (Monitoring, Fan Curves, AI Status)
 - **Right-click:** Quick access menu:
@@ -133,16 +146,18 @@ The scripts automatically detect your kernel and adapt:
 
 ## Repository Structure
 
-```
+```text
 GZ302-Linux-Setup/
 ├── gz302-setup.sh             # Unified installer (single entry point)
 ├── gz302-lib/                 # Core libraries (manager-based)
 │   ├── utils.sh               # Shared utilities, logging, backups
 │   ├── device-manager.sh      # Hardware detection, device profiles, capabilities (NEW)
+│   ├── device-profile-data.sh # Known-device matrix and profile capability data
 │   ├── kernel-compat.sh       # Kernel version detection
 │   └── ... (wifi, gpu, audio, etc.)
 ├── modules/                   # Optional feature packs (gaming, llm, etc.)
-├── scripts/                   # System scripts (fix-suspend, uninstall)
+├── scripts/                   # System scripts and repo sync helpers
+├── tests/                     # Regression checks and version validation helpers
 ├── command-center/            # PyQt6 system tray application
 ├── docs/                      # User guides and changelogs
 │   └── technical/             # Hardware research and obsolescence analysis

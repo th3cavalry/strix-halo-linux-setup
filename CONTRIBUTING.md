@@ -100,9 +100,7 @@ error "Error message (exits script)"
 bash -n gz302-setup.sh
 
 # Test all scripts
-for script in gz302-setup.sh gz302-lib/*.sh; do
-    bash -n "$script" && echo "✓ $script" || echo "✗ $script FAILED"
-done
+find . -name "*.sh" -type f -print0 | xargs -0 -I{} bash -n "{}"
 ```
 
 ### 2. ShellCheck Linting
@@ -113,15 +111,36 @@ done
 shellcheck gz302-setup.sh
 
 # Lint all scripts
-for script in gz302-setup.sh gz302-lib/*.sh; do
-    echo "=== $script ==="
-    shellcheck "$script"
-done
+find . -name "*.sh" -type f -print0 | xargs -0 shellcheck
 ```
 
 **All scripts must pass with zero warnings.**
 
-### 3. Distribution Testing
+### 3. Device Detection Regression Script
+
+**Recommended for hardware-profile changes:**
+```bash
+bash tests/device-manager-detection.sh
+```
+
+This covers the Strix Halo platform gate, known-device DMI aliases, generic fallback handling, and the ASUS command-center/z13ctl capability split.
+
+### 4. Generated Content Sync
+
+**Required when changing the supported-device matrix or profile metadata:**
+```bash
+bash scripts/sync-device-matrix.sh
+git diff -- README.md gz302-setup.sh docs/technical/external-integrations-catalog.md
+```
+
+### 5. Version Consistency
+
+**Required before committing:**
+```bash
+bash tests/validate-version-sync.sh
+```
+
+### 6. Distribution Testing
 
 **Strongly recommended:**
 Test your changes on all supported distributions:
@@ -139,6 +158,9 @@ You can use virtual machines or containers for testing.
 3. **Test thoroughly**:
    - Run syntax validation: `bash -n script.sh`
    - Run shellcheck: `shellcheck script.sh`
+    - Run device-profile regression checks when touching `gz302-lib/device-manager.sh`: `bash tests/device-manager-detection.sh`
+    - Run generated-content sync when changing supported devices: `bash scripts/sync-device-matrix.sh`
+    - Run version validation: `bash tests/validate-version-sync.sh`
    - Test on target hardware or VM if possible
 4. **Commit with clear messages**:
    ```

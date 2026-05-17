@@ -1,6 +1,6 @@
 # GZ302 Testing Guide — Strix Halo Edition
 
-**Current Version:** 6.4.1  
+**Current Version:** 6.6.2  
 **Status:** Unified Testing Framework for GZ302 & Strix Halo Platform
 
 ---
@@ -15,7 +15,7 @@ This guide provides comprehensive testing procedures for the GZ302-Linux-Setup p
 
 ### Supported Platforms
 1. **ASUS ROG Flow Z13 (GZ302)**: Primary reference hardware.
-2. **Generic Strix Halo Devices**: HP ZBook Ultra, Framework ITX, etc.
+2. **Other Strix Halo Devices**: Use the generated matrix in `docs/technical/external-integrations-catalog.md` as the current compatibility list. Validate hardware fixes/modules first; GZ302 command-center tests are not assumed portable.
 3. **Kernels**: 6.14 (Minimum), 6.17+ (Recommended/Native).
 
 ---
@@ -50,7 +50,6 @@ The Command Center is the most visible component and requires rigorous UI/UX val
 ### Installation & Idempotency
 - [ ] **Fresh Install**: Run `sudo ./gz302-setup.sh` on a clean system.
 - [ ] **Idempotency**: Run the script a second time. It should complete in < 5 seconds without re-downloading or re-applying static fixes.
-- [ ] **Status Mode**: Run `sudo ./gz302-setup.sh --status`. Verify it accurately reflects which components are "Applied".
 
 ### Hardware Enablement
 - [ ] **WiFi (MT7925)**: Verify connectivity and absence of "deauthentication" loops in `dmesg`.
@@ -65,10 +64,20 @@ The Command Center is the most visible component and requires rigorous UI/UX val
 ### Syntax & Linting
 ```bash
 # Validate all scripts
-for script in gz302-*.sh; do bash -n "$script" && echo "✓ $script"; done
+find . -name "*.sh" -type f -print0 | xargs -0 -I{} bash -n "{}"
 
 # Shellcheck (Critical for logic errors)
-shellcheck gz302-setup.sh gz302-lib/*.sh
+find . -name "*.sh" -type f -print0 | xargs -0 shellcheck
+
+# Device-profile regression coverage
+bash tests/device-manager-detection.sh
+
+# Generated content must stay in sync with the profile manifest
+bash scripts/sync-device-matrix.sh
+git diff --exit-code README.md gz302-setup.sh docs/technical/external-integrations-catalog.md
+
+# Version contract validation
+bash tests/validate-version-sync.sh
 ```
 
 ### Python/PyQt6 Sanity
@@ -86,6 +95,12 @@ python3 -m py_compile command-center/src/modules/*.py
 - [ ] Verify that old `pwrcfg` configs are correctly handled or migrated by the new `z13ctl` logic.
 - [ ] Ensure `sudo ./install-policy.sh` updates the sudoers entries for the new binary names.
 
+### Hardware Profile Regressions
+- [ ] Run `bash tests/device-manager-detection.sh` after changing `gz302-lib/device-manager.sh`.
+- [ ] Confirm that a known-device DMI alias still maps to the expected profile.
+- [ ] Confirm that generic `Max`/marketing strings without CPU or GPU proof do not set `CAP_STRIX_HALO=true`.
+- [ ] Confirm that `bash scripts/sync-device-matrix.sh` produces no unexpected diffs after editing the known-device matrix.
+
 ---
 
 ## Troubleshooting Tests
@@ -96,5 +111,5 @@ python3 -m py_compile command-center/src/modules/*.py
 
 ---
 
-**Last Updated:** 2026-04-23  
-**Status:** Updated for Command Center v6.2.0 features.
+**Last Updated:** 2026-05-16  
+**Status:** Updated for manifest-driven device metadata, generated matrix sync, and repository version validation.

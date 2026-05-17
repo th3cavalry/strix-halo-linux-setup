@@ -14,6 +14,11 @@
 ## Testing
 <!-- Describe the tests you ran to verify your changes -->
 
+**Device-profile changes:**
+- [ ] Not applicable
+- [ ] I ran `bash tests/device-manager-detection.sh`
+- [ ] I ran `bash scripts/sync-device-matrix.sh` and committed the generated updates
+
 **Tested on:**
 - [ ] Arch Linux / EndeavourOS / Manjaro
 - [ ] Ubuntu / Pop!_OS / Linux Mint
@@ -28,6 +33,7 @@
 ## Code Quality Checklist
 - [ ] My code passes `bash -n` syntax validation
 - [ ] My code passes `shellcheck` with zero warnings
+- [ ] I ran `bash tests/validate-version-sync.sh`
 - [ ] I have followed the code style guidelines in CONTRIBUTING.md
 - [ ] I have used proper quoting for all variables
 - [ ] I have added `-r` flag to all `read` commands
@@ -42,8 +48,9 @@
 
 ## Documentation
 - [ ] I have updated relevant documentation (README.md, CONTRIBUTING.md, etc.)
+- [ ] I have synced generated device-matrix blocks if supported-device data changed
 - [ ] I have added version numbers where applicable
-- [ ] I have updated CHANGELOG.md if this is a significant change
+- [ ] I have updated CHANGELOG.md for this version bump
 - [ ] Code comments are clear and follow existing style
 
 ## Additional Notes

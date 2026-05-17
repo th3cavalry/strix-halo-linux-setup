@@ -191,46 +191,30 @@ wifi_apply_configuration
 
 ## Testing
 
-### Unit Testing (Planned)
+### Device Detection Regression Checks
 ```bash
-# Using bats (Bash Automated Testing System)
-@test "wifi_detect_hardware detects MT7925e" {
-    run wifi_detect_hardware
-    [ "$status" -eq 0 ]
-    [[ "$output" =~ "14c3:0616" ]]
-}
+# Run the lightweight hardware-profile regression script
+bash tests/device-manager-detection.sh
 
-@test "wifi_requires_aspm_workaround returns correct value" {
-    # Mock kernel version 6.16
-    uname() { echo "6.16.0"; }
-    run wifi_requires_aspm_workaround
-    [ "$status" -eq 0 ]  # Workaround needed
-    
-    # Mock kernel version 6.17
-    uname() { echo "6.17.0"; }
-    run wifi_requires_aspm_workaround
-    [ "$status" -eq 1 ]  # Workaround not needed
-}
+# Refresh generated device tables and help output after profile data changes
+bash scripts/sync-device-matrix.sh
+
+# Validate the repository version contract
+bash tests/validate-version-sync.sh
 ```
 
-### Integration Testing (Planned)
+The current regression script validates:
+- allowlisted DMI-only matches for known devices like GZ302 and HP Z2 G1a
+- rejection of loose DMI strings that previously caused false positives
+- CPU/GPU signature fallback for unknown Strix Halo hardware
+- correct ASUS profile separation between the generic ASUS path and the A14-specific path
+
+Known-device metadata now lives in `gz302-lib/device-profile-data.sh`, which also feeds the generated support tables in the README, installer help text, and external catalog.
+
+### Future Expansion
 ```bash
-# Full workflow test
-source gz302-lib/wifi-manager.sh
-
-# 1. Detect
-wifi_detect_hardware || exit 1
-
-# 2. Apply
-wifi_apply_configuration || exit 1
-
-# 3. Verify
-wifi_verify_working || exit 1
-
-# 4. Status
-wifi_print_status
-
-echo "Integration test passed"
+# bats remains a good future option for per-library unit tests
+# but the repository now ships a dependency-free regression runner first
 ```
 
 ## Contributing
