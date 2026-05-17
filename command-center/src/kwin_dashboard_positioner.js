@@ -10,7 +10,8 @@ function isTarget(window) {
 }
 
 function targetGeometry(window) {
-    const area = workspace.clientArea(KWin.WorkArea, window);
+    const screen = window.output || workspace.activeScreen;
+    const area = workspace.clientArea(KWin.MaximizeArea, screen);
     const frame = window.frameGeometry;
     return {
         x: area.x + area.width - frame.width - MARGIN,

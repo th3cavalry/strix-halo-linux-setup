@@ -81,6 +81,11 @@ All notable changes to GZ302-Linux-Setup will be documented in this file.
 - **`gz302-lib/utils.sh` banner**: Subtitle now reads "Strix Halo Linux Setup — AMD Ryzen AI MAX Platform" instead of GZ302-specific text.
 - **Section 3 header**: "Display & Tools" renamed to "Display & Command Center".
 
+## [6.4.2] - 2026-05-15
+
+### Fixed
+- **Dashboard multi-monitor placement**: KWin positioner now correctly uses `window.output` so the dashboard stays on the screen that actually contains the window instead of teleporting to the active screen.
+
 ## [6.4.1] - 2026-05-15
 
 ### Fixed
