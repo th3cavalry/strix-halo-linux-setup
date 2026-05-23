@@ -35,6 +35,13 @@ class RGBController:
         # z13ctl handles both keyboard and lightbar
         self.window_available = self.keyboard_available
 
+    def is_available(self):
+        return self.keyboard_available or self.window_available
+
+    def refresh_availability(self):
+        self._check_installation()
+        return self.is_available()
+
     def check_available(self):
         """Check if z13ctl binary exists AND daemon is running."""
         try:

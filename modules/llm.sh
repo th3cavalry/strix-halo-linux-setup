@@ -2,7 +2,7 @@
 
 # ==============================================================================
 # Strix Halo LLM/AI Module
-# Version: 6.7.1
+# Version: 6.8.0
 #
 # This module installs LLM backends for the ASUS ROG Flow Z13 (GZ302)
 # Uses official installation methods - no custom builds

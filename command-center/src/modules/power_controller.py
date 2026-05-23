@@ -25,12 +25,32 @@ class PowerController:
 
     def __init__(self, notifier):
         self.notifier = notifier
+        self.available = self.check_available()
         self.current_profile = self._read_current_profile()
         self._auto_enabled = False
         self._ac_profile = "performance"
         self._battery_profile = "balanced"
         self._last_plugged = None
         self._load_auto_config()
+
+    def check_available(self):
+        result = self._run_z13ctl(["z13ctl", "status"], timeout=5)
+        return bool(result and result.returncode == 0)
+
+    def refresh_availability(self):
+        self.available = self.check_available()
+        if self.available:
+            self.current_profile = self._read_current_profile()
+        return self.available
+
+    def _notify_unavailable(self, action):
+        self.notifier.notify(
+            "Hardware Control Unavailable",
+            f"{action} requires a supported device control backend.",
+            "warning",
+            4000,
+        )
+        return False
 
     def _run_z13ctl(self, args, timeout=10):
         last_result = None
@@ -87,6 +107,65 @@ class PowerController:
             pass
         return "balanced"
 
+    def _read_apu_temp(self):
+        temps = []
+
+        try:
+            for zone in Path("/sys/class/thermal").glob("thermal_zone*"):
+                temp_file = zone / "temp"
+                if not temp_file.exists():
+                    continue
+
+                raw_value = temp_file.read_text().strip()
+                if not raw_value or not raw_value.lstrip("-").isdigit():
+                    continue
+
+                temp_value = float(int(raw_value))
+                if abs(temp_value) > 1000:
+                    temp_value /= 1000.0
+
+                zone_label = ""
+                zone_type = zone / "type"
+                if zone_type.exists():
+                    zone_label = zone_type.read_text().strip().lower()
+
+                temps.append((zone_label, temp_value))
+        except Exception:
+            pass
+
+        for preferred in ("apu", "cpu", "k10temp", "package", "soc"):
+            for zone_label, temp_value in temps:
+                if preferred in zone_label:
+                    return f"{int(round(temp_value))}°C"
+
+        if temps:
+            return f"{int(round(max(value for _, value in temps)))}°C"
+
+        return "--°C"
+
+    def _read_fan_summary(self):
+        fan_values = []
+
+        try:
+            for hwmon in Path("/sys/class/hwmon").glob("hwmon*"):
+                for fan_input in sorted(hwmon.glob("fan*_input")):
+                    raw_value = fan_input.read_text().strip()
+                    if raw_value.isdigit() and int(raw_value) > 0:
+                        fan_values.append(int(raw_value))
+        except Exception:
+            pass
+
+        if not fan_values:
+            return "-- RPM"
+
+        return " / ".join(f"{value} RPM" for value in fan_values[:2])
+
+    def _fallback_status(self):
+        return "\n".join([
+            f"APU: {self._read_apu_temp()}",
+            f"Fans: {self._read_fan_summary()}",
+        ])
+
     def _load_auto_config(self):
         try:
             if _AUTO_CONFIG_FILE.exists():
@@ -130,6 +209,9 @@ class PowerController:
         return self._battery_profile
 
     def set_auto(self, enabled):
+        if not self.available:
+            self._notify_unavailable("Auto power switching")
+            return False
         self._auto_enabled = enabled
         self._save_auto_config()
         if enabled:
@@ -137,6 +219,7 @@ class PowerController:
             self.check_auto_switch()
         status = "enabled" if enabled else "disabled"
         self.notifier.notify("Auto Power", f"Auto-switching {status}", "info", 2000)
+        return True
 
     def check_auto_switch(self):
         """Check power source and switch profile automatically if enabled."""
@@ -175,6 +258,8 @@ class PowerController:
         return tdp, tdp, tdp
 
     def set_profile(self, profile):
+        if not self.available:
+            return self._notify_unavailable("Profile changes")
         try:
             spec = POWER_PROFILES.get(profile)
             if spec:
@@ -210,6 +295,8 @@ class PowerController:
             return False
 
     def set_tdp(self, watts):
+        if not self.available:
+            return self._notify_unavailable("TDP overrides")
         try:
             result = self._run_z13ctl(["z13ctl", "tdp", "--set", str(watts)], timeout=10)
             if result and result.returncode == 0:
@@ -223,6 +310,8 @@ class PowerController:
             return False
 
     def set_fan_curve(self, curve):
+        if not self.available:
+            return self._notify_unavailable("Fan curve changes")
         try:
             result = self._run_z13ctl(["z13ctl", "fancurve", "--set", curve], timeout=10)
             if result and result.returncode == 0:
@@ -235,6 +324,8 @@ class PowerController:
             return False
 
     def set_charge_limit(self, limit):
+        if not self.available:
+            return self._notify_unavailable("Battery charge limits")
         try:
             result = self._run_z13ctl(["z13ctl", "batterylimit", "--set", str(limit)], timeout=10)
             if result and result.returncode == 0:
@@ -251,10 +342,12 @@ class PowerController:
 
     def get_status(self):
         try:
+            if not self.available:
+                return self._fallback_status()
             result = self._run_z13ctl(["z13ctl", "status"], timeout=10)
             return result.stdout.strip() if result and result.returncode == 0 else "Unknown"
         except Exception:
-            return "Unknown"
+            return self._fallback_status()
 
     def get_battery_info(self):
         try:

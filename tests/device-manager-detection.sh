@@ -105,6 +105,7 @@ test_gz302_dmi_allowlist() {
 
     expect_eq "GZ302 DMI marks Strix Halo" "true" "$CAP_STRIX_HALO"
     expect_eq "GZ302 profile name" "ROG Flow Z13 (GZ302)" "$DEVICE_MODEL"
+    expect_eq "GZ302 enables dashboard" "true" "$CAP_DASHBOARD"
     expect_eq "GZ302 enables command center" "true" "$CAP_COMMAND_CENTER"
 }
 
@@ -164,6 +165,7 @@ test_non_strix_amd_laptop_is_rejected() {
     device_detect
 
     expect_eq "Non-Strix AMD laptop does not mark Strix Halo" "false" "$CAP_STRIX_HALO"
+    expect_eq "Non-Strix AMD laptop keeps dashboard disabled" "false" "$CAP_DASHBOARD"
     expect_eq "Non-Strix AMD laptop keeps z13ctl disabled" "false" "$CAP_Z13CTL"
 }
 
@@ -179,6 +181,7 @@ test_cpu_signature_is_authoritative() {
     device_detect
 
     expect_eq "CPU signature marks Strix Halo" "true" "$CAP_STRIX_HALO"
+    expect_eq "CPU signature enables dashboard" "true" "$CAP_DASHBOARD"
     expect_eq "Unknown CPU-backed device stays experimental" "experimental" "$DEVICE_SUPPORT_TIER"
     expect_eq "Unknown CPU-backed device keeps z13ctl disabled" "false" "$CAP_Z13CTL"
 }
@@ -195,6 +198,7 @@ test_gpu_signature_is_authoritative() {
     device_detect
 
     expect_eq "GPU signature marks Strix Halo" "true" "$CAP_STRIX_HALO"
+    expect_eq "GPU signature enables dashboard" "true" "$CAP_DASHBOARD"
     expect_eq "GPU signature enables ROCm" "true" "$CAP_ROCM"
     expect_eq "Unknown GPU-backed device keeps fallback support tier" "experimental" "$DEVICE_SUPPORT_TIER"
 }
@@ -215,6 +219,46 @@ test_non_a14_tuf_profile_falls_back() {
     expect_eq "Unknown ASUS TUF keeps z13ctl disabled until explicitly validated" "false" "$CAP_Z13CTL"
 }
 
+test_known_device_matrix_coverage() {
+    local sys_vendor product_name product_family board_name expected_model
+    local expected_tier expected_dashboard expected_z13ctl expected_command_center expected_coverage
+    local actual_coverage
+
+    print_case "Known device profiles keep their expected support coverage"
+
+    while IFS='|' read -r sys_vendor product_name product_family board_name expected_model \
+        expected_tier expected_dashboard expected_z13ctl expected_command_center expected_coverage; do
+        [[ -n "$sys_vendor" ]] || continue
+
+        reset_mocks
+        MOCK_SYS_VENDOR="$sys_vendor"
+        MOCK_PRODUCT_NAME="$product_name"
+        MOCK_PRODUCT_FAMILY="$product_family"
+        MOCK_BOARD_NAME="$board_name"
+
+        device_detect
+        actual_coverage=$(device_profile_support_coverage_label "$DEVICE_SUPPORT_TIER" "$CAP_Z13CTL" "$CAP_COMMAND_CENTER")
+
+        expect_eq "$expected_model model" "$expected_model" "$DEVICE_MODEL"
+        expect_eq "$expected_model tier" "$expected_tier" "$DEVICE_SUPPORT_TIER"
+        expect_eq "$expected_model dashboard" "$expected_dashboard" "$CAP_DASHBOARD"
+        expect_eq "$expected_model z13ctl" "$expected_z13ctl" "$CAP_Z13CTL"
+        expect_eq "$expected_model tray app" "$expected_command_center" "$CAP_COMMAND_CENTER"
+        expect_eq "$expected_model coverage" "$expected_coverage" "$actual_coverage"
+    done <<'EOF'
+    ASUSTeK COMPUTER INC.|ROG Flow Z13 GZ302EA_GZ302EA|ROG Flow Z13|GZ302EA|ROG Flow Z13 (GZ302)|full|true|true|true|Full stack
+    HP|HP ZBook Ultra G1a|||HP ZBook Ultra G1a|partial|true|false|false|Dashboard + core stack
+    HP|HP Workstation||Z2 G1a|HP Mini Workstation (Z2 G1a)|partial|true|false|false|Dashboard + core stack
+    Framework|Framework Desktop|||Framework Desktop|partial|true|false|false|Dashboard + core stack
+    ASUSTeK COMPUTER INC.|ASUS TUF Gaming A14|||ASUS TUF Gaming A14|partial|true|true|false|Dashboard + ASUS control
+    Sixunited|AXP77|||Sixunited AXP77|experimental|true|false|false|Dashboard + baseline stack
+    GMKtec|EVO-X2|||GMKtec EVO-X2|experimental|true|false|false|Dashboard + baseline stack
+    Minisforum|MS-S1 Max|||Minisforum MS-S1 Max|experimental|true|false|false|Dashboard + baseline stack
+    AYANEO|NEXT 2|||AYANEO NEXT 2|experimental|true|false|false|Dashboard + baseline stack
+    GPD|Win 5|||GPD Win 5|experimental|true|false|false|Dashboard + baseline stack
+EOF
+}
+
 main() {
     test_gz302_dmi_allowlist
     test_hp_z2_board_allowlist
@@ -224,6 +268,7 @@ main() {
     test_cpu_signature_is_authoritative
     test_gpu_signature_is_authoritative
     test_non_a14_tuf_profile_falls_back
+    test_known_device_matrix_coverage
 
     printf '\nAssertions passed: %s\n' "$ASSERTIONS_PASSED"
 

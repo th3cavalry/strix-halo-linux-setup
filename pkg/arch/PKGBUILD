@@ -1,6 +1,6 @@
 # Maintainer: th3cavalry <github.com/th3cavalry>
 pkgname=strix-halo-setup
-pkgver=6.7.1
+pkgver=6.8.0
 pkgrel=1
 pkgdesc="Linux optimization suite for ASUS ROG Flow Z13 (GZ302) — z13ctl backend"
 arch=('any')

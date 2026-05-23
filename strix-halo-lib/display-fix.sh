@@ -4,7 +4,7 @@ set -euo pipefail
 
 # ==============================================================================
 # GZ302 Display Fix Library
-# Version: 6.7.1
+# Version: 6.8.0
 #
 # This library provides display-specific fixes for OLED panels on GZ302.
 # Focuses on all eDP power-saving features that can cause display artifacts.
@@ -548,12 +548,12 @@ display_print_psr_su_status() {
 # --- Library Information ---
 
 display_fix_lib_version() {
-    echo "6.7.1"
+    echo "6.8.0"
 }
 
 display_fix_lib_help() {
     cat <<'HELP'
-GZ302 Display Fix Library v6.7.1
+GZ302 Display Fix Library v6.8.0
 
 PSR/Replay/IPS Detection Functions:
   display_psr_su_enabled        - Check if display fix bits are set

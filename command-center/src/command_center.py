@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Strix Halo Command Center — Strix Halo Edition (v6.7.1)
+Strix Halo Command Center — Strix Halo Edition (v6.8.0)
 Unified Dashboard and System Tray Controller.
 Inspired by G-Helper and Strix-Halo-Control.
 """
@@ -37,7 +37,7 @@ from modules.rgb_controller import RGBController
 from modules.power_controller import PowerController
 
 TRAY_ICON_SIZE = 24
-VERSION = "6.7.1"
+VERSION = "6.8.0"
 DASHBOARD_WINDOW_TITLE = "Strix Halo Dashboard"
 DASHBOARD_WINDOW_ROLE = "strix-halo-dashboard"
 KWIN_DASHBOARD_SCRIPT_NAME = "strix_halo_dashboard_anchor"
@@ -74,6 +74,8 @@ class DashboardWindow(QWidget):
         self.config = config
         self.notifier = notifier
         self._profile_btns = {}
+        self._rgb_buttons = []
+        self._fan_curve_placeholder = "48:2,53:22,57:30,60:43,63:56,65:68,70:89,76:102"
 
         self.setWindowTitle(DASHBOARD_WINDOW_TITLE)
         self.setWindowRole(DASHBOARD_WINDOW_ROLE)
@@ -86,6 +88,7 @@ class DashboardWindow(QWidget):
 
         self.setup_ui()
         self.apply_styles()
+    self.apply_backend_state()
 
     # ------------------------------------------------------------------
     # UI construction
@@ -113,8 +116,9 @@ class DashboardWindow(QWidget):
         hbox = QHBoxLayout(header)
         hbox.setContentsMargins(14, 10, 14, 10)
 
-        title = QLabel("ROG Flow Z13 · GZ302")
+        title = QLabel(self.config.get_device_label())
         title.setObjectName("title_label")
+        self._title_label = title
         hbox.addWidget(title)
 
         hbox.addStretch()
@@ -232,6 +236,7 @@ class DashboardWindow(QWidget):
             btn.setObjectName("rgb_btn")
             btn.setFixedHeight(28)
             btn.clicked.connect(lambda _, v=val: self.rgb.set_keyboard_brightness(v))
+            self._rgb_buttons.append(btn)
             hbox.addWidget(btn)
         hbox.addStretch()
         vbox.addLayout(hbox)
@@ -247,6 +252,7 @@ class DashboardWindow(QWidget):
                 btn.clicked.connect(lambda _, e=fx: self.rgb.set_keyboard_animation(e))
             else:
                 btn.clicked.connect(self.rgb.turn_off_keyboard)
+            self._rgb_buttons.append(btn)
             hbox.addWidget(btn)
         hbox.addStretch()
         vbox.addLayout(hbox)
@@ -271,12 +277,14 @@ class DashboardWindow(QWidget):
         custom_btn.clicked.connect(
             lambda _, zone=zone_label, callback=apply_color: self._pick_custom_color(zone, callback)
         )
+        self._rgb_buttons.append(custom_btn)
         hbox.addWidget(custom_btn)
 
         off_btn = QPushButton("Off")
         off_btn.setObjectName("rgb_minor_btn")
         off_btn.setFixedHeight(24)
         off_btn.clicked.connect(turn_off)
+        self._rgb_buttons.append(off_btn)
         hbox.addWidget(off_btn)
         hbox.addStretch()
         return row
@@ -298,6 +306,7 @@ class DashboardWindow(QWidget):
             "QPushButton:hover { border: 2px solid #f5f5f5; }"
             "QPushButton:pressed { border: 2px solid #ff4655; }"
         )
+        self._rgb_buttons.append(btn)
         return btn
 
     def _pick_custom_color(self, zone_label, apply_color):
@@ -322,13 +331,14 @@ class DashboardWindow(QWidget):
         hbox = QHBoxLayout()
         hbox.setSpacing(6)
         self.curve_input = QLineEdit()
-        self.curve_input.setPlaceholderText("48:2,53:22,57:30,60:43,63:56,65:68,70:89,76:102")
+        self.curve_input.setPlaceholderText(self._fan_curve_placeholder)
         self.curve_input.setObjectName("curve_input")
         hbox.addWidget(self.curve_input)
         apply_btn = QPushButton("Apply")
         apply_btn.setObjectName("apply_btn")
         apply_btn.setFixedHeight(30)
         apply_btn.clicked.connect(self._apply_fan_curve)
+        self._fan_apply_btn = apply_btn
         hbox.addWidget(apply_btn)
         vbox.addLayout(hbox)
         return section
@@ -359,6 +369,29 @@ class DashboardWindow(QWidget):
         line.setObjectName("divider")
         line.setFixedHeight(1)
         return line
+
+    def refresh_device_label(self):
+        self._title_label.setText(self.config.get_device_label())
+
+    def apply_backend_state(self):
+        power_available = self.power.available
+        rgb_available = self.rgb.is_available()
+
+        for btn in self._profile_btns.values():
+            btn.setEnabled(power_available)
+
+        for btn in self._bat_btns.values():
+            btn.setEnabled(power_available)
+
+        self.curve_input.setEnabled(power_available)
+        self._fan_apply_btn.setEnabled(power_available)
+        self._auto_btn.setEnabled(power_available)
+        self.curve_input.setPlaceholderText(
+            self._fan_curve_placeholder if power_available else "Hardware control backend unavailable on this device"
+        )
+
+        for btn in self._rgb_buttons:
+            btn.setEnabled(rgb_available)
 
     def _section_title(self, text):
         lbl = QLabel(text)
@@ -576,7 +609,10 @@ class DashboardWindow(QWidget):
 
             self.stat_temp._value_lbl.setText(temp)
             self.stat_fans._value_lbl.setText(fans)
-            self.stat_pwr._value_lbl.setText(self.power.current_profile.title())
+            if self.power.available:
+                self.stat_pwr._value_lbl.setText(self.power.current_profile.title())
+            else:
+                self.stat_pwr._value_lbl.setText("Monitor")
 
             bat_info = self.power.get_battery_info()
             pct = bat_info.get("percent")
@@ -590,6 +626,7 @@ class DashboardWindow(QWidget):
 
         self._update_profile_buttons()
         self._auto_btn.setChecked(self.power.is_auto_enabled())
+    self.apply_backend_state()
 
 class CommandCenterApp(QSystemTrayIcon):
     def __init__(self, app):
@@ -612,6 +649,7 @@ class CommandCenterApp(QSystemTrayIcon):
         self.setContextMenu(self.menu)
 
         self.activated.connect(self._on_activated)
+        self.setToolTip(self.config.get_app_name())
         self.update_icon()
         self.show()
         
@@ -619,7 +657,7 @@ class CommandCenterApp(QSystemTrayIcon):
         self.timer.timeout.connect(self.poll_status)
         self.timer.start(3000)
         
-        self.notifier.notify("Strix Halo", "Control Panel Ready", "success", 2000)
+        self.notifier.notify("Dashboard Ready", self.config.get_device_label(), "success", 2000)
 
     def _build_color_icon(self, hex_color):
         pixmap = QPixmap(14, 14)
@@ -652,6 +690,8 @@ class CommandCenterApp(QSystemTrayIcon):
 
     def setup_menu(self):
         self.menu.clear()
+        power_available = self.power.available
+        rgb_available = self.rgb.is_available()
         self.menu.addAction("🖥️ Open Dashboard").triggered.connect(
             lambda _=False: QTimer.singleShot(0, self._show_dashboard)
         )
@@ -676,6 +716,7 @@ class CommandCenterApp(QSystemTrayIcon):
             a.triggered.connect(lambda _, code=c: self.power.set_profile(code))
             profiles_menu.addAction(a)
             profile_group.addAction(a)
+        profiles_menu.setEnabled(power_available)
 
         # --- Battery Limit ---
         limit_menu = self.menu.addMenu("🔋 Battery Limit")
@@ -683,6 +724,7 @@ class CommandCenterApp(QSystemTrayIcon):
             a = QAction(f"Limit to {lim}%", self)
             a.triggered.connect(lambda _, l=lim: self.power.set_charge_limit(l))
             limit_menu.addAction(a)
+        limit_menu.setEnabled(power_available)
 
         self.menu.addSeparator()
 
@@ -730,6 +772,7 @@ class CommandCenterApp(QSystemTrayIcon):
         lightbar_fx_menu.addAction("Off").triggered.connect(self.rgb.turn_off_lightbar)
             
         rgb_menu.addAction("❌ Turn Off All").triggered.connect(self.rgb.turn_off)
+        rgb_menu.setEnabled(rgb_available)
 
         self.menu.addSeparator()
 
@@ -738,6 +781,7 @@ class CommandCenterApp(QSystemTrayIcon):
         auto_action.setCheckable(True)
         auto_action.setChecked(self.power.is_auto_enabled())
         auto_action.triggered.connect(lambda checked: self.power.set_auto(checked))
+        auto_action.setEnabled(power_available)
         self.menu.addAction(auto_action)
 
         self.menu.addSeparator()
@@ -793,6 +837,12 @@ class CommandCenterApp(QSystemTrayIcon):
         self.dashboard.raise_()
         self.dashboard.activateWindow()
 
+    def reload_config(self):
+        self.config.load_config()
+        self.setToolTip(self.config.get_app_name())
+        self.dashboard.refresh_device_label()
+        self.dashboard.update_ui_states()
+
     def _on_activated(self, reason):
         if reason in (
             QSystemTrayIcon.ActivationReason.Trigger,
@@ -806,8 +856,11 @@ class CommandCenterApp(QSystemTrayIcon):
 
     def update_icon(self):
         assets = Path(__file__).resolve().parent.parent / "assets"
-        icon_name = "battery" if self.power.is_auto_enabled() and not self.power.get_battery_info().get("plugged") else "ac"
-        if not self.power.is_auto_enabled():
+        if not self.power.available:
+            icon_name = "battery" if self.power.get_battery_info().get("plugged") is False else "ac"
+        else:
+            icon_name = "battery" if self.power.is_auto_enabled() and not self.power.get_battery_info().get("plugged") else "ac"
+        if self.power.available and not self.power.is_auto_enabled():
             icon_name = {"quiet": "profile-b", "balanced": "profile-b", "performance": "profile-p", "gaming": "profile-g"}.get(self.power.current_profile, "profile-b")
 
         icon_path = assets / f"{icon_name}.svg"
@@ -844,15 +897,16 @@ class CommandCenterApp(QSystemTrayIcon):
 
     def poll_status(self):
         try:
+            self.power.refresh_availability()
+            self.rgb.refresh_availability()
             self.power.check_auto_switch()
             self.update_icon()
             if self.dashboard.isVisible(): self.dashboard.update_ui_states()
         except Exception: pass
 
 def main():
-    signal.signal(signal.SIGINT, signal.SIG_DFL)
     app = QApplication(sys.argv)
-    app.setApplicationName("Strix Halo Dashboard")
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
     app.setQuitOnLastWindowClosed(False)
     
     if not QSystemTrayIcon.isSystemTrayAvailable():
@@ -862,6 +916,8 @@ def main():
             if QSystemTrayIcon.isSystemTrayAvailable(): break
             
     tray = CommandCenterApp(app)
+    app.setApplicationName(tray.config.get_app_name())
+    signal.signal(signal.SIGUSR1, lambda *_: tray.reload_config())
     sys.exit(app.exec())
 
 if __name__ == "__main__":

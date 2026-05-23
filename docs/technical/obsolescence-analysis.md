@@ -4,9 +4,9 @@
 
 This document analyzes the obsolescence status of GZ302-Linux-Setup components as of April 2026, based on upstream Linux kernel support evolution (6.14-6.19+). The repository has fully transitioned from a **hardware enablement tool** (fixing broken hardware) to a **performance optimization toolkit** (tuning working hardware).
 
-As the repository broadens toward Strix Halo platform support, hardware-fix, AI/LLM, and ASUS control-stack paths must remain gated behind confirmed Strix Halo CPU/GPU signatures. The known-device matrix now lives in `strix-halo-lib/device-profile-data.sh`, and the device manager uses that allowlisted DMI vendor/product/family/board metadata before falling back to CPU/GPU signatures for unknown devices. This reduces false positives without shrinking the supported Strix Halo matrix. The z13ctl-based command-center tray app also remains a GZ302-first path until additional ASUS profiles are validated.
+As the repository broadens toward Strix Halo platform support, hardware-fix, AI/LLM, and ASUS control-stack paths must remain gated behind confirmed Strix Halo CPU/GPU signatures. The known-device matrix now lives in `strix-halo-lib/device-profile-data.sh`, and the device manager uses that allowlisted DMI vendor/product/family/board metadata before falling back to CPU/GPU signatures for unknown devices. This reduces false positives without shrinking the supported Strix Halo matrix. The generated device matrix now also derives a support-coverage label from those same capabilities so user-facing docs can distinguish full-stack, dashboard-first core-stack, and baseline support without overstating vendor-specific ASUS control coverage. The generic Strix Halo dashboard now applies to all confirmed Strix Halo devices, while z13ctl-backed control surfaces remain explicitly gated to validated ASUS profiles.
 
-**Last Updated:** April 4, 2026 
+**Last Updated:** May 17, 2026 
 **Analysis Period:** Early 2025 (Kernel 6.14) → April 2026 (Kernel 6.19+) 
 **Target Hardware:** ASUS ROG Flow Z13 (GZ302EA-XS99/XS98/XS96)
 

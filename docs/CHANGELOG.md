@@ -2,6 +2,19 @@
 
 All notable changes to Strix Halo Linux Setup will be documented in this file.
 
+## [6.8.0] - 2026-05-23
+
+### Added
+- **Known-device coverage regression checks**: `tests/device-manager-detection.sh` now validates the generated support-coverage mapping for the known Strix Halo device profiles, including the ASUS-control split and baseline-stack devices.
+- **Generic dashboard capability**: `strix-halo-lib/device-manager.sh` now exposes `CAP_DASHBOARD=true` for every confirmed Strix Halo device, so the tray/dashboard path is no longer GZ302-only.
+
+### Changed
+- **Equal dashboard support across devices**: `strix-halo-setup.sh` now offers the Strix Halo dashboard to all confirmed Strix Halo devices, writes neutral tray metadata, and keeps ASUS control backends opt-in only where `z13ctl` is actually supported.
+- **Dashboard-first coverage model**: The generated device matrix, README, and command-center docs now describe support in dashboard-first terms instead of implying that non-ASUS devices lose the tray path entirely.
+- **Supported-device matrix clarity**: `scripts/sync-device-matrix.sh` now generates a Coverage column alongside the support tier in the README, integrations catalog, and installer help output so each profile advertises the exact validated support surface.
+- **Support terminology docs**: `docs/technical/external-integrations-catalog.md` and `docs/technical/obsolescence-analysis.md` now explain that coverage labels are derived from the same capability metadata used by device detection, reducing ambiguity around what “partial” support means.
+- **Command-center runtime behavior**: The PyQt dashboard now loads per-device labels from `/etc/strix-halo/tray.conf`, falls back to generic sysfs telemetry without `z13ctl`, and disables unsupported ASUS-only actions instead of presenting a GZ302-only UI on every device.
+
 ## [6.7.1] - 2026-05-16
 
 ### Changed

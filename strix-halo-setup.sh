@@ -3,22 +3,22 @@
 # ==============================================================================
 # Strix Halo Linux Setup — Unified Installer
 # Author: th3cavalry using Copilot
-# Version: 6.7.1
+# Version: 6.8.0
 #
 # Supported devices (Strix Halo platform — AMD Ryzen AI MAX / MAX+):
 # BEGIN AUTO-GENERATED SUPPORTED DEVICES
 # AUTO-GENERATED from strix-halo-lib/device-profile-data.sh via scripts/sync-device-matrix.sh.
-# - ASUS ROG Flow Z13 (GZ302) — full support
-# - HP ZBook Ultra G1a — partial support
-# - HP Mini Workstation (Z2 G1a) — partial support
-# - Framework Desktop — partial support
-# - ASUS TUF Gaming A14 — partial support
-# - Sixunited AXP77 — experimental
-# - GMKtec EVO-X2 — experimental
-# - Minisforum MS-S1 Max — experimental
-# - AYANEO NEXT 2 — experimental
-# - GPD Win 5 — experimental
-# - Other confirmed Strix Halo — experimental baseline
+# - ASUS ROG Flow Z13 (GZ302) — full support (Full stack)
+# - HP ZBook Ultra G1a — partial support (Dashboard + core stack)
+# - HP Mini Workstation (Z2 G1a) — partial support (Dashboard + core stack)
+# - Framework Desktop — partial support (Dashboard + core stack)
+# - ASUS TUF Gaming A14 — partial support (Dashboard + ASUS control)
+# - Sixunited AXP77 — experimental (Dashboard + baseline stack)
+# - GMKtec EVO-X2 — experimental (Dashboard + baseline stack)
+# - Minisforum MS-S1 Max — experimental (Dashboard + baseline stack)
+# - AYANEO NEXT 2 — experimental (Dashboard + baseline stack)
+# - GPD Win 5 — experimental (Dashboard + baseline stack)
+# - Other confirmed Strix Halo — experimental baseline (Dashboard + baseline stack)
 # END AUTO-GENERATED SUPPORTED DEVICES
 #
 # Hardware detection automatically selects only the relevant fixes and
@@ -46,27 +46,27 @@ print_supported_device_help() {
     # BEGIN AUTO-GENERATED SUPPORTED DEVICES HELP
     # AUTO-GENERATED from strix-halo-lib/device-profile-data.sh via scripts/sync-device-matrix.sh.
     printf '%s
-' 'ASUS ROG Flow Z13 (GZ302) — Full'
+' 'ASUS ROG Flow Z13 (GZ302) — Full (Full stack)'
     printf '%s
-' 'HP ZBook Ultra G1a — Partial'
+' 'HP ZBook Ultra G1a — Partial (Dashboard + core stack)'
     printf '%s
-' 'HP Mini Workstation (Z2 G1a) — Partial'
+' 'HP Mini Workstation (Z2 G1a) — Partial (Dashboard + core stack)'
     printf '%s
-' 'Framework Desktop — Partial'
+' 'Framework Desktop — Partial (Dashboard + core stack)'
     printf '%s
-' 'ASUS TUF Gaming A14 — Partial'
+' 'ASUS TUF Gaming A14 — Partial (Dashboard + ASUS control)'
     printf '%s
-' 'Sixunited AXP77 — Experimental'
+' 'Sixunited AXP77 — Experimental (Dashboard + baseline stack)'
     printf '%s
-' 'GMKtec EVO-X2 — Experimental'
+' 'GMKtec EVO-X2 — Experimental (Dashboard + baseline stack)'
     printf '%s
-' 'Minisforum MS-S1 Max — Experimental'
+' 'Minisforum MS-S1 Max — Experimental (Dashboard + baseline stack)'
     printf '%s
-' 'AYANEO NEXT 2 — Experimental'
+' 'AYANEO NEXT 2 — Experimental (Dashboard + baseline stack)'
     printf '%s
-' 'GPD Win 5 — Experimental'
+' 'GPD Win 5 — Experimental (Dashboard + baseline stack)'
     printf '%s
-' 'Other confirmed Strix Halo — Experimental baseline'
+' 'Other confirmed Strix Halo — Experimental baseline (Dashboard + baseline stack)'
     # END AUTO-GENERATED SUPPORTED DEVICES HELP
 }
 
@@ -81,7 +81,7 @@ while [[ $# -gt 0 ]]; do
         --no-modules)    SKIP_MODULES=true; shift ;;
         -h|--help)
             cat << 'EOF'
-Strix Halo Linux Setup — Unified Installer v6.7.1
+Strix Halo Linux Setup — Unified Installer v6.8.0
 
 Usage: sudo ./strix-halo-setup.sh [OPTIONS]
 
@@ -119,7 +119,7 @@ done
 GITHUB_RAW_URL="https://raw.githubusercontent.com/th3cavalry/GZ302-Linux-Setup/main"
 
 # --- Version (read once at startup) ---
-SETUP_VERSION="6.7.1"
+SETUP_VERSION="6.8.0"
 
 # --- Script directory detection ---
 resolve_script_dir() {
@@ -771,12 +771,12 @@ EOF
 # ==============================================================================
 
 install_display_tools() {
-    if [[ "${CAP_COMMAND_CENTER:-false}" != "true" ]]; then
-        info "The GZ302 command-center tray app is not offered for ${DEVICE_MODEL:-this profile}."
+    if [[ "${CAP_DASHBOARD:-false}" != "true" ]]; then
+        info "The Strix Halo dashboard is not offered for ${DEVICE_MODEL:-this profile}."
         return 0
     fi
 
-    print_section "Section 2: Strix Halo Command Center"
+    print_section "Section 2: Strix Halo Dashboard"
 
     local distro
     distro=$(detect_distribution)
@@ -802,7 +802,7 @@ install_display_tools() {
 
 install_tray_app() {
     local distro="$1"
-    info "Installing ASUS ROG Flow Z13 (GZ302) Command Center..."
+    info "Installing Strix Halo Dashboard..."
 
     local tray_dir="${SCRIPT_DIR}/command-center"
     if [[ ! -d "$tray_dir" ]]; then
@@ -834,6 +834,16 @@ install_tray_app() {
             ;;
     esac
 
+    install -d -m 755 /etc/strix-halo
+    cat > /etc/strix-halo/tray.conf << EOF
+APP_NAME="Strix Halo Dashboard"
+DEVICE_LABEL="${DEVICE_MODEL:-Strix Halo}"
+HAS_DASHBOARD="${CAP_DASHBOARD:-false}"
+HAS_Z13CTL="${CAP_Z13CTL:-false}"
+HAS_COMMAND_CENTER="${CAP_COMMAND_CENTER:-false}"
+EOF
+    chmod 644 /etc/strix-halo/tray.conf
+
     # Run the tray installer
     if [[ -f "${tray_dir}/install-tray.sh" ]]; then
         bash "${tray_dir}/install-tray.sh"
@@ -849,7 +859,7 @@ install_tray_app() {
         cp "${tray_dir}/VERSION" "$opt_dir/VERSION" 2>/dev/null || true
     fi
 
-    success "Tray app installed"
+    success "Dashboard installed"
 }
 
 # ==============================================================================
@@ -1164,17 +1174,19 @@ main() {
         fi
     fi
 
-    # --- Step 3: Command Center / ASUS control paths -------------------------
+    # --- Step 3: Dashboard / device control paths ----------------------------
     if [[ "$SKIP_Z13CTL" != "true" ]] || [[ "$SKIP_TOOLS" != "true" ]]; then
         echo
         local cc_prompt=""
         if [[ "${CAP_COMMAND_CENTER:-false}" == "true" ]] && [[ "$SKIP_Z13CTL" != "true" ]] && [[ "$SKIP_TOOLS" != "true" ]]; then
             cc_prompt="Install Command Center? (z13ctl hardware control + tray app)"
-        elif [[ "${CAP_COMMAND_CENTER:-false}" == "true" ]] && [[ "$SKIP_TOOLS" != "true" ]]; then
-            cc_prompt="Install Strix Halo Command Center tray app?"
+        elif [[ "${CAP_DASHBOARD:-false}" == "true" ]] && [[ "${CAP_Z13CTL:-false}" == "true" ]] && [[ "$SKIP_Z13CTL" != "true" ]] && [[ "$SKIP_TOOLS" != "true" ]]; then
+            cc_prompt="Install Strix Halo Dashboard? (generic dashboard + ASUS control backend)"
+        elif [[ "${CAP_DASHBOARD:-false}" == "true" ]] && [[ "$SKIP_TOOLS" != "true" ]]; then
+            cc_prompt="Install Strix Halo Dashboard tray app?"
         elif [[ "${CAP_Z13CTL:-false}" == "true" ]] && [[ "$SKIP_Z13CTL" != "true" ]]; then
             cc_prompt="Install ASUS control backend? (z13ctl CLI + daemon)"
-            info "The GZ302 tray app is not offered on this device profile."
+            info "The generic dashboard is not offered on this device profile."
         fi
 
         if [[ -n "$cc_prompt" ]] && prompt_section "$cc_prompt (Y/n): " Y; then
@@ -1185,9 +1197,9 @@ main() {
                 install_display_tools
             fi
         elif [[ -n "$cc_prompt" ]]; then
-            info "Skipping Command Center"
+            info "Skipping dashboard / device control path"
         elif [[ "${CAP_STRIX_HALO:-false}" == "true" ]]; then
-            info "No ASUS command-center path is available for ${DEVICE_MODEL:-this device} — skipping."
+            info "No dashboard or vendor control path is available for ${DEVICE_MODEL:-this device} — skipping."
         fi
     fi
 

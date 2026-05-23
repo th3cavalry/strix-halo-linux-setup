@@ -4,7 +4,7 @@ set -euo pipefail
 
 # ==============================================================================
 # Strix Halo Device Manager Library
-# Version: 6.7.1
+# Version: 6.8.0
 #
 # Detects the running hardware and produces a normalized device profile for
 # the Strix Halo (AMD Ryzen AI MAX / MAX+) platform.  All installer sections
@@ -25,6 +25,7 @@ set -euo pipefail
 #   CAP_INTERNAL_OLED    — device ships with an internal OLED panel
 #   CAP_MT7925           — MediaTek MT7925 WiFi detected
 #   CAP_CS35L41          — Cirrus Logic CS35L41 smart-amp detected
+#   CAP_DASHBOARD        — generic Strix Halo dashboard / tray app is applicable
 #   CAP_Z13CTL           — z13ctl hardware-control tool is applicable
 #   CAP_COMMAND_CENTER   — GZ302 command-center tray app is applicable
 #   CAP_ROCM             — ROCm GPU compute is applicable (Radeon 8050S/8060S present)
@@ -55,6 +56,7 @@ CAP_DETACHABLE_KB="false"
 CAP_INTERNAL_OLED="false"
 CAP_MT7925="false"
 CAP_CS35L41="false"
+CAP_DASHBOARD="false"
 CAP_Z13CTL="false"
 CAP_COMMAND_CENTER="false"
 CAP_ROCM="false"
@@ -290,6 +292,7 @@ device_detect() {
     CAP_INTERNAL_OLED="false"
     CAP_MT7925="false"
     CAP_CS35L41="false"
+    CAP_DASHBOARD="false"
     CAP_Z13CTL="false"
     CAP_COMMAND_CENTER="false"
     CAP_ROCM="false"
@@ -300,6 +303,10 @@ device_detect() {
     board_name=$(_dmi_read "board_name")
 
     device_detect_strix_halo_platform "$sys_vendor" "$product_name" "$product_family" "$board_name"
+
+    if [[ "$CAP_STRIX_HALO" == "true" ]]; then
+        CAP_DASHBOARD="true"
+    fi
 
     # Run component capability probes
     device_detect_asus_wmi
@@ -319,7 +326,7 @@ device_detect() {
 
     export DEVICE_VENDOR DEVICE_MODEL DEVICE_CLASS DEVICE_SUPPORT_TIER
     export CAP_STRIX_HALO CAP_ASUS_WMI CAP_DETACHABLE_KB CAP_INTERNAL_OLED
-    export CAP_MT7925 CAP_CS35L41 CAP_Z13CTL CAP_COMMAND_CENTER CAP_ROCM
+    export CAP_MT7925 CAP_CS35L41 CAP_DASHBOARD CAP_Z13CTL CAP_COMMAND_CENTER CAP_ROCM
 }
 
 # --- Profile Display ---
@@ -351,6 +358,7 @@ device_print_profile() {
     [[ "$CAP_INTERNAL_OLED" == "true" ]] && caps+=("internal-oled")
     [[ "$CAP_MT7925"        == "true" ]] && caps+=("MT7925-wifi")
     [[ "$CAP_CS35L41"       == "true" ]] && caps+=("CS35L41-audio")
+    [[ "$CAP_DASHBOARD"     == "true" ]] && caps+=("dashboard")
     [[ "$CAP_Z13CTL"        == "true" ]] && caps+=("z13ctl")
     [[ "$CAP_COMMAND_CENTER" == "true" ]] && caps+=("command-center")
     [[ "$CAP_ROCM"          == "true" ]] && caps+=("ROCm")

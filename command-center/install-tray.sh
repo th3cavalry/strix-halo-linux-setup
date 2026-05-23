@@ -111,7 +111,7 @@ fi
 DESKTOP_FILE_CONTENT="[Desktop Entry]
 Type=Application
 Name=$APP_NAME
-Comment=G-Helper inspired Dashboard for ASUS ROG Flow Z13 (GZ302)
+Comment=G-Helper inspired dashboard for AMD Strix Halo devices
 Exec=python3 $APP_PY
 Icon=$ICON_NAME
 Terminal=false
@@ -193,9 +193,10 @@ fi
 if ! command -v z13ctl >/dev/null 2>&1; then
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "z13ctl Backend Missing"
-    echo "The Command Center requires z13ctl for RGB and power control."
-    echo "Run strix-halo-setup.sh first, or install z13ctl manually:"
+  echo "Optional z13ctl Backend Missing"
+  echo "The dashboard will still launch, but ASUS RGB and power control"
+  echo "features require z13ctl on supported devices."
+  echo "Install z13ctl manually if you want those ASUS-specific controls:"
     echo "  https://github.com/dahui/z13ctl"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""

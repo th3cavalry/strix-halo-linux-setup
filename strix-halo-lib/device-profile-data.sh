@@ -4,7 +4,7 @@ set -euo pipefail
 
 # ==============================================================================
 # Strix Halo Device Profile Data Library
-# Version: 6.7.1
+# Version: 6.8.0
 #
 # Single source of truth for the known Strix Halo device matrix used by the
 # installer, device detection, and generated documentation.
@@ -103,4 +103,39 @@ device_profile_apply_record() {
     CAP_COMMAND_CENTER="$cap_command_center"
     CAP_DETACHABLE_KB="$cap_detachable"
     CAP_INTERNAL_OLED="$cap_internal_oled"
+}
+
+device_profile_support_coverage_label() {
+    local support_tier="$1"
+    local cap_z13ctl="$2"
+    local cap_command_center="$3"
+
+    if [[ "$cap_command_center" == "true" ]]; then
+        printf 'Full stack'
+        return 0
+    fi
+
+    if [[ "$cap_z13ctl" == "true" ]]; then
+        printf 'Dashboard + ASUS control'
+        return 0
+    fi
+
+    case "$support_tier" in
+        full|partial) printf 'Dashboard + core stack' ;;
+        experimental) printf 'Dashboard + baseline stack' ;;
+        *) printf '%s' "$support_tier" ;;
+    esac
+}
+
+device_profile_support_coverage_from_record() {
+    local record="$1"
+    local _id _vendor_tokens _profile_vendor _device_model _doc_name _device_class
+    local _doc_class support_tier _apu cap_z13ctl cap_command_center
+    local _cap_detachable _cap_internal_oled _aliases
+
+    IFS='|' read -r _id _vendor_tokens _profile_vendor _device_model _doc_name _device_class \
+        _doc_class support_tier _apu cap_z13ctl cap_command_center _cap_detachable \
+        _cap_internal_oled _aliases <<< "$record"
+
+    device_profile_support_coverage_label "$support_tier" "$cap_z13ctl" "$cap_command_center"
 }

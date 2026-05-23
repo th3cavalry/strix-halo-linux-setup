@@ -1,13 +1,13 @@
 # Strix Halo Linux Setup
 
-![Version](https://img.shields.io/badge/version-6.7.1-blue?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-6.8.0-blue?style=for-the-badge)
 ![Kernel](https://img.shields.io/badge/Kernel-6.14%2B-orange?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/Platform-AMD%20Strix%20Halo-red?style=for-the-badge)
 
 **Unified Linux optimization suite for AMD Strix Halo (Ryzen AI MAX / MAX+) devices.**
 
-Hardware auto-detection, per-device fixes, ASUS hardware control via [z13ctl](https://github.com/dahui/z13ctl), and a GZ302-first command-center tray app.
+Hardware auto-detection, per-device fixes, a vendor-neutral Strix Halo dashboard, and ASUS hardware control via [z13ctl](https://github.com/dahui/z13ctl) where applicable.
 
 Supports the known Strix Halo device matrix below plus other confirmed Strix Halo hardware through the generic baseline profile.
 
@@ -17,19 +17,21 @@ Supports the known Strix Halo device matrix below plus other confirmed Strix Hal
 
 <!-- BEGIN:SUPPORTED_DEVICE_TABLE -->
 <!-- AUTO-GENERATED from strix-halo-lib/device-profile-data.sh via scripts/sync-device-matrix.sh -->
-| Device | APU | Class | Support tier |
-| :--- | :--- | :--- | :--- |
-| **ASUS ROG Flow Z13 (GZ302)** | Ryzen AI Max+ 395 / Max 390 | Tablet / Gaming 2-in-1 | Full |
-| **HP ZBook Ultra G1a** | Ryzen AI Max+ PRO 395 | Workstation laptop | Partial |
-| **HP Mini Workstation (Z2 G1a)** | Ryzen AI Max+ 395 | Mini workstation | Partial |
-| **Framework Desktop** | Ryzen AI Max 385 / Max+ 395 | Desktop | Partial |
-| **ASUS TUF Gaming A14** | Ryzen AI Max+ 392 | Laptop | Partial |
-| **Sixunited AXP77** | Ryzen AI Max+ 395 | Mini-PC | Experimental |
-| **GMKtec EVO-X2** | Ryzen AI Max+ 395 | Mini-PC | Experimental |
-| **Minisforum MS-S1 Max** | Ryzen AI Max+ 395 | Mini-PC | Experimental |
-| **AYANEO NEXT 2** | Ryzen AI Max+ 395 | Handheld | Experimental |
-| **GPD Win 5** | Ryzen AI Max+ 395 | Handheld | Experimental |
-| **Other Strix Halo** | Ryzen AI MAX family | Laptop / Mini-PC / Handheld | Experimental baseline |
+| Device | APU | Class | Support tier | Coverage |
+| :--- | :--- | :--- | :--- | :--- |
+| **ASUS ROG Flow Z13 (GZ302)** | Ryzen AI Max+ 395 / Max 390 | Tablet / Gaming 2-in-1 | Full | Full stack |
+| **HP ZBook Ultra G1a** | Ryzen AI Max+ PRO 395 | Workstation laptop | Partial | Dashboard + core stack |
+| **HP Mini Workstation (Z2 G1a)** | Ryzen AI Max+ 395 | Mini workstation | Partial | Dashboard + core stack |
+| **Framework Desktop** | Ryzen AI Max 385 / Max+ 395 | Desktop | Partial | Dashboard + core stack |
+| **ASUS TUF Gaming A14** | Ryzen AI Max+ 392 | Laptop | Partial | Dashboard + ASUS control |
+| **Sixunited AXP77** | Ryzen AI Max+ 395 | Mini-PC | Experimental | Dashboard + baseline stack |
+| **GMKtec EVO-X2** | Ryzen AI Max+ 395 | Mini-PC | Experimental | Dashboard + baseline stack |
+| **Minisforum MS-S1 Max** | Ryzen AI Max+ 395 | Mini-PC | Experimental | Dashboard + baseline stack |
+| **AYANEO NEXT 2** | Ryzen AI Max+ 395 | Handheld | Experimental | Dashboard + baseline stack |
+| **GPD Win 5** | Ryzen AI Max+ 395 | Handheld | Experimental | Dashboard + baseline stack |
+| **Other Strix Halo** | Ryzen AI MAX family | Laptop / Mini-PC / Handheld | Experimental baseline | Dashboard + baseline stack |
+
+> Coverage labels: **Full stack** = dashboard + core fixes + ASUS control + the full GZ302 command-center surface; **Dashboard + ASUS control** = dashboard + core fixes + ASUS control on supported ASUS devices; **Dashboard + core stack** = dashboard + cross-device fixes, gaming, AI/ROCm, and integrations; **Dashboard + baseline stack** = the same dashboard-first path under experimental validation.
 <!-- END:SUPPORTED_DEVICE_TABLE -->
 
 ---
@@ -49,7 +51,7 @@ The installer detects your device, distribution, kernel, and capabilities, then 
 | Section | What it does |
 | :--- | :--- |
 | **1. Hardware Fixes** | WiFi (MT7925), GPU (Radeon 8060S), Input, Audio (SOF/CS35L41), OLED PSR-SU fix, Suspend fix |
-| **2. Command Center** | z13ctl CLI/daemon on supported ASUS Strix Halo devices; GZ302 tray app and refresh controls where applicable |
+| **2. Dashboard** | Strix Halo dashboard on all confirmed devices; ASUS z13ctl control surfaces where applicable |
 | **3. Gaming** | Steam, Lutris, MangoHUD, GameMode, Wine, Proton-GE |
 | **4. AI / LLM** | Ollama, LM Studio, ROCm, PyTorch, vLLM, ComfyUI |
 | **5. Other Tools** | Hypervisor (KVM/QEMU), community integrations |
@@ -102,18 +104,16 @@ On ASUS devices where `z13ctl` is supported, the installer creates `pwrcfg` and 
 
 ---
 
-## Strix Halo Command Center
+## Strix Halo Dashboard
 
-On ASUS ROG Flow Z13 (GZ302) systems, after installation, look for **"ASUS ROG Flow Z13 (GZ302) Command Center"** in your system tray.
+After installation on any confirmed Strix Halo device, look for **"Strix Halo Dashboard"** in your system tray.
 
-On non-ASUS or non-GZ302 Strix Halo devices, the installer skips the tray app and only offers the device-appropriate hardware fixes, modules, and community integrations.
+On non-ASUS or non-z13ctl Strix Halo devices, the dashboard stays in monitoring mode and keeps unsupported vendor-control actions disabled.
 
 - **Left-click:** Toggle Dashboard Window (Monitoring, Fan Curves, AI Status)
-- **Right-click:** Quick access menu:
-  - **⚡ Profiles:** Switch between all 8 performance modes (10W-90W)
-  - **🌈 RGB Lighting:** Pick static colors separately for keyboard and backlight, plus brightness and animation effects
-  - **🔋 Battery Limit:** Set 60/80/100% charge caps
-  - **🔄 Auto Switch:** Toggle automatic AC/Battery profile switching
+- **Right-click:** Quick access menu.
+- **ASUS + z13ctl:** Profiles, RGB lighting, battery limits, and auto-switch controls stay available.
+- **Other Strix Halo devices:** Monitoring, launch, and generic dashboard flows stay available while unsupported vendor controls remain disabled.
 - **Hover:** Real-time temperature, profile, and power status
 
 ---

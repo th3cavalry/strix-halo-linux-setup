@@ -40,7 +40,7 @@ Documentation for the ASUS ROG Flow Z13 (GZ302) Linux Setup project.
 
 ```text
 GZ302-Linux-Setup/
-├── strix-halo-setup.sh         # Unified installer (v6.7.1)
+├── strix-halo-setup.sh         # Unified installer (v6.8.0)
 ├── strix-halo-lib/             # Shared bash libraries
 ├── modules/               # Optional modules (gaming, AI, hypervisor)
 ├── scripts/               # Standalone tools & utilities

@@ -1,6 +1,6 @@
 # Strix Halo External Integrations Catalog
 
-**Last updated:** 2026-05-16  
+**Last updated:** 2026-05-17  
 **Scope:** Curated list of third-party projects, toolkits, and applications for
 AMD Strix Halo (Ryzen AI MAX / MAX+) devices on Linux.  
 **Format:** Each entry includes its purpose, supported devices/distros, install
@@ -139,28 +139,31 @@ Trust levels:
 
 ---
 
-## Known Strix Halo Devices (as of 2026-05-16)
+## Known Strix Halo Devices (as of 2026-05-17)
 
 <!-- BEGIN:KNOWN_STRIX_HALO_DEVICE_TABLE -->
 <!-- AUTO-GENERATED from strix-halo-lib/device-profile-data.sh via scripts/sync-device-matrix.sh -->
-| Device | APU | Class | Support tier |
-|---|---|---|---|
-| ASUS ROG Flow Z13 (GZ302) | Ryzen AI Max+ 395 / Max 390 | Tablet / Gaming 2-in-1 | Full |
-| HP ZBook Ultra G1a | Ryzen AI Max+ PRO 395 | Workstation laptop | Partial |
-| HP Mini Workstation (Z2 G1a) | Ryzen AI Max+ 395 | Mini workstation | Partial |
-| Framework Desktop | Ryzen AI Max 385 / Max+ 395 | Desktop | Partial |
-| ASUS TUF Gaming A14 | Ryzen AI Max+ 392 | Laptop | Partial |
-| Sixunited AXP77 | Ryzen AI Max+ 395 | Mini-PC | Experimental |
-| GMKtec EVO-X2 | Ryzen AI Max+ 395 | Mini-PC | Experimental |
-| Minisforum MS-S1 Max | Ryzen AI Max+ 395 | Mini-PC | Experimental |
-| AYANEO NEXT 2 | Ryzen AI Max+ 395 | Handheld | Experimental |
-| GPD Win 5 | Ryzen AI Max+ 395 | Handheld | Experimental |
+| Device | APU | Class | Support tier | Coverage |
+|---|---|---|---|---|
+| ASUS ROG Flow Z13 (GZ302) | Ryzen AI Max+ 395 / Max 390 | Tablet / Gaming 2-in-1 | Full | Full stack |
+| HP ZBook Ultra G1a | Ryzen AI Max+ PRO 395 | Workstation laptop | Partial | Dashboard + core stack |
+| HP Mini Workstation (Z2 G1a) | Ryzen AI Max+ 395 | Mini workstation | Partial | Dashboard + core stack |
+| Framework Desktop | Ryzen AI Max 385 / Max+ 395 | Desktop | Partial | Dashboard + core stack |
+| ASUS TUF Gaming A14 | Ryzen AI Max+ 392 | Laptop | Partial | Dashboard + ASUS control |
+| Sixunited AXP77 | Ryzen AI Max+ 395 | Mini-PC | Experimental | Dashboard + baseline stack |
+| GMKtec EVO-X2 | Ryzen AI Max+ 395 | Mini-PC | Experimental | Dashboard + baseline stack |
+| Minisforum MS-S1 Max | Ryzen AI Max+ 395 | Mini-PC | Experimental | Dashboard + baseline stack |
+| AYANEO NEXT 2 | Ryzen AI Max+ 395 | Handheld | Experimental | Dashboard + baseline stack |
+| GPD Win 5 | Ryzen AI Max+ 395 | Handheld | Experimental | Dashboard + baseline stack |
+| Other Strix Halo | Ryzen AI MAX family | Laptop / Mini-PC / Handheld | Experimental baseline | Dashboard + baseline stack |
+
+> Coverage labels: **Full stack** = dashboard + core fixes + ASUS control + the full GZ302 command-center surface; **Dashboard + ASUS control** = dashboard + core fixes + ASUS control on supported ASUS devices; **Dashboard + core stack** = dashboard + cross-device fixes, gaming, AI/ROCm, and integrations; **Dashboard + baseline stack** = the same dashboard-first path under experimental validation.
 <!-- END:KNOWN_STRIX_HALO_DEVICE_TABLE -->
 
 > **Note:** This list is a living compatibility matrix. Confidence levels:
 > - *Full* — confirmed shipping, tested, all major features working  
-> - *Partial* — confirmed hardware, limited feature set (no z13ctl, etc.)  
-> - *Experimental* — community-reported or pre-release; treat as unverified until vendor availability confirmed
+> - *Partial* — confirmed hardware with a validated subset of surfaces; use the Coverage column for the exact supported paths  
+> - *Experimental* — community-reported or early validation; coverage remains baseline until device-specific confirmation improves
 
 ---
 

@@ -28,7 +28,7 @@ class NotificationManager:
     def __init__(self, tray_icon):
         self.tray = tray_icon
         self.dbus_available = _DBUS_AVAILABLE
-        self._app_name = "ASUS ROG Flow Z13 (GZ302) Command Center"
+        self._app_name = "Strix Halo Dashboard"
 
     @property
     def app_name(self):

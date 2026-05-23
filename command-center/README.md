@@ -1,10 +1,10 @@
-# Strix Halo Command Center — Strix Halo Edition
+# Strix Halo Dashboard — Strix Halo Edition
 
-A unified system tray and dashboard application for the ASUS ROG Flow Z13 (GZ302) "Strix Halo".
+A unified system tray and dashboard application for confirmed AMD Strix Halo devices.
 
 ## Overview
 
-This is a G-Helper inspired GUI utility that provides quick access to system controls through a system tray application and a detailed dashboard. It leverages `z13ctl` to manage power, lighting, and performance settings without needing terminal commands.
+This is a G-Helper inspired GUI utility that provides a cross-device monitoring dashboard for Strix Halo systems. On supported ASUS hardware it also leverages `z13ctl` for power, lighting, fan, and battery controls.
 
 ## Features
 
@@ -12,7 +12,7 @@ This is a G-Helper inspired GUI utility that provides quick access to system con
 - **8 Distinct Profiles**: From Emergency (10W) to Maximum (90W).
 - **Auto Settings Adjust**: Automatically switches profiles when plugging/unplugging AC power.
 - **Battery Charge Limit**: Set thresholds (60%, 80%, 100%) to extend battery longevity.
-- **Real-time TDP Overrides**: Surgical control over power limits via `z13ctl`.
+- **Real-time TDP Overrides**: Surgical control over power limits via `z13ctl` on supported ASUS devices.
 
 ### 🌈 RGB Lighting
 - **Separate Static Color Pickers**: Visual swatches and custom color dialogs for keyboard and backlight.
@@ -22,21 +22,21 @@ This is a G-Helper inspired GUI utility that provides quick access to system con
 - **Quick Toggle**: "Turn Off All" option for immediate stealth mode.
 
 ### 🖥️ Dashboard
-- **Real-time Monitoring**: Track APU temperature, CPU load, and fan speeds.
+- **Real-time Monitoring**: Track APU temperature, CPU load, battery state, and available fan telemetry across Strix Halo devices.
 - **Visual Feedback**: The tray icon changes based on the active power profile and charging state.
-- **Fan Curve Editor**: (In Dashboard) Apply custom T:P fan curves.
+- **Fan Curve Editor**: (In Dashboard) Apply custom T:P fan curves when the control backend is available.
 
 ## Technology Stack
 
 - **Python 3** - Main programming language
 - **PyQt6** - GUI framework for system tray and dashboard
-- **z13ctl** - The underlying driver for GZ302 hardware control
+- **z13ctl** - Optional ASUS control backend for supported power and lighting actions
 
 ## Installation
 
 ### Prerequisites
 
-1. GZ302 Linux Setup main scripts must be installed (`z13ctl` daemon should be running).
+1. Strix Halo Linux Setup main scripts must be installed.
 2. Python 3.8 or higher.
 
 ### Step 1: Install Python Dependencies
@@ -59,7 +59,7 @@ cd command-center
 sudo ./install-policy.sh
 ```
 
-This configures `z13ctl` permissions to allow the GUI to make changes without password prompts.
+This configures `z13ctl` permissions to allow the GUI to make ASUS control changes without password prompts.
 If you installed through the main `strix-halo-setup.sh` workflow, the installer already handles the `users` group and the GUI sudoers fallback.
 
 ### Step 3: Install Desktop Launcher + Autostart
@@ -69,16 +69,12 @@ cd command-center
 ./install-tray.sh
 ```
 
-This creates a launcher in your application menu and sets the command center to start automatically on login.
+This creates a launcher in your application menu and sets the dashboard to start automatically on login.
 
 ## Usage
 
 1. **Open Dashboard**: Left-click the tray icon or select "Open Dashboard" from the right-click menu.
-2. **Quick Switch**: Right-click the tray icon to access:
-   - **⚡ Profiles**: Select performance modes.
-   - **🔋 Battery Limit**: Quickly cap charging.
-   - **🌈 RGB Lighting**: Pick static colors separately for keyboard and backlight, then adjust brightness and effects.
-   - **🔄 Auto Settings Adjust**: Toggle automatic power switching.
+2. **Quick Switch**: Right-click the tray icon to access monitoring and any controls your device backend supports.
 3. **Tray Icons**:
    - 🔋 Battery icon: Running on battery (Auto-switch enabled).
    - 🔌 AC icon: Running on AC power (Auto-switch enabled).
@@ -91,10 +87,11 @@ This creates a launcher in your application menu and sets the command center to 
 - **Missing SVG Support**: On Arch, SVG is bundled in `python-pyqt6`. On Debian/Fedora, install `python3-pyqt6.qtsvg` or `python3-qt6-qtsvg`.
 
 ### Changes Don't Apply
-- Ensure the `z13ctl` daemon is active: `systemctl --user status z13ctl.service`
+- On non-ASUS systems, unsupported control widgets are intentionally disabled and the dashboard remains monitoring-only.
+- On supported ASUS systems, ensure the `z13ctl` daemon is active: `systemctl --user status z13ctl.service`
 - If the installer just added your account to the `users` group, log out and back in once.
 - Try running `sudo z13ctl setup` to ensure udev rules and sockets are correctly configured.
 
 ---
 
-**Note**: This is an optional companion utility. The main GZ302 setup scripts and `z13ctl` work perfectly via terminal commands.
+**Note**: This is an optional companion utility. The main Strix Halo setup scripts still work through the terminal, and vendor-specific control remains optional.
